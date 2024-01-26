@@ -256,6 +256,44 @@ class GameStatus
     {
         return new Collator(CONFIG->get('locale')[$this->current_lang]);
     }
+
+    public function currentEntry()
+    {
+        $space_separated_letters = implode(' ', $this->letters->list);
+        $space_separated_found_words = implode(' ', $this->found_words);
+        return <<<END
+        #Current Game
+        $space_separated_letters
+        $space_separated_found_words
+        Game Number\t{$this->game_number}
+        Game Language\t{$this->current_lang}
+
+        # General Settings
+        Base Language\t{$this->base_lang}
+        Planned Language\t{$this->planned_lang}
+        Saved Games\t{$this->max_saved_game}
+        END;
+    }
+
+    public function archiveEntry()
+    {
+        $letters_sorted = $this->letters->list;
+        $this->collator()->sort($letters_sorted);
+        $space_separated_letters_alphabetic = implode(' ', $letters_sorted);
+        $space_separated_found_words_alphabetic = implode(' ', $this->foundWordsSorted());
+        return <<<END
+        {$this->game_number}. ({$this->current_lang})
+        $space_separated_letters_alphabetic
+        $space_separated_found_words_alphabetic
+        END;
+    }
+
+    public function foundWordsSorted()
+    {
+        $result = $this->found_words->toArray();
+        $this->collator()->sort($result);
+        return $result;
+    }
 }
 
 /*
@@ -370,9 +408,6 @@ import icu
     for x in ["wordlist", "community", "custom_reactions"] + available_languages:
       approval_dict["any"] = bool(approval_dict[x]) or approval_dict["any"]
     return approval_dict
-
-  def found_words_sorted(self):
-    return sorted(self.found_words_set, key=self._collator().getSortKey)
   
   def word_valid(self, word):
     if self.current_lang == "German":
@@ -427,21 +462,6 @@ import icu
         # one more saved game
         self.max_saved_game += 1
         self.save_game()
-
-  def archive_entry(self):
-    return '{}. ({})\n{}\n{}'.format(self.game_number, self.current_lang, ' '.join(sorted(self.letters.list, key=self._collator().getSortKey)), ' '.join(self.found_words_sorted()))
-
-  def current_entry(self):
-    return (
-    f"#Current Game\n"
-    f"{' '.join(self.letters.list)}\n"
-    f"{' '.join(self.found_words_set)}\n"
-    f"Game Number\t{self.game_number}\n"
-    f"Game Language\t{self.current_lang}\n\n"
-    f"# General Settings\n"
-    f"Base Language\t{self.base_lang}\n"
-    f"Planned Language\t{self.planned_lang}\n"
-    f"Saved Games\t{self.max_saved_game}")
   
   def new_game(self):
     self._save_old()
