@@ -217,8 +217,7 @@ class GameStatus
 			if (!array_key_exists($letter, $this->letters->lower_cntdict))
 				return false;
 		$wdict = array_count_values($word_letters);
-		#if not set(wdict.keys()) < set(refdict.keys()):
-		#    return False
+
 		foreach ($word_letters as $letter)
 			if ($wdict[$letter] > $refdict[$letter])
 				return false;
@@ -252,6 +251,11 @@ class GameStatus
 		$amount = $this->solutions->diff($this->found_words)->count();
 		$this->amount_approved_words = $this->solutions->count() - $amount;
 	}
+
+    private function collator()
+    {
+        return new Collator(CONFIG->get('locale')[$this->current_lang]);
+    }
 }
 
 /*
@@ -307,11 +311,6 @@ import icu
     if len(last_found_words) <= 10:
       return True
     return False
-
-
-  def _collator(self):
-    return icu.Collator.createInstance(icu.Locale(CONFIG->get('locale')[self.current_lang]))
-
 
   def __init__(self, file, archive_file):
     self.archive_file = archive_file
@@ -401,11 +400,6 @@ import icu
   def save_game(self):
     with open(self.file, 'w') as f:
       f.write(self.current_entry())
-
-  # not needed anymore
-  def save_game_test(self):
-    with open("live_data/current_game_test.txt", 'w') as f:
-      f.write(self.current_entry_new())
 
   #should be called when the current game is overwritten (by a load or starting a new game etc.)
   def _save_old(self):
