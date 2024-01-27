@@ -95,7 +95,7 @@ class GameStatus
     public Set $solutions;
     public Set $wordlist_solutions;
     public $available_hints;
-	public $amount_approved_words;
+    public $amount_approved_words;
 
     public function fileValid()
     {
