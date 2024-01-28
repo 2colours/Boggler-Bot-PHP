@@ -1,16 +1,16 @@
 <?php
 
-include __DIR__.'/vendor/autoload.php';
+include __DIR__ . '/vendor/autoload.php';
 
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Typography\Font;
 use Ds\Set;
 
-require __DIR__ .'/bojler_config.php'; # TODO ConfigHandler with PSR-4 autoloader
-require __DIR__ .'/bojler_db.php'; # TODO DatabaseHandler, DictionaryType with PSR-4 autoloader
-require __DIR__ .'/bojler_util.php'; # TODO remove_special_char with PSR-4 autoloader
-require __DIR__ .'/bojler_player.php'; # TODO PlayerHandler with PSR-4 autoloader
+require __DIR__ . '/bojler_config.php'; # TODO ConfigHandler with PSR-4 autoloader
+require __DIR__ . '/bojler_db.php'; # TODO DatabaseHandler, DictionaryType with PSR-4 autoloader
+require __DIR__ . '/bojler_util.php'; # TODO remove_special_char with PSR-4 autoloader
+require __DIR__ . '/bojler_player.php'; # TODO PlayerHandler with PSR-4 autoloader
 
 # TODO better dependency injection surely...
 define('CONFIG', ConfigHandler::getInstance());
@@ -21,10 +21,10 @@ define('DEFAULT_TRANSLATION', CONFIG->get('default_translation'));
 define('DICE_DICT', CONFIG->get('dice'));
 define('AVAILABLE_LANGUAGES', array_keys(DICE_DICT));
 define('DEFAULT_END_AMOUNT', CONFIG->get('default_end_amount'));
-define('WORDLIST_PATHS', array_map(fn($value) => "param/$value", CONFIG->get('wordlists')));
+define('WORDLIST_PATHS', array_map(fn ($value) => "param/$value", CONFIG->get('wordlists')));
 define('DICTIONARIES', CONFIG->get('dictionaries'));
 define('AVAILABLE_DICTIONARIES', array_keys(DICTIONARIES)); # TODO is this still needed?
-define('COMMUNITY_WORDLIST_PATHS', array_map(fn($value) => "live_data/$value", CONFIG->get('community_wordlists')));
+define('COMMUNITY_WORDLIST_PATHS', array_map(fn ($value) => "live_data/$value", CONFIG->get('community_wordlists')));
 define('CUSTOM_EMOJIS', CONFIG->get('custom_emojis'));
 define('EASTER_EGGS', CONFIG->get('easter_eggs'));
 
@@ -36,7 +36,7 @@ class LetterList
     public readonly mixed $list;
     public readonly array $lower_cntdict;
 
-    public function __construct($data, $preshuffle=false, $just_regenerate=false)
+    public function __construct($data, $preshuffle = false, $just_regenerate = false)
     {
         $this->list = $data;
         $this->lower_cntdict = array_count_values(array_map(mb_strtolower(...), $data)); # TODO there was some None filtering - watch out with the input
@@ -57,7 +57,7 @@ class LetterList
 
     private function drawImageMatrix($space_top, $space_left, $distance_vertical, $distance_horizontal, $font_size, $image_filename, $img_h, $img_w)
     {
-        $manager = new ImageManager(Driver::class);;
+        $manager = new ImageManager(Driver::class);
         $image = $manager->create($img_w, $img_h);
         $font = new Font('param/arial.ttf');
         $font->setSize($font_size);
@@ -68,7 +68,8 @@ class LetterList
                 $item,
                 $space_left + $distance_horizontal * ($i % 4),
                 $space_top + $distance_vertical * intdiv($i, 4),
-                $font);
+                $font
+            );
 
         $image->save("live_data/$image_filename");
     }
@@ -156,8 +157,8 @@ class GameStatus
 
     private function getLongestWords()
     {
-        $length = max(array_map(fn($item) => mb_strlen(remove_special_char($item)), $this->solutions->toArray()));
-        $this->longest_solutions = $this->solutions->filter(fn($item) => mb_strlen(remove_special_char($item)) == $length);
+        $length = max(array_map(fn ($item) => mb_strlen(remove_special_char($item)), $this->solutions->toArray()));
+        $this->longest_solutions = $this->solutions->filter(fn ($item) => mb_strlen(remove_special_char($item)) == $length);
         echo 'Longest solution: ' . $length . ' letters';
         #var_dump($this->longest_solutions);
     }
@@ -184,7 +185,7 @@ class GameStatus
     private function findWordlistSolutions($refdict)
     {
         $content = file(WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES);
-        $this->wordlist_solutions = new Set(array_filter($content, fn($item) => $this->wordValidFast($item, $refdict)));
+        $this->wordlist_solutions = new Set(array_filter($content, fn ($item) => $this->wordValidFast($item, $refdict)));
     }
 
     private function findHints()
@@ -192,7 +193,7 @@ class GameStatus
         $db = DatabaseHandler::getInstance();
         $refdict = $this->letters->lower_cntdict;
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
-            $this->available_hints[$language] = array_filter($db->getWords(new DictionaryType($this->current_lang, $language)), fn($item) => $this->wordValidFast($item, $refdict));
+            $this->available_hints[$language] = array_filter($db->getWords(new DictionaryType($this->current_lang, $language)), fn ($item) => $this->wordValidFast($item, $refdict));
         }
     }
 
@@ -200,57 +201,57 @@ class GameStatus
     public function availableDictionariesFrom($origin = null)
     {
         $origin ??= $this->current_lang;
-        return array_filter(AVAILABLE_LANGUAGES, fn($item) => array_key_exists((new DictionaryType($origin, $item))->asDictstring(), DICTIONARIES));
+        return array_filter(AVAILABLE_LANGUAGES, fn ($item) => array_key_exists((new DictionaryType($origin, $item))->asDictstring(), DICTIONARIES));
     }
 
     # gets the refdict instead of creating it every time
     public function wordValidFast($word, $refdict) # TODO why is there a $refdict passed and $this->letters->lower_cntdict also used??
     {
-		# Pre-processing word for validity check
-		$word = mb_ereg_replace("/[.'-]/", '', $word);
-		if ($this->current_lang == "German")
-			$word = $this->germanLetters($word);
-		$word = mb_strtolower($word);
+        # Pre-processing word for validity check
+        $word = mb_ereg_replace("/[.'-]/", '', $word);
+        if ($this->current_lang == "German")
+            $word = $this->germanLetters($word);
+        $word = mb_strtolower($word);
 
-		$word_letters = mb_str_split($word);
-		foreach ($word_letters as $letter)
-			if (!array_key_exists($letter, $this->letters->lower_cntdict))
-				return false;
-		$wdict = array_count_values($word_letters);
+        $word_letters = mb_str_split($word);
+        foreach ($word_letters as $letter)
+            if (!array_key_exists($letter, $this->letters->lower_cntdict))
+                return false;
+        $wdict = array_count_values($word_letters);
 
-		foreach ($word_letters as $letter)
-			if ($wdict[$letter] > $refdict[$letter])
-				return false;
-		return true;
+        foreach ($word_letters as $letter)
+            if ($wdict[$letter] > $refdict[$letter])
+                return false;
+        return true;
     }
 
-	public function germanLetters($word)
-	{
-		$german_letters = [
-			"ä" => "ae",
-			"ö" => "oe",
-			"ü" => "ue",
-			"Ä" => "AE",
-			"Ö" => "OE",
-			"Ü" => "UE",
-			"ß" => "ss"
-		];
-		return str_replace(array_keys($german_letters), array_values($german_letters), $word);
-	}
+    public function germanLetters($word)
+    {
+        $german_letters = [
+            "ä" => "ae",
+            "ö" => "oe",
+            "ü" => "ue",
+            "Ä" => "AE",
+            "Ö" => "OE",
+            "Ü" => "UE",
+            "ß" => "ss"
+        ];
+        return str_replace(array_keys($german_letters), array_values($german_letters), $word);
+    }
 
-	private function setEndAmount()
-	{
-		if (!empty($this->solutions))
-			$this->end_amount = 100;
-		else
-			$this->end_amount = min(DEFAULT_END_AMOUNT, intdiv($this->solutions->count() * 2, 3));
-	}
+    private function setEndAmount()
+    {
+        if (!empty($this->solutions))
+            $this->end_amount = 100;
+        else
+            $this->end_amount = min(DEFAULT_END_AMOUNT, intdiv($this->solutions->count() * 2, 3));
+    }
 
-	private function countApprovedWords()
-	{
-		$amount = $this->solutions->diff($this->found_words)->count();
-		$this->amount_approved_words = $this->solutions->count() - $amount;
-	}
+    private function countApprovedWords()
+    {
+        $amount = $this->solutions->diff($this->found_words)->count();
+        $this->amount_approved_words = $this->solutions->count() - $amount;
+    }
 
     private function collator()
     {

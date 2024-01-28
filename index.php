@@ -1,6 +1,6 @@
 <?php
 
-include __DIR__.'/vendor/autoload.php';
+include __DIR__ . '/vendor/autoload.php';
 
 use Discord\Discord;
 use Discord\Parts\Channel\Message;
@@ -9,12 +9,12 @@ use Discord\WebSockets\Event;
 use Symfony\Component\Dotenv\Dotenv;
 
 $dotenv = new Dotenv();
-$dotenv->load(__DIR__.'/.env');
+$dotenv->load(__DIR__ . '/.env');
 
 $discord = new Discord([
     'token' => $_ENV['DC_TOKEN'],
     'intents' => Intents::getDefaultIntents()
-//      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
+    //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
 ]);
 
 

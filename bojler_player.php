@@ -8,23 +8,23 @@ function hungarian_role(Member $member)
     $hungarian_roles = ['Beginner', 'Native speaker', 'Intermediate', 'Fluent', 'Advanced', 'Distant native'];
     $roles = $member->roles;
     foreach ($roles as $item)
-      foreach ($hungarian_roles as $hu_role)
-        if ($item->name == $hu_role)
-          return $hu_role;
+        foreach ($hungarian_roles as $hu_role)
+            if ($item->name == $hu_role)
+                return $hu_role;
     return '';
 }
 
 function name_shortened($name)
 {
     if (mb_strlen($name) >= 15)
-		$name = mb_substr($name, 0, mb_strpos($name, '|'));
-	if (mb_strlen($name) >= 15)
-		$name = mb_substr($name, 0, mb_strpos($name, ' '));
-	if (mb_strlen($name) >= 15)
-		$name = mb_substr($name, 0, 15);
-	return $name;
+        $name = mb_substr($name, 0, mb_strpos($name, '|'));
+    if (mb_strlen($name) >= 15)
+        $name = mb_substr($name, 0, mb_strpos($name, ' '));
+    if (mb_strlen($name) >= 15)
+        $name = mb_substr($name, 0, 15);
+    return $name;
 }
-  
+
 class PlayerHandler
 {
     private static $instance;
@@ -34,7 +34,7 @@ class PlayerHandler
         if (self::$instance === null) {
             self::$instance = new self();
         }
-        
+
         return self::$instance;
     }
 
@@ -72,7 +72,7 @@ class PlayerHandler
             'name' => $member->username,
             'found_words' => [],
             'used_hints' => [],
-            'all_time_found' => 0, 
+            'all_time_found' => 0,
             'all_time_approved' => 0,
             'personal_emoji' => '👤',
             'role' => hungarian_role($member),

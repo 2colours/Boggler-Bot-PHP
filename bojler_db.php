@@ -1,5 +1,5 @@
 <?php
-require __DIR__ .'/bojler_config.php'; # TODO ConfigHandler with PSR-4 autoloader
+require __DIR__ . '/bojler_config.php'; # TODO ConfigHandler with PSR-4 autoloader
 
 
 class DictionaryType
@@ -16,12 +16,12 @@ class DictionaryType
         $this->src_lang = $src_lang;
         $this->target_lang = $target_lang;
     }
-  
+
     public function asDictstring()
     {
         return "{$this->src_lang}-{$this->target_lang}";
     }
-  
+
     public function asDictcode()
     {
         return ConfigHandler::getInstance()->get('dictionaries')[$this->asDictstring()]; # TODO better injection of singleton
@@ -60,18 +60,18 @@ class DictionaryEntry
         return [$this->word, $this->description, $this->langcode];
     }
 }
-        
+
 
 class DatabaseHandler
 {
     private static $instance;
 
-    public static function getInstance() : self
+    public static function getInstance(): self
     {
         if (self::$instance === null) {
             self::$instance = new self();
         }
-        
+
         return self::$instance;
     }
 
@@ -126,8 +126,9 @@ class DatabaseHandler
                 $this->db
                     ->query("SELECT word, description FROM dictionary WHERE word $operator $safe_word AND dictionarycode = $dictcode")
                     ->fetchArray(SQLITE3_NUM),
-                1);
-            yield [$word, ', '.join($results)];
+                1
+            );
+            yield [$word, ', ' . join($results)];
         }
     }
 
@@ -138,7 +139,8 @@ class DatabaseHandler
             $this->db
                 ->query("SELECT DISTINCT word FROM dictionary WHERE dictionarycode = $safe_dictcode")
                 ->fetchArray(SQLITE3_NUM),
-            0);
+            0
+        );
     }
 
     private function __construct()

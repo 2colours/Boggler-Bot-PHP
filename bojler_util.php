@@ -12,7 +12,7 @@ function output_split($arg)
         return [$arg];
     # 1998, because we should be able to add _ before and after
     $index = mb_strrpos(mb_substr($arg, 0, 1998), ' ');
-    return [mb_substr($arg, 0, $index), ...output_split(mb_substr($arg, $index+1))];
+    return [mb_substr($arg, 0, $index), ...output_split(mb_substr($arg, $index + 1))];
 }
 
 function output_split_cursive($arg)
