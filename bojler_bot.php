@@ -66,8 +66,10 @@ function instructions($lang)
 $bot = new DiscordCommandClient([
     'prefix' => 'b!',
     'token' => $_ENV['DC_TOKEN'],
-    'intents' => Intents::getDefaultIntents()
-    //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
+    'discordOptions' => [
+        'intents' => Intents::getDefaultIntents()
+        //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
+    ]
 ]);
 
 # TODO instructions(GAME_STATUS->current_lang)
