@@ -59,8 +59,36 @@ function instructions($lang)
     return str_replace(["{0}", "{1}"], [$lang, EXAMPLES[$lang]], INSTRUCTION_TEMPLATE);
 }
 
+class Counter
+{
+    private $current_value;
+    public readonly int $threshold;
+
+    public function __construct($threshold)
+    {
+        $this->current_value = 0;
+        $this->threshold = $threshold;
+    }
+
+    public function reset()
+    {
+        $this->current_value = 0;
+    }
+
+    public function trigger()
+    {
+        $this->current_value++;
+        if ($this->current_value == $this->threshold) {
+            $this->current_value = 0;
+            return true;
+        }
+        return false;
+    }
+}
+
 # TODO constructor not ported yet
 # define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
+define('counter', new Counter(10));
 
 # bot=commands.Bot(command_prefix=('b!','B!'), owner_ids=[745671966266228838, 297037173541175296], help_command=commands.DefaultHelpCommand(verify_checks=False), intents=discord.Intents.all())
 $bot = new DiscordCommandClient([
