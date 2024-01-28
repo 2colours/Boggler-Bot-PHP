@@ -3,7 +3,8 @@
         "team-reflex/discord-php": "^7.3",
         "intervention/image": "^3.3",
         "symfony/dotenv": "^7.0",
-        "php-ds/php-ds": "^1.5"
+        "php-ds/php-ds": "^1.5",
+        "react/async": "^4.2"
     },
     "require-dev": {
         "codeception/codeception": "^5.0"
