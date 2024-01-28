@@ -86,6 +86,16 @@ class Counter
     }
 }
 
+/*
+async def try_send_msg(ctx, msg):
+    can_be_sent = len(msg) <= 2000
+    if can_be_sent:
+        await ctx.send(msg)
+    return can_be_sent
+commands.Context.try_send=try_send_msg
+*/
+
+# TODO it's dubious whether these are actually constants; gotta think about it
 # TODO constructor not ported yet
 # define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
 define('counter', new Counter(10));
@@ -102,12 +112,6 @@ $bot = new DiscordCommandClient([
 
 # TODO instructions(GAME_STATUS->current_lang)
 $bot->registerCommand('info', fn () => instructions('Hungarian'), ['description' => 'show instructions']);
-
-/*
-        @bot.command(brief='show instructions')
-        async def info(ctx):
-        await ctx.send(instructions(game_status.current_lang))
-        */
 
 
 # Blocks the code - has to be at the bottom
@@ -227,8 +231,7 @@ from EasterEgg_Adventure import Adventure
 #for player in player_dict:
 #player_dict[player]["all_time_found"] = len(player_dict[player]["found_words"])
 
-async def try_send_msg(ctx, msg):
-can_be_sent = len(msg) <= 2000 if can_be_sent: await ctx.send(msg) return can_be_sent commands.Context.try_send=try_send_msg class Counter: def __init__(self, threshold): self.current_value=0 self.threshold=threshold def reset(self): self.current_value=0 def trigger(self): self.current_value +=1 if self.current_value==self.threshold: self.current_value=0 return True return False counter=Counter(10) easter_egg_handler=EasterEggHandler(game_status.found_words_set) #adventure=Adventure(game_status.letters.list, game_status.solutions) adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.current_lang].keys()))  def needs_counting(func): async def action(ctx, *args, **kwargs): await func(ctx, *args, **kwargs) if counter.trigger(): await simple_board(ctx) action.__name__=func.__name__ sig=inspect.signature(func) action.__signature__=sig.replace(parameters=tuple(sig.parameters.values())) return action def current_emoji_version(): hash=int(md5(bytes(' '.join(sorted(game_status.letters.list, key=game_status._collator().getSortKey)), ' utf-8')).hexdigest(), base=16) if date.today().strftime("%m%d") in progress_bar_version_dict: current_list=progress_bar_version_dict[date.today().strftime("%m%d")] else: current_list=progress_bar_version_dict["default"] return current_list[hash % len(current_list)] ''' #how is this easier??
+easter_egg_handler=EasterEggHandler(game_status.found_words_set) #adventure=Adventure(game_status.letters.list, game_status.solutions) adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.current_lang].keys()))  def needs_counting(func): async def action(ctx, *args, **kwargs): await func(ctx, *args, **kwargs) if counter.trigger(): await simple_board(ctx) action.__name__=func.__name__ sig=inspect.signature(func) action.__signature__=sig.replace(parameters=tuple(sig.parameters.values())) return action def current_emoji_version(): hash=int(md5(bytes(' '.join(sorted(game_status.letters.list, key=game_status._collator().getSortKey)), ' utf-8')).hexdigest(), base=16) if date.today().strftime("%m%d") in progress_bar_version_dict: current_list=progress_bar_version_dict[date.today().strftime("%m%d")] else: current_list=progress_bar_version_dict["default"] return current_list[hash % len(current_list)] ''' #how is this easier??
 def emoji_ration(variant_list, current, total):
   if total == 0:
     return ''
