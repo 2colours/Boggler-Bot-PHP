@@ -1,13 +1,13 @@
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use Symfony\Component\Dotenv\Dotenv;
 use Discord\DiscordCommandClient;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Intents;
 
-require __DIR__ . '/bojler_game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
+require_once __DIR__ . '/bojler_game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
 
 $dotenv = new Dotenv();
 $dotenv->load('./.env');
