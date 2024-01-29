@@ -38,3 +38,9 @@ function output_split_cursive($arg)
     }
     return $output_array;
 }
+
+function fetch_all(SQLite3Result $db_result)
+{
+    while ($current_entry = $db_result->fetchArray())
+        yield $current_entry;
+}
