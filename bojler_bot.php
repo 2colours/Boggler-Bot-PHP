@@ -6,8 +6,11 @@ use Symfony\Component\Dotenv\Dotenv;
 use Discord\DiscordCommandClient;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Intents;
+use React\Promise\Promise;
+use function React\Async\await;
 
 require_once __DIR__ . '/bojler_game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
+require_once __DIR__ . '/bojler_player.php'; # TODO PlayerHandler with PSR-4 autoloader
 
 $dotenv = new Dotenv();
 $dotenv->load('./.env');
@@ -86,18 +89,44 @@ class Counter
     }
 }
 
-/*
-async def try_send_msg(ctx, msg):
-    can_be_sent = len(msg) <= 2000
-    if can_be_sent:
-        await ctx.send(msg)
-    return can_be_sent
-commands.Context.try_send=try_send_msg
-*/
+function get_translation($text, DictionaryType $dictionary = new DictionaryType(...DEFAULT_TRANSLATION))
+{
+    $db = DatabaseHandler::getInstance(); # TODO better injection?
+    foreach ($db->translate($text, $dictionary) as $translation)
+        if (isset($translation))
+            return $translation;
+    return null;
+}
+
+function translator_command($src_lang = null, $target_lang = null)
+{
+    return function (Message $ctx, $args) use ($src_lang, $target_lang) {
+        $word = $args[0];
+        $translation = isset($src_lang) && isset($target_lang) ? get_translation($word, new DictionaryType($src_lang, $target_lang)) : get_translation($word); # TODO does passing null work for obtaining the default?
+        if (isset($translation))
+            await($ctx->channel->sendMessage("$word: ||$translation||"));
+        else
+            await($ctx->react('😶'));
+    };
+}
+
+function try_send_msg(Message $ctx, $content)
+{
+    $can_be_sent = mb_strlen($content) <= 2000; # TODO this magic constant should be moved from here and other places as well
+    if ($can_be_sent)
+        await($ctx->channel->sendMessage($content));
+    return $can_be_sent;
+}
+
+function channel_valid(Message $ctx)
+{
+    return $ctx->guild?->id == HOME_SERVER && $ctx->channel?->id == HOME_CHANNEL;
+}
 
 # TODO it's dubious whether these are actually constants; gotta think about it
 # TODO constructor not ported yet
 # define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
+# define('easter_egg_handler', new EasterEggHandler(GAME_STATUS->found_words_set));
 define('counter', new Counter(10));
 
 # bot=commands.Bot(command_prefix=('b!','B!'), owner_ids=[745671966266228838, 297037173541175296], help_command=commands.DefaultHelpCommand(verify_checks=False), intents=discord.Intents.all())
@@ -111,8 +140,27 @@ $bot = new DiscordCommandClient([
 ]);
 
 # TODO instructions(GAME_STATUS->current_lang)
+# TODO more consistency about how the functions send the message? (not super important if we move to slash commands)
 $bot->registerCommand('info', fn () => instructions('Hungarian'), ['description' => 'show instructions']);
-
+$bot->registerCommand('teh', translator_command('English', 'Hungarian'), ['description' => 'translate given word Eng-Hun']);
+$bot->registerCommand('thg', translator_command('Hungarian', 'German'), ['description' => 'translate given word Hun-Ger']);
+$bot->registerCommand('tgh', translator_command('German', 'Hungarian'), ['description' => 'translate given word Ger-Hun']);
+$bot->registerCommand('thh', translator_command('Hungarian', 'Hungarian'), ['description' => 'translate given word Hun-Hun']);
+$bot->registerCommand('t', function (Message $ctx, $args) {
+    $translator_args = channel_valid($ctx) ? [/*GAME_STATUS->current_lang, GAME_STATUS->base_lang*/] : []; # TODO uncomment when GameStatus is ready to construct
+    translator_command(...$translator_args)($ctx, $args);
+}, ['description' => 'translate given word']);
+$bot->registerCommand('stats', function (Message $ctx, $args) {
+    $infos = PlayerHandler::getInstance()->player_dict[$ctx->author->id]; # TODO better injection
+    $found_words = implode(', ', $infos['found_words']);
+    return <<<END
+    **Player stats for $infos[server_name]:**
+    *Total found words:* $infos[all_time_found]
+    *Approved words in previous games:* $infos[all_time_approved]
+    *Personal emoji:* $infos[personal_emoji]
+    *Words found in current game:* $found_words
+    END;
+}, ['description' => 'send user stats']);
 
 # Blocks the code - has to be at the bottom
 $bot->run();
@@ -202,6 +250,13 @@ def found_words_output():
         return "No words found yet 😭"
     return "_" + ', '.join(fw_list) +  " (" + str(len(fw_list)) + ")_\n" + progress_bar() + " (" + str(game_status.amount_approved_words) + "/" + str(int(game_status.end_amount)) + ")"
 
+def acknowledgement_reaction(word):
+    word=remove_special_char(word)
+    return '💯' if len(word)> 9 else '🤯' if len(word) > 8 else '🎉' if len(word) > 5 else '👍'
+
+async def savefile_valid(ctx): # TODO may be unneeded in the new system
+    return game_status.file_valid()
+
 */
 
 
@@ -223,7 +278,6 @@ from bojler_db import DatabaseHandler, DictionaryType
 from bojler_config import ConfigHandler
 from bojler_game_status import GameStatus, EasterEggHandler
 from bojler_util import remove_special_char, output_split_cursive
-from bojler_player import PlayerHandler
 from EasterEgg_Adventure import Adventure
 
 
@@ -231,22 +285,11 @@ from EasterEgg_Adventure import Adventure
 #for player in player_dict:
 #player_dict[player]["all_time_found"] = len(player_dict[player]["found_words"])
 
-easter_egg_handler=EasterEggHandler(game_status.found_words_set) #adventure=Adventure(game_status.letters.list, game_status.solutions) adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.current_lang].keys()))  def needs_counting(func): async def action(ctx, *args, **kwargs): await func(ctx, *args, **kwargs) if counter.trigger(): await simple_board(ctx) action.__name__=func.__name__ sig=inspect.signature(func) action.__signature__=sig.replace(parameters=tuple(sig.parameters.values())) return action def current_emoji_version(): hash=int(md5(bytes(' '.join(sorted(game_status.letters.list, key=game_status._collator().getSortKey)), ' utf-8')).hexdigest(), base=16) if date.today().strftime("%m%d") in progress_bar_version_dict: current_list=progress_bar_version_dict[date.today().strftime("%m%d")] else: current_list=progress_bar_version_dict["default"] return current_list[hash % len(current_list)] ''' #how is this easier??
-def emoji_ration(variant_list, current, total):
-  if total == 0:
-    return ''
-  if len(variant_list) == 2:
-    return variant_list[1-round(current/total)]
-  if current == 0:
-    return variant_list[-1]
-  if current == total:
-    return variant_list[0]
-  inner_elements = len(variant_list) - 2
-  return variant_list[inner_elements-math.floor(current/total*inner_elements)]
+#adventure=Adventure(game_status.letters.list, game_status.solutions)
+adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.current_lang].keys()))
+def needs_counting(func): async def action(ctx, *args, **kwargs): await func(ctx, *args, **kwargs) if counter.trigger(): await simple_board(ctx) action.__name__=func.__name__ sig=inspect.signature(func) action.__signature__=sig.replace(parameters=tuple(sig.parameters.values())) return action def current_emoji_version(): hash=int(md5(bytes(' '.join(sorted(game_status.letters.list, key=game_status._collator().getSortKey)), ' utf-8')).hexdigest(), base=16) if date.today().strftime("%m%d") in progress_bar_version_dict: current_list=progress_bar_version_dict[date.today().strftime("%m%d")] else: current_list=progress_bar_version_dict["default"] return current_list[hash % len(current_list)]
 
-'''
-
-    # sends the small game board with the found words if they fit into one message async def simple_board(ctx): message="**Already found words:** " + found_words_output() if not (await ctx.try_send(message)): await ctx.send("_Too many found words. Please use b!see._") with open(image_filepath_small, 'rb' ) as f: await ctx.send(file=discord.File(f))  #Checks if dice are thrown, thrown_the_dice exists just for this async def thrown_dice(ctx): if not game_status.thrown_the_dice: await ctx.send("_Please load game using_ **b!load** _or start a new game using_ **b!new**") return game_status.thrown_the_dice #Checks if current_game savefile is correctly formatted async def savefile_valid(ctx): return game_status.file_valid() #Checks if the current message is in the tracked channel async def channel_valid(ctx): return ctx.guild and ctx.guild.id==home_server and ctx.channel.id==home_channel async def bojler(ctx): messages=easter_eggs["bojler"] times=[0,1.5,1.5,1.5,1.5,0.3,0.3] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(times[i]) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def quick_walk(ctx, arg): messages=easter_eggs[arg] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(0.3) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def easter_egg_trigger(ctx, word, add='' ): # handle_easter_eggs decides which one to trigger, this here triggers it then type=easter_egg_handler.handle_easter_eggs(word, add) if not type: return print("Easter Egg") # to tell us when this might be responsible for anything if type=="nyan" : await quick_walk(ctx, "nyan" ) elif type=="bojler" : await bojler(ctx) elif type=="tongue" : message=await ctx.send("😝") await sleep(0.3) await message.delete() elif type=="varázsló" : await quick_walk(ctx, "varázsló" ) elif type=="huszár" : message=await ctx.send(easter_eggs["nagyhuszár"][0]) await sleep(2) await message.delete() #Determines which emoji reaction a certain word deserves - it doesn't remove special characters def acknowledgement_reaction(word): word=remove_special_char(word) return '💯' if len(word)> 9 else '🤯' if len(word) > 8 else '🎉' if len(word) > 5 else '👍'
+    # sends the small game board with the found words if they fit into one message async def simple_board(ctx): message="**Already found words:** " + found_words_output() if not (await ctx.try_send(message)): await ctx.send("_Too many found words. Please use b!see._") with open(image_filepath_small, 'rb' ) as f: await ctx.send(file=discord.File(f))  #Checks if dice are thrown, thrown_the_dice exists just for this async def thrown_dice(ctx): if not game_status.thrown_the_dice: await ctx.send("_Please load game using_ **b!load** _or start a new game using_ **b!new**") return game_status.thrown_the_dice #Checks if current_game savefile is correctly formatted  #Checks if the current message is in the tracked channel async def bojler(ctx): messages=easter_eggs["bojler"] times=[0,1.5,1.5,1.5,1.5,0.3,0.3] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(times[i]) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def quick_walk(ctx, arg): messages=easter_eggs[arg] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(0.3) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def easter_egg_trigger(ctx, word, add='' ): # handle_easter_eggs decides which one to trigger, this here triggers it then type=easter_egg_handler.handle_easter_eggs(word, add) if not type: return print("Easter Egg") # to tell us when this might be responsible for anything if type=="nyan" : await quick_walk(ctx, "nyan" ) elif type=="bojler" : await bojler(ctx) elif type=="tongue" : message=await ctx.send("😝") await sleep(0.3) await message.delete() elif type=="varázsló" : await quick_walk(ctx, "varázsló" ) elif type=="huszár" : message=await ctx.send(easter_eggs["nagyhuszár"][0]) await sleep(2) await message.delete() #Determines which emoji reaction a certain word deserves - it doesn't remove special characters
 
       async def achievements(ctx, word, type):
       reactions = []
@@ -260,10 +303,10 @@ def emoji_ration(variant_list, current, total):
       return reactions
 
       async def s_reactions(ctx, word):
-      reaction_list = [acknowledgement_reaction(word), approval_reaction(word)]
-      # zsemle special
-      if (ctx.author.id == 400894576577085460) and (reaction_list[1]=='❔'):
-      reaction_list.append("<:blobpeep:393319772076376066>")
+        reaction_list = [acknowledgement_reaction(word), approval_reaction(word)]
+        # zsemle special
+        if (ctx.author.id == 400894576577085460) and (reaction_list[1]=='❔'):
+            reaction_list.append("<:blobpeep:393319772076376066>")
         reaction_list += await achievements(ctx, word, "s")
         return reaction_list
 
@@ -291,49 +334,6 @@ def emoji_ration(variant_list, current, total):
         await ctx.send(word + " doesn't fit the given letters.")
         if counter.trigger():
         await simple_board(ctx)
-
-        @bot.command(brief='translate given word', aliases=['T'])
-        async def t(ctx, arg):
-        if await channel_valid(ctx):
-        entry = game_status.get_translation(arg, DictionaryType(game_status.current_lang, game_status.base_lang))
-        else:
-        entry = game_status.get_translation(arg)
-        if entry:
-        await ctx.send(arg + ": ||" + entry + "||")
-        else:
-        await ctx.message.add_reaction('😶')
-
-        @bot.command(brief='translate given word Eng-Hun')
-        async def teh(ctx, arg):
-        entry = game_status.get_translation(arg, DictionaryType("English", "Hungarian"))
-        if entry:
-        await ctx.send(arg + ": ||" + entry + "||")
-        else:
-        await ctx.message.add_reaction('😶')
-
-        @bot.command(brief='translate given word Hun-Ger')
-        async def thg(ctx, arg):
-        entry = game_status.get_translation(arg, DictionaryType("Hungarian", "German"))
-        if entry:
-        await ctx.send(arg + ": ||" + entry + "||")
-        else:
-        await ctx.message.add_reaction('😶')
-
-        @bot.command(brief='translate given word Ger-Hun')
-        async def tgh(ctx, arg):
-        entry = game_status.get_translation(arg, DictionaryType("German", "Hungarian"))
-        if entry:
-        await ctx.send(arg + ": ||" + entry + "||")
-        else:
-        await ctx.message.add_reaction('😶')
-
-        @bot.command(brief='translate given word Ger-Hun')
-        async def thh(ctx, arg):
-        entry = game_status.get_translation(arg, DictionaryType("Hungarian", "Hungarian"))
-        if entry:
-        await ctx.send(arg + ": ||" + entry + "||")
-        else:
-        await ctx.message.add_reaction('😶')
 
         @bot.command(brief='add to community wordlist')
         @needs_counting
@@ -616,16 +616,6 @@ def emoji_ration(variant_list, current, total):
         @bot.command(brief = 'send highscore')
         async def highscore(ctx):
         await ctx.send(game_highscore())
-
-        @bot.command(brief = 'send user stats')
-        async def stats(ctx):
-        infos = PlayerHandler.player_dict[str(ctx.author.id)]
-        msg = "**Player stats for " + infos["server_name"] + ":**\n"
-        msg += "*Total found words:* " + str(infos["all_time_found"]) + "\n"
-        msg += "*Approved words in previous games:* " + str(infos["all_time_approved"]) + "\n"
-        msg += "*Personal emoji:* " + infos["personal_emoji"] + "\n"
-        msg += "*Words found in current game:* " + ", ".join(infos["found_words"])
-        await ctx.send(msg)
 
         #debug/testing stuff
         @bot.command(hidden=True,brief='delete long time saves (current game is deleted with \'new\')')

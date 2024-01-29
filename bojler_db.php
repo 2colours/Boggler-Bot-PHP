@@ -120,16 +120,18 @@ class DatabaseHandler
     {
         $dictcode = $dtype->asDictcode();
         $operators = ['=', 'LIKE'];
+        $safe_word = SQLite3::escapeString($word);
+        $result = [];
         foreach ($operators as $operator) {
-            $safe_word = SQLite3::escapeString($word);
-            $results = array_column(
+            $db_results = array_column(
                 $this->db
                     ->query("SELECT word, description FROM dictionary WHERE word $operator $safe_word AND dictionarycode = $dictcode")
                     ->fetchArray(SQLITE3_NUM),
                 1
             );
-            yield [$word, ', ' . join($results)];
+            $result[$operator] = implode(', ', $db_results) || null;
         }
+        return $result;
     }
 
     public function getWords(DictionaryType $dtype)
