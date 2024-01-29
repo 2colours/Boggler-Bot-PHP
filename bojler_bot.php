@@ -89,9 +89,7 @@ class Counter
     }
 }
 
-# This is a workaround because "constant expressions" cannot contain unpacking
-define('DEFAULT_DICTIONARY', new DictionaryType(...DEFAULT_TRANSLATION));
-function get_translation($text, DictionaryType $dictionary = DEFAULT_DICTIONARY)
+function get_translation($text, DictionaryType $dictionary)
 {
     $db = DatabaseHandler::getInstance(); # TODO better injection?
     foreach ($db->translate($text, $dictionary) as $translation)
@@ -104,7 +102,8 @@ function translator_command($src_lang = null, $target_lang = null)
 {
     return function (Message $ctx, $args) use ($src_lang, $target_lang) {
         $word = $args[0];
-        $translation = isset($src_lang) && isset($target_lang) ? get_translation($word, new DictionaryType($src_lang, $target_lang)) : get_translation($word); # TODO does passing null work for obtaining the default?
+        $ctor_args = isset($src_lang) && isset($target_lang) ? [$src_lang, $target_lang] : DEFAULT_TRANSLATION;
+        $translation = get_translation($word, new DictionaryType(...$ctor_args));
         if (isset($translation))
             await($ctx->channel->sendMessage("$word: ||$translation||"));
         else
