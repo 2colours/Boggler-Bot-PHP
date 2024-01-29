@@ -133,6 +133,7 @@ define('counter', new Counter(10));
 $bot = new DiscordCommandClient([
     'prefix' => 'b!',
     'token' => $_ENV['DC_TOKEN'],
+    'description' => 'Szórakodtató bot',
     'discordOptions' => [
         'intents' => Intents::getDefaultIntents()
         //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
