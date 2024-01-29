@@ -40,7 +40,7 @@ class PlayerHandler
 
 
     public const PLAYER_SAVES_PATH = 'live_data/player_saves.json'; # TODO can this be used through instances?
-    public readonly mixed $player_dict;
+    public $player_dict;
 
     private function __construct()
     {
