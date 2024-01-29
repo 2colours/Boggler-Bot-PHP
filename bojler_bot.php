@@ -89,7 +89,9 @@ class Counter
     }
 }
 
-function get_translation($text, DictionaryType $dictionary = new DictionaryType(...DEFAULT_TRANSLATION))
+# This is a workaround because "constant expressions" cannot contain unpacking
+define('DEFAULT_DICTIONARY', new DictionaryType(...DEFAULT_TRANSLATION));
+function get_translation($text, DictionaryType $dictionary = DEFAULT_DICTIONARY)
 {
     $db = DatabaseHandler::getInstance(); # TODO better injection?
     foreach ($db->translate($text, $dictionary) as $translation)
