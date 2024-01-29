@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/bojler_config.php'; # TODO ConfigHandler with PSR-4 autoloader
+require_once __DIR__ . '/bojler_util.php'; # TODO fetch_all with PSR-4 autoloader
 
 
 class DictionaryType
@@ -34,7 +35,7 @@ class DictionaryEntry
 {
     public const TABLE_TYPES = ['TEXT', 'TEXT', 'INTEGER'];
     public const TABLE_COLUMNS = ['word', 'description', 'dictionarycode'];
-    public const INDEXES = [['dictindex', ['word', 'dictionarycode']]];
+    public const INDEXES = ['dictindex' => ['word', 'dictionarycode']];
 
     public readonly mixed $word;
     public readonly mixed $description;
@@ -55,6 +56,7 @@ class DictionaryEntry
         return "{$this->word}\t{$this->description}\t{$this->langcode}";
     }
 
+    # Has to be in accordance with TABLE_TYPES and TABLE_COLUMNS!
     public function asRow()
     {
         return [$this->word, $this->description, $this->langcode];
@@ -88,10 +90,12 @@ class DatabaseHandler
                 $typed_columns[] = $entry_class::TABLE_COLUMNS[$i] . ' ' . $entry_class::TABLE_TYPES[$i];
             }
             $column_string = implode(', ', $typed_columns);
-            $this->db->exec("CREATE TABLE IF NOT EXISTS $name ($column_string)");
-            foreach ($entry_class::indexes as $index_name => $index_columns) {
+            $query = "CREATE TABLE IF NOT EXISTS $name ($column_string)";
+            $this->db->exec($query);
+            foreach ($entry_class::INDEXES as $index_name => $index_columns) {
                 $fields = implode(', ', $index_columns);
-                $this->db->exec("CREATE INDEX IF NOT EXISTS $index_name ON $name ($fields)");
+                $query = "CREATE INDEX IF NOT EXISTS $index_name ON $name ($fields)";
+                $this->db->exec($query);
             }
         }
     }
@@ -103,8 +107,12 @@ class DatabaseHandler
             $line_object = new $current_table_class($line);
             $current_row = $line_object->asRow();
             $column_names = implode(', ', $current_table_class::TABLE_COLUMNS);
-            $column_placeholders = implode(', ', array_map(SQLite3::escapeString(...), $current_row));
-            $this->db->exec("INSERT INTO $table_name ($column_names) VALUES ($column_placeholders)");
+            $column_placeholders = implode(', ', array_map(fn () => '?', $current_row));
+            $statement = $this->db->prepare("INSERT INTO $table_name ($column_names) VALUES ($column_placeholders)");
+            $column_types = $current_table_class::TABLE_TYPES;
+            foreach ($current_row as $i => $value)
+                $statement->bindValue($i + 1, $value, constant("SQLITE3_{$column_types[$i]}"));
+            $statement->execute();
         }
     }
 
@@ -113,36 +121,30 @@ class DatabaseHandler
         $in_language = $dtype->src_lang;
         $test_words = ['Hungarian' => 'bársonyos', 'German' => 'Ente', 'English' => 'admirer'];
         $dummy_request = [...$this->translate($test_words[$in_language], $dtype)];
-        return !empty($dummy_request);
+        return isset(array_values($dummy_request)[0]);
     }
 
     public function translate($word, DictionaryType $dtype)
     {
         $dictcode = $dtype->asDictcode();
         $operators = ['=', 'LIKE'];
-        $safe_word = SQLite3::escapeString($word);
         $result = [];
         foreach ($operators as $operator) {
-            $db_results = array_column(
-                $this->db
-                    ->query("SELECT word, description FROM dictionary WHERE word $operator $safe_word AND dictionarycode = $dictcode")
-                    ->fetchArray(SQLITE3_NUM),
-                1
-            );
-            $result[$operator] = implode(', ', $db_results) || null;
+            $query = "SELECT word, description FROM dictionary WHERE word $operator :word AND dictionarycode = :dictcode";
+            $statement = $this->db->prepare($query);
+            $statement->bindValue(':word', $word);
+            $statement->bindValue(':dictcode', $dictcode, SQLITE3_INTEGER);
+            $db_results = [...fetch_all($statement->execute())];
+            $result[$operator] = $db_results ? implode(', ', array_column($db_results, 1)) : null;
         }
         return $result;
     }
 
     public function getWords(DictionaryType $dtype)
     {
-        $safe_dictcode = SQLite3::escapeString($dtype->asDictcode());
-        return array_column(
-            $this->db
-                ->query("SELECT DISTINCT word FROM dictionary WHERE dictionarycode = $safe_dictcode")
-                ->fetchArray(SQLITE3_NUM),
-            0
-        );
+        $statement = $this->db->prepare('SELECT DISTINCT word FROM dictionary WHERE dictionarycode = :dictcode');
+        $statement->bindValue(':dictcode', $dtype->asDictcode(), SQLITE3_INTEGER);
+        return array_column($this->db->exec()->fetchArray(SQLITE3_NUM), 0);
     }
 
     private function __construct()
