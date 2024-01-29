@@ -6,7 +6,6 @@ use Symfony\Component\Dotenv\Dotenv;
 use Discord\DiscordCommandClient;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Intents;
-use React\Promise\Promise;
 use function React\Async\await;
 
 require_once __DIR__ . '/bojler_game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
@@ -226,6 +225,17 @@ def approval_reaction(word):
     else:
         return '❔'
 
+# emojis are retrieved in a deterministic way: (current date, sorted letters, emoji list) determine the value
+# special dates have a unique emoji list to be used
+# in general, the letters are hashed modulo the length of the emoji list, to obtain the index in the emoji list
+def current_emoji_version():
+    hash=int(md5(bytes(' '.join(sorted(game_status.letters.list, key=game_status._collator().getSortKey)), ' utf-8')).hexdigest(), base=16)
+    if date.today().strftime("%m%d") in progress_bar_version_dict:
+        current_list=progress_bar_version_dict[date.today().strftime("%m%d")]
+    else:
+        current_list=progress_bar_version_dict["default"]
+    return current_list[hash % len(current_list)]
+
 def progress_bar(emoji_scale = None):
     if not emoji_scale:
         emoji_scale = current_emoji_version()[1]
@@ -273,7 +283,6 @@ import traceback
 from hashlib import md5
 from datetime import date
 from asyncio import sleep
-import requests
 import inspect
 from bojler_db import DatabaseHandler, DictionaryType
 from bojler_config import ConfigHandler
@@ -288,7 +297,7 @@ from EasterEgg_Adventure import Adventure
 
 #adventure=Adventure(game_status.letters.list, game_status.solutions)
 adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.current_lang].keys()))
-def needs_counting(func): async def action(ctx, *args, **kwargs): await func(ctx, *args, **kwargs) if counter.trigger(): await simple_board(ctx) action.__name__=func.__name__ sig=inspect.signature(func) action.__signature__=sig.replace(parameters=tuple(sig.parameters.values())) return action def current_emoji_version(): hash=int(md5(bytes(' '.join(sorted(game_status.letters.list, key=game_status._collator().getSortKey)), ' utf-8')).hexdigest(), base=16) if date.today().strftime("%m%d") in progress_bar_version_dict: current_list=progress_bar_version_dict[date.today().strftime("%m%d")] else: current_list=progress_bar_version_dict["default"] return current_list[hash % len(current_list)]
+def needs_counting(func): async def action(ctx, *args, **kwargs): await func(ctx, *args, **kwargs) if counter.trigger(): await simple_board(ctx) action.__name__=func.__name__ sig=inspect.signature(func) action.__signature__=sig.replace(parameters=tuple(sig.parameters.values())) return action
 
     # sends the small game board with the found words if they fit into one message async def simple_board(ctx): message="**Already found words:** " + found_words_output() if not (await ctx.try_send(message)): await ctx.send("_Too many found words. Please use b!see._") with open(image_filepath_small, 'rb' ) as f: await ctx.send(file=discord.File(f))  #Checks if dice are thrown, thrown_the_dice exists just for this async def thrown_dice(ctx): if not game_status.thrown_the_dice: await ctx.send("_Please load game using_ **b!load** _or start a new game using_ **b!new**") return game_status.thrown_the_dice #Checks if current_game savefile is correctly formatted  #Checks if the current message is in the tracked channel async def bojler(ctx): messages=easter_eggs["bojler"] times=[0,1.5,1.5,1.5,1.5,0.3,0.3] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(times[i]) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def quick_walk(ctx, arg): messages=easter_eggs[arg] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(0.3) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def easter_egg_trigger(ctx, word, add='' ): # handle_easter_eggs decides which one to trigger, this here triggers it then type=easter_egg_handler.handle_easter_eggs(word, add) if not type: return print("Easter Egg") # to tell us when this might be responsible for anything if type=="nyan" : await quick_walk(ctx, "nyan" ) elif type=="bojler" : await bojler(ctx) elif type=="tongue" : message=await ctx.send("😝") await sleep(0.3) await message.delete() elif type=="varázsló" : await quick_walk(ctx, "varázsló" ) elif type=="huszár" : message=await ctx.send(easter_eggs["nagyhuszár"][0]) await sleep(2) await message.delete() #Determines which emoji reaction a certain word deserves - it doesn't remove special characters
 
