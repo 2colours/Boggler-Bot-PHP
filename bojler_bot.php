@@ -156,7 +156,7 @@ $bot->registerCommand('t', function (Message $ctx, $args) {
     $translator_args = channel_valid($ctx) ? [/*GAME_STATUS->current_lang, GAME_STATUS->base_lang*/] : []; # TODO uncomment when GameStatus is ready to construct
     translator_command(...$translator_args)($ctx, $args);
 }, ['description' => 'translate given word']);
-$bot->registerCommand('stats', function (Message $ctx, $args) {
+$bot->registerCommand('stats', function (Message $ctx) {
     $infos = PlayerHandler::getInstance()->player_dict[$ctx->author->id]; # TODO better injection
     $found_words = implode(', ', $infos['found_words']);
     return <<<END
