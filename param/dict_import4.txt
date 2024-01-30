@@ -403,8 +403,6 @@ ellenállhatatlan	fékezhetetlen	4
 ellenállhatatlan	legyőzhetetlen	4
 ellenállhatatlan	leküzdhetetlen	4
 ellenállhatatlan	elsöprő	4
-!	(U+0021)	4
-!	felkiáltójel	4
 rögtön	azonnal	4
 rögtön	hamar	4
 rögtön	máris	4
@@ -462,12 +460,6 @@ henger	orsó	4
 henger	cséve	4
 méhtenyésztés	méhészkedés	4
 méhtenyésztés	méhészet	4
-$	dollár	4
-$	zöldhasú	4
-$	$ (jel)	4
-$	USD (röv.)	4
-$	(U+0024)	4
-$	dollárjel	4
 halk	csendes	4
 halk	csöndes	4
 halk	néma	4
@@ -484,9 +476,6 @@ halk	nem hallható	4
 halk	szófukar	4
 halk	fojtott	4
 halk	elfojtott	4
-%	(U+0025)	4
-%	százalékjel	4
-%	százalék	4
 hall	értesül	4
 hall	meglát	4
 hall	megtud	4
@@ -505,16 +494,6 @@ doppingol	serkent	4
 doppingol	ösztökél	4
 doppingol	nógat	4
 doppingol	mozgat	4
-&	és	4
-&	meg	4
-&	s	4
-&	továbbá	4
-&	egyúttal	4
-&	plusz	4
-&	et	4
-&	(U+0026)	4
-&	et jel	4
-&	és jel	4
 gázálarc	gázmaszk	4
 grapefruit	grépfrút	4
 grapefruit	citrancs	4
@@ -529,12 +508,6 @@ sárgabarack	kajszi	4
 vandál	gátlástalan	4
 vandál	kíméletlen	4
 vandál	féktelen	4
-(	(U+0028)	4
-(	nyitó zárójel	4
-(	zárójel	4
-)	(U+0029)	4
-)	bezáró zárójel	4
-)	zárójel	4
 extra	külön	4
 extra	számfeletti	4
 ringyó	foszlány	4
@@ -545,10 +518,6 @@ ringyó	cafka	4
 ringyó	lotyó	4
 ringyó	szajha	4
 ringyó	repedtsarkú	4
-*	(U+002A)	4
-*	csillag	4
-*	hivatkozás	4
-*	jel (kategória)	4
 németalföldi	holland	4
 németalföldi	hollandi	4
 németalföldi	hollandus	4
@@ -609,11 +578,6 @@ borzalmas	rémséges	4
 borzalmas	rémületes	4
 borzalmas	szörnyűséges	4
 borzalmas	rémítő	4
-+	(U+002B)	4
-+	pluszjel	4
-+	összeadásjel	4
-+	plusz	4
-+	matematikai jelek (kategória)	4
 találkahely	találkozóhely	4
 szlavón	szláv	4
 okosság	bölcsesség	4
@@ -627,8 +591,6 @@ ború	homályosság	4
 ború	gonoszság	4
 hitlerista	fasiszta	4
 hitlerista	náci	4
-,	(U+002C)	4
-,	vessző	4
 hegyetlen	életlen	4
 hegyetlen	tompa	4
 hegyetlen	kicsorbult	4
@@ -663,12 +625,6 @@ fut	tart	4
 fut	vezet	4
 fut	húzódik	4
 fut	visz	4
--	(U+002D)	4
--	kiskötőjel	4
--	elválasztójel	4
--	diviz	4
--	kötőjel	4
--	jel (kategória)	4
 vámkirendeltség	vámőrség	4
 jogszerű	engedélyezett	4
 jogszerű	jogos	4
@@ -704,8 +660,6 @@ fék	barikád	4
 fék	gát	4
 fék	torlasz	4
 fék	béklyó	4
-.	(U+002E)	4
-.	pont (jel)	4
 különös	fantasztikus	4
 különös	csodálatos	4
 különös	rendkívüli	4
@@ -766,9 +720,6 @@ fél	2	4
 fél	jel (kategória)	4
 fél	vitapartner	4
 antológia	versgyűjtemény	4
-/	(U+002F)	4
-/	perjel	4
-/	osztásjel	4
 védőjátékos	védő	4
 védőjátékos	őr	4
 vezérszerep	főszerep	4
@@ -797,12 +748,6 @@ pöffeszkedő	tetszelgő	4
 pöffeszkedő	büszke	4
 foltos	maszatos	4
 foltos	piszkos	4
-1	(U+00B9)	4
-1	¹	4
-1	első hatvány (jel)	4
-1	hivatkozás (jel)	4
-1	jel (kategória)	4
-1	matematikai jelek (kategória)	4
 megragaszt	gumiz	4
 megragaszt	ragaszt	4
 eső	esőzés	4
@@ -1048,8 +993,6 @@ máris	íziben	4
 máris	azon melegében	4
 máris	azon nyomban	4
 máris	közvetlenül	4
-:	(U+003A)	4
-:	kettőspont	4
 pénzhígulás	infláció	4
 nyomáscsökkentő	dekompresszor	4
 használ	alkalmaz	4
@@ -1070,14 +1013,8 @@ használ	segélyez	4
 használ	előnyére van	4
 használ	hasznára van	4
 használ	segédkezet nyújt	4
-;	(U+003B)	4
-;	pontosvessző	4
-;	vessző (kategória)	4
 rohanás	hajsza	4
 rohanás	roham	4
-<	(U+003C)	4
-<	kisebb jel	4
-<	kisebb (jel)	4
 sóvárog	áhítozik	4
 sóvárog	vágyik	4
 sóvárog	epekedik	4
@@ -1089,9 +1026,6 @@ sóvárog	vágyakozik	4
 levéltár	archívum	4
 levéltár	irattár	4
 levéltár	okmánytár	4
-=	(U+003D)	4
-=	egyenlőségjel	4
-=	egyenlő (jel)	4
 rend	apácarend	4
 rend	lovagrend	4
 rend	mód	4
@@ -1108,11 +1042,6 @@ rend	következés	4
 rend	sorrendiség	4
 rend	elrendezés	4
 rend	szerzetesrend	4
->	(U+003E)	4
->	nagyobb jel	4
->	nagyobb (jel)	4
-?	(U+003F)	4
-?	kérdőjel	4
 uralkodik	önkényeskedik	4
 uralkodik	hatalmaskodik	4
 uralkodik	parancsolgat	4
@@ -1648,9 +1577,6 @@ diákotthon	kollégium	4
 értékes	jelentékeny	4
 értékes	elég nagy	4
 értékes	takaros	4
-[	(U+005B)	4
-[	szögletes zárójel	4
-[	zárójel (kategória)	4
 bariton	baritonista	4
 elismervény	bizonylat	4
 elismervény	bizonyíték	4
@@ -1661,9 +1587,6 @@ elismervény	nyugta	4
 elismervény	tanúsítvány	4
 elismervény	nyugtatvány	4
 elismervény	okmány	4
-]	(U+005D)	4
-]	szögletes zárójel	4
-]	zárójel (kategória)	4
 muskotálybor	muskotály	4
 muskotálybor	muskotályszőlő	4
 első	elemi	4
@@ -2159,9 +2082,6 @@ rövidital	tinta	4
 rövidital	itóka	4
 rövidital	spiritusz	4
 rövidital	szeszes ital	4
-{	(U+007B)	4
-{	kapcsos zárójel	4
-{	zárójel (kategória)	4
 randi	randevú	4
 randi	találka	4
 randi	légyott	4
@@ -2186,13 +2106,6 @@ kiegészítésül	azonfelül	4
 kiegészítésül	tetejébe	4
 kiegészítésül	még hozzá	4
 kiegészítésül	és	4
-}	(U+007D)	4
-}	kapcsos zárójel	4
-}	zárójel (kategória)	4
-~	(U+007E)	4
-~	hullámvonal	4
-~	hullám (jel)	4
-~	jel (kategória)	4
 szerkesztői	szerkesztőségi	4
 fogadalom	ígéret	4
 fogadalom	eskü	4
@@ -30282,10 +30195,6 @@ kompilál	írogat	4
 kompilál	szerkeszt	4
 kompilál	irkál	4
 horganyfehér	cinkfehér	4
-〈	(U+3008)	4
-〈	nyitó csúcsos zárójel	4
-〈	csúcsos zárójel	4
-〈	zárójel	4
 fölény	előny	4
 fölény	többség	4
 fölény	túlsúly	4
@@ -30315,10 +30224,6 @@ probléma	galiba	4
 probléma	zökkenő	4
 probléma	akadály	4
 probléma	kérdés	4
-〉	(U+3009)	4
-〉	bezáró csúcsos zárójel	4
-〉	csúcsos zárójel	4
-〉	zárójel	4
 ismétlő	ismétlődő	4
 ismétlő	ismételt	4
 hasonul	asszimilálódik	4
@@ -52500,17 +52405,11 @@ teendő	tevékenység	4
 teendő	elfoglaltság	4
 teendő	tennivaló	4
 teendő	feladat	4
-¡	(U+00A1)	4
-¡	fordított felkiáltójel	4
-¡	felkiáltójel (kategória)	4
 sajnálatos	kár	4
 sajnálatos	nem szerencsés	4
 sajnálatos	szomorú	4
 elidegenítés	elidegenülés	4
 elidegenítés	elidegenedés	4
-¢	(U+00A2)	4
-¢	cent (jel)	4
-¢	pénz (kategória)	4
 tok	héj	4
 tok	bőr	4
 tok	burok	4
@@ -52523,9 +52422,6 @@ tok	külső felület	4
 ízléses	választékos	4
 ízléses	kényes	4
 ízléses	esztétikus	4
-£	(U+00A3)	4
-£	font sterling (jel)	4
-£	pénz (kategória)	4
 tol	pártfogol	4
 tol	segít	4
 tol	nyom	4
@@ -52555,9 +52451,6 @@ elront	elfuserál	4
 elront	elügyetlenkedik	4
 atommáglya	atomreaktor	4
 atommáglya	reaktor	4
-¥	(U+00A5)	4
-¥	jen (jel)	4
-¥	pénz (kategória)	4
 fülgyógyászat	fülészet	4
 jóváhagyás	engedély	4
 jóváhagyás	hozzájárulás	4
@@ -52599,10 +52492,6 @@ ráró	szab	4
 ráró	kiszab	4
 ráró	kivet	4
 ráró	kimér	4
-§	(U+00A7)	4
-§	paragrafusjel	4
-§	paragrafus (jel)	4
-§	jel (kategória)	4
 karvalyorrú	sasorrú	4
 pózol	pózba helyezkedik	4
 lényegében	tulajdonképpen	4
@@ -52613,10 +52502,6 @@ lényegében	voltaképpen	4
 lényegében	tulajdonképp	4
 lényegében	alapjában véve	4
 lényegében	végeredményben	4
-©	(U+00A9)	4
-©	copyright (jel)	4
-©	jogvédett (jel)	4
-©	jel (kategória)	4
 múlékony	ideiglenes	4
 múlékony	rövid	4
 múlékony	átmeneti	4
@@ -52634,12 +52519,6 @@ múlékony	futólagos	4
 múlékony	provizórikus	4
 múlékony	tovatűnő	4
 múlékony	alkalmi	4
-«	(U+00AB)	4
-«	záró belső idézőjel	4
-«	U+00AB	4
-«	idézőjel	4
-«	lúdláb (jel)	4
-«	jel (kategória)	4
 radiológia	röntgenológia	4
 hűtőgép	hűtő	4
 hűtőgép	hűtőszekrény	4
@@ -52665,10 +52544,6 @@ gáttalan	végeérhetetlen	4
 gáttalan	véget nem érő	4
 gáttalan	vég nélküli	4
 gáttalan	végtelen	4
-­	(U+00AD)	4
-­	feltételes elválasztójel	4
-­	elválasztójel	4
-­	jel (kategória)	4
 felbátorít	ösztönöz	4
 felbátorít	felbujt	4
 vonzóerő	mágnesesség	4
@@ -52677,10 +52552,6 @@ vonzóerő	vonzás	4
 vonzóerő	vonzalom	4
 vonzóerő	vonzódás	4
 vonzóerő	varázs	4
-®	(U+00AE)	4
-®	védett márka (jel)	4
-®	jogvédett (jel)	4
-®	márka (jel)	4
 lemaradás	késedelem	4
 lemaradás	csúszás	4
 lemaradás	halasztás	4
@@ -52703,19 +52574,11 @@ nyugtalanít	idegesít	4
 nyugtalanít	izgat	4
 nyugtalanít	irritál	4
 nyugtalanít	zavar	4
-°	(U+00B0)	4
-°	fokjel	4
-°	fok (jel)	4
-°	jel (kategória)	4
 vasalás	sarokvas	4
 vasalás	pánt	4
 vasalás	zsanér	4
 vasalás	vaspánt	4
 mellkas	mell	4
-±	(U+00B1)	4
-±	plusz-mínusz jel	4
-±	plusz-mínusz	4
-±	matematikai jelek (kategória)	4
 tengerszoros	szoros	4
 metszés	bevágás	4
 előjel	jövendölés	4
@@ -52734,13 +52597,6 @@ divatjamúlt	régies	4
 divatjamúlt	régimódi	4
 divatjamúlt	túlhaladott	4
 divatjamúlt	özönvíz előtti	4
-²	(U+00B2)	4
-²	négyzet	4
-²	második hatvány	4
-²	2	4
-²	hivatkozás	4
-²	jel (kategória)	4
-²	matematikai jelek (kategória)	4
 elidegenülés	elidegenítés	4
 elidegenülés	elidegenedés	4
 törekvő	becsvágyó	4
@@ -52749,13 +52605,6 @@ törekvő	igyekvő	4
 törekvő	nagyravágyó	4
 törekvő	nagyra törő	4
 törekvő	törtető	4
-³	(U+00B3)	4
-³	köb	4
-³	harmadik hatvány	4
-³	3	4
-³	hivatkozás	4
-³	jel (kategória)	4
-³	matematikai jelek (kategória)	4
 meghökken	leesik az álla	4
 meghökken	csodálkozik	4
 meghökken	meglepődik	4
@@ -52786,18 +52635,12 @@ sértődött	durcás	4
 sértődött	morcos	4
 sértődött	duzzogó	4
 szemcse	szem	4
-¶	(U+00B6)	4
-¶	bekezdésjel	4
-¶	bekezdés (jel)	4
 üvegszerű	átlátszó	4
 üvegszerű	tiszta	4
 üvegszerű	áttetsző	4
 üvegszerű	fátyolszerű	4
 üvegszerű	opálos	4
 kitalál	kohol	4
-·	(U+00B7)	4
-·	középső pont (jel)	4
-·	pont (jel)	4
 fütyülő	férfi nemi szerv	4
 fütyülő	férfiasság	4
 fütyülő	hímvessző	4
@@ -52810,12 +52653,6 @@ fütyülő	kukac	4
 szoknyavadász	nőcsábász	4
 szoknyavadász	aszfaltbetyár	4
 szoknyavadász	jampec	4
-¹	(U+00B9)	4
-¹	első hatvány (jel)	4
-¹	1 (jel)	4
-¹	hivatkozás (jel)	4
-¹	jel (kategória)	4
-¹	matematikai jelek (kategória)	4
 tájszólás	nyelvjárás	4
 tájszólás	dialektus	4
 tájszólás	tájnyelv	4
@@ -52824,11 +52661,6 @@ bedob	postáz	4
 bedob	postára ad	4
 bipoláris	kétpólusú	4
 bipoláris	kétsarkú	4
-»	(U+00BB)	4
-»	nyitó belső idézőjel	4
-»	idézőjel	4
-»	lúdláb	4
-»	jel (kategória)	4
 turfa	tőzeg	4
 rokon	hasonló	4
 rokon	egyforma	4
@@ -52874,22 +52706,10 @@ rokon	összefüggésben álló	4
 átkutat	kipuhatol	4
 átkutat	tűvé tesz	4
 átkutat	kitapogat	4
-¼	(U+00BC)	4
-¼	negyed	4
-¼	egynegyed	4
-¼	tört	4
-¼	4	4
-¼	jel (kategória)	4
 tananyag	tanmenet	4
 tananyag	tanterv	4
 megkövesedett	állandósult	4
 fogpiszkáló	fogvájó	4
-½	(U+00BD)	4
-½	fél	4
-½	egyketted	4
-½	tört	4
-½	2	4
-½	jel (kategória)	4
 áruló	hitszegő	4
 áruló	szószegő	4
 áruló	júdás	4
@@ -52898,11 +52718,6 @@ aggodalmaskodó	aggódó	4
 aggodalmaskodó	nyugtalan	4
 aggodalmaskodó	nyugtalankodó	4
 aggodalmaskodó	szorongásos	4
-¾	(U+00BE)	4
-¾	háromnegyed	4
-¾	tört	4
-¾	4	4
-¾	jel (kategória)	4
 közösségi	szociális	4
 közösségi	társadalmi	4
 közösségi	kollektív	4
@@ -52935,9 +52750,6 @@ elragadtatás	öröm	4
 elragadtatás	gyönyör	4
 elragadtatás	gyönyörűség	4
 elragadtatás	kéj	4
-¿	(U+00BF)	4
-¿	fordított kérdőjel	4
-¿	kérdőjel	4
 önkielégítés	maszturbáció	4
 önkielégítés	onánia	4
 híradástechnika	távközlés	4
@@ -53376,10 +53188,6 @@ kizsarol	kivasal	4
 kizsarol	érvényre juttat	4
 kizsarol	keresztülvisz	4
 homlok	szemöldök	4
-×	(U+00D7)	4
-×	szorzásjel	4
-×	szorzás	4
-×	jel (kategória)	4
 süti	sütemény	4
 süti	tészta	4
 süti	sült tészta	4
@@ -53502,10 +53310,6 @@ feldühödött	fogát csikorgatja	4
 feldühödött	pipa	4
 bérmentes	díjmentes	4
 bérmentes	bérmentve	4
-ß	(U+00DF)	4
-ß	scharfes S	4
-ß	scharfes	4
-ß	jel (kategória)	4
 ritkán	néha	4
 ritkán	időközönként	4
 ritkán	időnként	4
@@ -53611,11 +53415,6 @@ elképzel	feltételez	4
 elképzel	feltesz	4
 elképzel	képzel	4
 elképzel	gondol	4
-ä	(U+00E4)	4
-ä	umlautos a	4
-ä	Ä	4
-ä	umlaut	4
-ä	jel (kategória)	4
 ritkás	gyér	4
 ritkás	ritka	4
 ritkás	szórványos	4
@@ -53868,22 +53667,6 @@ hízeleg	nyalizik	4
 cérna	fonal	4
 cérna	fonál	4
 cérna	szál	4
-ó	elavult	4
-ó	régi	4
-ó	ócska	4
-ó	vén	4
-ó	divatjamúlt	4
-ó	idejétmúlt	4
-ó	korszerűtlen	4
-ó	ódivatú	4
-ó	ódon	4
-ó	ósdi	4
-ó	régies	4
-ó	régimódi	4
-ó	túlhaladott	4
-ó	özönvíz előtti	4
-ó	ősi	4
-ó	antik	4
 távbeszélő	telefon	4
 jubileum	évforduló	4
 faliújság	tacepaó	4
@@ -63901,18 +63684,10 @@ megegyezés	megállapodás	4
 megegyezés	egyezség	4
 megegyezés	konvenció	4
 alvajáró	holdkóros	4
-α	(U+03B1)	4
-α	alfa	4
-α	Α (nagybetű)	4
-α	görög ábécé (kat.)	4
 fityma	előbőr	4
 szabadosság	erkölcstelenség	4
 szabadosság	kicsapongás	4
 erdész	erdőkerülő	4
-β	(U+03B2)	4
-β	béta	4
-β	Β (nagybetű)	4
-β	görög ábécé (kat.)	4
 ritmikus	ütemes	4
 ritmikus	ritmusos	4
 erősség	intenzitás	4
@@ -63936,10 +63711,6 @@ később	abban az esetben	4
 később	erre	4
 később	utóbb	4
 később	későbben	4
-γ	(U+03B3)	4
-γ	gamma	4
-γ	Γ (nagybetű)	4
-γ	görög ábécé (kat.)	4
 áskálódás	ármány	4
 áskálódás	intrika	4
 áskálódás	cselszövés	4
@@ -63950,16 +63721,8 @@ narkotizál	szédít	4
 narkotizál	mámorít	4
 narkotizál	részegít	4
 növénytan	botanika	4
-δ	(U+03B4)	4
-δ	delta	4
-δ	Δ (nagybetű)	4
-δ	görög ábécé (kat.)	4
 pasztellkréta	pasztell	4
 teáskészlet	kávéskészlet	4
-ε	(U+03B5)	4
-ε	epszilon	4
-ε	Ε (nagybetű)	4
-ε	görög ábécé (kat.)	4
 őrszolgálat	őr	4
 őrszolgálat	felügyelő	4
 őrszolgálat	őrző	4
@@ -63975,10 +63738,6 @@ meghúz	összevon	4
 meghúz	lerövidít	4
 meghúz	megkurtít	4
 meghúz	sűrít	4
-ζ	(U+03B6)	4
-ζ	zéta	4
-ζ	Ζ (nagybetű)	4
-ζ	görög ábécé (kat.)	4
 bérlet	bérlemény	4
 bélyegez	blokkol	4
 bélyegez	feltüntet	4
@@ -63988,10 +63747,6 @@ bélyegez	minősít	4
 bélyegez	osztályoz	4
 bélyegez	rangsorol	4
 bélyegez	mond	4
-η	(U+03B7)	4
-η	éta	4
-η	Η (nagybetű)	4
-η	görög ábécé (kat.)	4
 dotálás	támogatás	4
 dotálás	segély	4
 dotálás	segélyezés	4
@@ -64002,27 +63757,15 @@ nappali	lakószoba	4
 nappali	társalgó	4
 nappali	nappali szoba	4
 nappali	fogadószoba	4
-θ	(U+03B8)	4
-θ	théta	4
-θ	Θ (nagybetű)	4
-θ	görög ábécé (kat.)	4
 makett	modell	4
 makett	minta	4
 makett	mintadarab	4
-ι	(U+03B9)	4
-ι	ióta	4
-ι	Ι (nagybetű)	4
-ι	görög ábécé (kat.)	4
 szántóföld	mező	4
 szántóföld	szántó	4
 szántóföld	termőföld	4
 szántóföld	föld	4
 kórmeghatározás	diagnózis	4
 kórmeghatározás	kórkép	4
-κ	(U+03BA)	4
-κ	kappa	4
-κ	Κ (nagybetű)	4
-κ	görög ábécé (kat.)	4
 lódít	hazudik	4
 lódít	füllent	4
 lódít	hazudozik	4
@@ -64045,10 +63788,6 @@ lódít	hazudozik	4
 ápolatlan	piszkos	4
 ápolatlan	kopott	4
 ápolatlan	hanyag	4
-λ	(U+03BB)	4
-λ	lambda	4
-λ	Λ (nagybetű)	4
-λ	görög ábécé (kat.)	4
 önös	önző	4
 önös	egoista	4
 önös	egocentrikus	4
@@ -64102,10 +63841,6 @@ gyalázatos	undok	4
 gyalázatos	hírhedt	4
 gyalázatos	cégéres	4
 gyalázatos	közismert	4
-μ	(U+03BC)	4
-μ	mű	4
-μ	Μ (nagybetű)	4
-μ	görög ábécé (kat.)	4
 gyújtópont	fókusz	4
 gyújtópont	középpont	4
 állhatatos	kitartó	4
@@ -64118,10 +63853,6 @@ gyújtópont	középpont	4
 állhatatos	fáradhatatlan	4
 állhatatos	lankadatlan	4
 állhatatos	ernyedetlen	4
-ν	(U+03BD)	4
-ν	nű	4
-ν	Ν (nagybetű)	4
-ν	görög ábécé (kat.)	4
 életkor	kor	4
 radiológus	röntgenológus	4
 radiológus	röntgenorvos	4
@@ -64129,15 +63860,7 @@ irattáros	levéltáros	4
 kútforrás	forrás	4
 kútforrás	eredet	4
 kútforrás	kútfő	4
-ξ	(U+03BE)	4
-ξ	kszi	4
-ξ	Ξ (nagybetű)	4
-ξ	görög ábécé (kat.)	4
 farigcsál	fúr-farag	4
-ο	(U+03BF)	4
-ο	omikron	4
-ο	Ο (nagybetű)	4
-ο	görög ábécé (kat.)	4
 merevgörcs	tetanusz	4
 fásli	pólya	4
 fásli	kötszer	4
@@ -64218,30 +63941,17 @@ zéta	(U+03B6)	4
 zéta	ζ	4
 zéta	Ζ (nagybetű)	4
 zéta	görög ábécé (kat.)	4
-π	(U+03C0)	4
-π	pi	4
-π	Π (nagybetű)	4
-π	görög ábécé (kat.)	4
 mindenfelől	mindenhonnan	4
 mindenfelől	mindenünnen	4
 mindenfelől	minden irányból	4
 mindenfelől	minden oldalról	4
 dohánybolt	trafik	4
 dohánybolt	dohányáruda	4
-ρ	(U+03C1)	4
-ρ	ró	4
-ρ	Ρ (nagybetű)	4
-ρ	görög ábécé (kat.)	4
 megsértődés	sértődés	4
 megsértődés	sértődöttség	4
 mértékadó	irányadó	4
 mértékadó	normatív	4
 mértékadó	mérvadó	4
-ς	(U+03C2)	4
-ς	szigma	4
-ς	szóvégi szigma	4
-ς	Σ (nagybetű)	4
-ς	görög ábécé (kat.)	4
 virágkor	aranykor	4
 virágkor	virágzás	4
 virágkor	kivirágzás	4
@@ -64267,13 +63977,6 @@ zökkenő	zűrzavar	4
 zökkenő	galiba	4
 zökkenő	akadály	4
 belehelyez	beleilleszt	4
-σ	(U+03C2)	4
-σ	ς	4
-σ	szigma	4
-σ	szóvégi szigma	4
-σ	Σ (nagybetű)	4
-σ	görög ábécé (kat.)	4
-σ	(U+03C3)	4
 szélhámosság	ármány	4
 szélhámosság	csalás	4
 szélhámosság	ámítás	4
@@ -64303,10 +64006,6 @@ szélhámosság	becstelen eljárás	4
 szélhámosság	manőver	4
 szélhámosság	szédelgés	4
 könnyes	sírós	4
-τ	(U+03C4)	4
-τ	tau	4
-τ	Τ (nagybetű)	4
-τ	görög ábécé (kat.)	4
 ördögi	sötét	4
 ördögi	pokoli	4
 ördögi	sátáni	4
@@ -64316,16 +64015,8 @@ sebtében	felületesen	4
 sebtében	hamarjában	4
 sebtében	hevenyészve	4
 sebtében	kutyafuttában	4
-υ	(U+03C5)	4
-υ	üpszilon	4
-υ	Υ (nagybetű)	4
-υ	görög ábécé (kat.)	4
 pióca	nadály	4
 pióca	vérszopó	4
-φ	(U+03C6)	4
-φ	fi	4
-φ	Φ (nagybetű)	4
-φ	görög ábécé (kat.)	4
 vitathatatlan	kétségtelen	4
 vitathatatlan	cáfolhatatlan	4
 vitathatatlan	elvitathatatlan	4
@@ -64352,10 +64043,6 @@ felállít	megteremt	4
 felállít	összehoz	4
 felállít	életre hív	4
 felállít	emel	4
-χ	(U+03C7)	4
-χ	khi	4
-χ	Χ (nagybetű)	4
-χ	görög ábécé (kat.)	4
 értelmi	szellemi	4
 értelmi	intellektuális	4
 értelmi	mentális	4
@@ -64374,18 +64061,10 @@ körülteker	becsavar	4
 körülteker	begöngyöl	4
 körülteker	bepólyáz	4
 körülteker	bekötöz	4
-ψ	(U+03C8)	4
-ψ	pszi	4
-ψ	Ψ (nagybetű)	4
-ψ	görög ábécé (kat.)	4
 súlyosság	nyomósság	4
 megérkezik	odaér	4
 kivon	elvesz	4
 kivon	csökkent	4
-ω	(U+03C9)	4
-ω	ómega	4
-ω	Ω (nagybetű)	4
-ω	görög ábécé (kat.)	4
 vonzás	vonzalom	4
 vonzás	vonzódás	4
 vonzás	vonzóerő	4
@@ -73933,10 +73612,6 @@ előbb	korán	4
 előbb	hamarább	4
 előbb	korább	4
 előbb	idő előtt	4
-‑	(U+2011)	4
-‑	nem törő kötőjel	4
-‑	kötőjel	4
-‑	jel (kategória)	4
 furkó	fütykös	4
 furkó	bot	4
 furkó	bunkósbot	4
@@ -73987,11 +73662,6 @@ boncol	tanulmányoz	4
 boncol	figyel	4
 csavargó	csöves	4
 csavargó	naplopó	4
-–	(U+2013)	4
-–	gondolatjel	4
-–	nagykötőjel	4
-–	kötőjel	4
-–	jel (kategória)	4
 tanúságtétel	bizonyság	4
 tanúságtétel	bizonyíték	4
 tanúságtétel	tanúbizonyság	4
@@ -74000,8 +73670,6 @@ tanúságtétel	tanúskodás	4
 tanúságtétel	tanúvallomás	4
 tanúságtétel	tanújel	4
 tanúságtétel	tanú	4
-—	(U+2014)	4
-—	kvirtmínusz	4
 végezetül	végre	4
 végezetül	végül	4
 végezetül	utoljára	4
@@ -74115,10 +73783,6 @@ hazugság	maszlag	4
 hazugság	füllentés	4
 hazugság	valótlanság	4
 hazugság	koholmány	4
-’	(U+2019)	4
-’	aposztróf (jel)	4
-’	félidézőjel	4
-’	idézőjel	4
 egyenetlenség	ellenségeskedés	4
 egyenetlenség	gyűlölet	4
 egyenetlenség	gyűlölködés	4
@@ -74182,11 +73846,6 @@ interpretáció	megjegyzés	4
 interpretáció	interpretálás	4
 interpretáció	magyarázás	4
 interpretáció	jegyzet	4
-”	(U+201D)	4
-”	záró idézőjel	4
-”	idézőjel	4
-”	macskaköröm	4
-”	jel (kategória)	4
 coca	disznó	4
 coca	sertés	4
 tetejébe	azonkívül	4
@@ -74199,11 +73858,6 @@ tetejébe	azonfelül	4
 tetejébe	kiegészítésül	4
 tetejébe	még hozzá	4
 tetejébe	és	4
-„	(U+201E)	4
-„	nyitó idézőjel	4
-„	idézőjel	4
-„	macskaköröm	4
-„	jel (kategória)	4
 fagy	hideg	4
 kiegyezés	egyetértés	4
 kiegyezés	egység	4
@@ -74270,10 +73924,6 @@ mint	mintsem	4
 megadott	adott	4
 megadott	meghatározott	4
 megadott	bizonyos	4
-†	(U+2020)	4
-†	kereszt (jel)	4
-†	hivatkozás	4
-†	jel (kategória)	4
 röpirat	röplap	4
 röpirat	brosúra	4
 kérdez	faggat	4
@@ -74281,11 +73931,6 @@ kérdez	kérdezősködik	4
 kérdez	vallat	4
 kérdez	kikérdez	4
 kérdez	kihallgat	4
-‡	(U+2021)	4
-‡	kettőskereszt	4
-‡	kereszt (jel)	4
-‡	hivatkozás	4
-‡	jel (kategória)	4
 kacag	nevet	4
 előrelátható	valószínű	4
 előrelátható	várható	4
@@ -74297,9 +73942,6 @@ előrelátható	reális	4
 futómű	futószerkezet	4
 koefficiens	együttható	4
 koefficiens	tényező	4
-•	(U+2022)	4
-•	díszpont (jel)	4
-•	pont (jel)	4
 vajbab	zöldbab	4
 zsiradék	háj	4
 zsiradék	zsír	4
@@ -74339,10 +73981,6 @@ siheder	srác	4
 siheder	kamasz	4
 siheder	legény	4
 alapítvány	szervezet	4
-…	(U+2026)	4
-…	három pont (jel)	4
-…	pont (jel)	4
-…	jel (kategória)	4
 modernizáció	korszerűsítés	4
 gyúlékony	tűzveszélyes	4
 eufória	kitörő jókedv	4
@@ -74499,19 +74137,7 @@ verbuvál	begyűjt	4
 verbuvál	betakarít	4
 verbuvál	összegyűjt	4
 verbuvál	összeszed	4
-‰	(U+2030)	4
-‰	ezrelékjel	4
-‰	százalékjel	4
-‰	jel (kategória)	4
 énekes	dalnok	4
-‱	(U+2031)	4
-‱	tízezrelékjel	4
-‱	ezrelékjel	4
-‱	százalékjel	4
-‱	jel (kategória)	4
-′	(U+2032)	4
-′	szögperc (jel)	4
-′	jel (kategória)	4
 többhangú	többszólamú	4
 többhangú	polifón	4
 ironikus	csipkelődő	4
@@ -74527,9 +74153,6 @@ ironikus	csúfondáros	4
 ironikus	rosszakaratú	4
 ironikus	gonosz	4
 ironikus	szarkasztikus	4
-″	(U+2033)	4
-″	szögmásodperc (jel)	4
-″	jel (kategória)	4
 pamut	gyapot	4
 pamut	karton	4
 pamut	pamutszövet	4
@@ -74824,9 +74447,6 @@ tégla	spicli	4
 tégla	spion	4
 tégla	beépített ember	4
 tégla	titkos ügynök	4
-⁄	(U+2044)	4
-⁄	törtjel	4
-⁄	perjel	4
 köpcös	tömzsi	4
 köpcös	vaskos	4
 köpcös	zömök	4
@@ -76181,9 +75801,6 @@ hajókázik	csónakázik	4
 hajókázik	hajózik	4
 spaletta	zsalu	4
 zoológia	állattan	4
-€	(U+20AC)	4
-€	euró (jel)	4
-€	jel (kategória)	4
 péküzlet	pékbolt	4
 ruha	öltözet	4
 ruha	öltözék	4
@@ -77587,10 +77204,6 @@ semleges	nem részrehajló	4
 semleges	megértő	4
 semleges	indifferens	4
 semleges	semlegesnemű	4
-℃	(U+2103)	4
-℃	Celsius-fok	4
-℃	Celsius	4
-℃	°C (hely.)	4
 tényező	együttható	4
 tényező	koefficiens	4
 ökölvívó	bokszoló	4
@@ -77635,10 +77248,6 @@ fondorkodó	ravasz	4
 kézelő	mandzsetta	4
 dúsítás	gazdagítás	4
 angyalbőr	egyenruha	4
-℉	(U+2103)	4
-℉	Fahreinheit-fok	4
-℉	Fahrenheit	4
-℉	°F (hely.)	4
 reklámoz	propagál	4
 reklámoz	hirdet	4
 moszat	alga	4
@@ -78802,20 +78411,9 @@ autogram	szignó	4
 újrahasznosítás	(U+2652)	4
 újrahasznosítás	♲	4
 újrahasznosítás	egyéb (jel)	4
-⅓	(U+2153)	4
-⅓	harmad	4
-⅓	egyharmad	4
-⅓	tört	4
-⅓	3	4
-⅓	jel (kategória)	4
 díjaz	jutalmaz	4
 díjaz	honorál	4
 díjaz	megjutalmaz	4
-⅔	(U+2154)	4
-⅔	kétharmad	4
-⅔	tört	4
-⅔	3	4
-⅔	jel (kategória)	4
 hervad	sorvad	4
 hervad	csökken	4
 hervad	fogy	4
@@ -78898,12 +78496,6 @@ eredeti	effektív	4
 eredeti	valóságos	4
 misi	Misi	4
 misi	Miska	4
-⅕	(U+2155)	4
-⅕	ötöd	4
-⅕	egyötöd	4
-⅕	tört	4
-⅕	5	4
-⅕	jel (kategória)	4
 dől	áramlik	4
 dől	árad	4
 dől	szakad	4
@@ -78928,28 +78520,13 @@ dől	billen	4
 dől	borul	4
 dől	megdől	4
 dől	felbillen	4
-⅖	(U+2156)	4
-⅖	kétötöd	4
-⅖	tört	4
-⅖	5	4
-⅖	jel (kategória)	4
 szikvíz	szódavíz	4
 szikvíz	szóda	4
 szellemidézés	spiritizmus	4
 bemasíroz	bevonul	4
-⅗	(U+2157)	4
-⅗	háromötöd	4
-⅗	tört	4
-⅗	5	4
-⅗	jel (kategória)	4
 böjtöl	fogy	4
 böjtöl	fogyaszt	4
 böjtöl	koplal	4
-⅘	(U+2158)	4
-⅘	négyötöd	4
-⅘	tört	4
-⅘	5	4
-⅘	jel (kategória)	4
 sakk	sakkjáték	4
 sakk	(U+2654)	4
 sakk	♔	4
@@ -79039,12 +78616,6 @@ kusza	komplikált	4
 kusza	szövevényes	4
 kusza	keszekusza	4
 kusza	nehéz	4
-⅙	(U+2159)	4
-⅙	hatod	4
-⅙	egyhatod	4
-⅙	tört	4
-⅙	6	4
-⅙	jel (kategória)	4
 álomfejtés	jóslat (kategória)	4
 óramutató	kismutató	4
 óramutató	nagymutató	4
@@ -79069,11 +78640,6 @@ képmutató	kétszínű	4
 képmutató	alakoskodó	4
 képmutató	köpönyegforgató	4
 képmutató	hamis	4
-⅚	(U+215A)	4
-⅚	öthatod	4
-⅚	tört	4
-⅚	6	4
-⅚	jel (kategória)	4
 mátyásmadár	szajkó	4
 rókázik	hány	4
 rókázik	okád	4
@@ -79081,22 +78647,10 @@ rókázik	okádik	4
 rókázik	kidobja a taccsot	4
 rókázik	ont	4
 falu	község	4
-⅛	(U+215B)	4
-⅛	nyolcad	4
-⅛	egynyolcad	4
-⅛	tört	4
-⅛	8	4
-⅛	jel (kategória)	4
 jégkorizik	jégkorcsolyázik	4
 jégkorizik	korcsolyázik	4
 házassági	hitvesi	4
 házassági	házastársi	4
-⅜	(U+215C)	4
-⅜	nyolcad	4
-⅜	háromnyolcad	4
-⅜	tört	4
-⅜	8	4
-⅜	jel (kategória)	4
 protuberancia	kidudorodás	4
 leköt	elfoglal	4
 leköt	foglal	4
@@ -79110,12 +78664,6 @@ házasságtörő	csalfa	4
 házasságtörő	hűtlen	4
 házasságtörő	megbízhatatlan	4
 házasságtörő	hitszegő	4
-⅝	(U+215D)	4
-⅝	nyolcad	4
-⅝	ötnyolcad	4
-⅝	tört	4
-⅝	8	4
-⅝	jel (kategória)	4
 vélt	vélelmezett	4
 gyerek	gyermek	4
 gyerek	srác	4
@@ -79125,12 +78673,6 @@ gyerek	kissrác	4
 gyerek	lurkó	4
 gyerek	poronty	4
 gyerek	kölyök	4
-⅞	(U+215E)	4
-⅞	nyolcad	4
-⅞	hétnyolcad	4
-⅞	tört	4
-⅞	8	4
-⅞	jel (kategória)	4
 saválló	korrózióálló	4
 klubhelyiség	klubház	4
 pofa	ajak	4
@@ -79164,11 +78706,6 @@ pofa	muki	4
 pofa	muksó	4
 pofa	pacák	4
 pofa	ember (kategória)	4
-⅟	(U+215F)	4
-⅟	egy n-ed	4
-⅟	tört	4
-⅟	8	4
-⅟	jel (kategória)	4
 vérfürdő	öldöklés	4
 vérfürdő	vérontás	4
 vérfürdő	mészárlás	4
@@ -79938,9 +79475,6 @@ pöttöm	pinduri	4
 pöttöm	pindur	4
 pöttöm	pindurka	4
 pöttöm	kicsi	4
-←	(U+2190)	4
-←	balra mutató nyíl	4
-←	nyíl (kategória)	4
 élveboncolás	viviszekció	4
 nevezetesség	látnivaló	4
 nevezetesség	látványosság	4
@@ -79956,20 +79490,11 @@ rücskös	ragyás	4
 rücskös	himlőhelyes	4
 rücskös	ripacsos	4
 rücskös	ragyavert	4
-↑	(U+2191)	4
-↑	felfelé mutató nyíl	4
-↑	nyíl (kategória)	4
 csonkítatlan	eredeti terjedelmű	4
 csonkítatlan	teljes egész	4
-→	(U+2192)	4
-→	jobbra mutató nyíl	4
-→	nyíl (kategória)	4
 olvas	számol	4
 olvas	számlál	4
 régészeti	archeológiai	4
-↓	(U+2193)	4
-↓	lefelé mutató nyíl	4
-↓	nyíl (kategória)	4
 éta	(U+03B7)	4
 éta	η	4
 éta	Η (nagybetű)	4
@@ -81680,10 +81205,6 @@ feszélyez	zavar	4
 feszélyez	összezavar	4
 feszélyez	zavarba hoz	4
 feszélyez	frusztrál	4
-∀	(U+2200)	4
-∀	minden (jel)	4
-∀	univerzális kvantor	4
-∀	matematikai jelek (kategória)	4
 főnemes	arisztokrata	4
 gerinctelen	alázatos	4
 gerinctelen	megalkuvó	4
@@ -81726,24 +81247,13 @@ benyomás	jártasság	4
 benyomás	tapasztalás	4
 benyomás	impresszió	4
 benyomás	jelenség	4
-∃	(U+2203)	4
-∃	létezik (jel)	4
-∃	egzisztenciális kvantor	4
-∃	matematikai jelek (kategória)	4
 flóra	növényzet	4
 flóra	növénytakaró	4
 flóra	növényvilág	4
 flóra	vegetáció	4
-∄	(U+2204)	4
-∄	nem létezik (jel)	4
-∄	matematikai jelek (kategória)	4
 törvényalkotás	törvényhozás	4
 hulladéklerakó	anyagtároló	4
 hulladéklerakó	depónia	4
-∅	(U+2205)	4
-∅	üres halmaz (jel)	4
-∅	halmaz (kategória)	4
-∅	matematikai jelek (kategória)	4
 marokszámra	marokszám	4
 örökre	végérvényesen	4
 örökre	végleg	4
@@ -81759,37 +81269,17 @@ földkerekség	világ	4
 támadás	akció	4
 támadás	roham	4
 támadás	ostromlás	4
-∈	(U+2208)	4
-∈	eleme (jel)	4
-∈	halmaz (kategória)	4
-∈	matematikai jelek (kategória)	4
 fullad	fulladozik	4
 nehezen	alig	4
 nehezen	szűken	4
 nehezen	éppen hogy	4
 nehezen	bajosan	4
-∉	(U+2209)	4
-∉	nem eleme (jel)	4
-∉	halmaz (kategória)	4
-∉	matematikai jelek (kategória)	4
 émelyítő	mézesmázos	4
 émelyítő	édeskés	4
 émelyítő	mézédes	4
 émelyítő	nyájas	4
 émelyítő	szirupos	4
 émelyítő	barátságos	4
-∊	(U+220A)	4
-∊	eleme (jel)	4
-∊	halmaz (kategória)	4
-∊	matematikai jelek (kategória)	4
-∋	(U+220B)	4
-∋	elemként tartalmazza (jel)	4
-∋	halmaz (kategória)	4
-∋	matematikai jelek (kategória)	4
-∌	(U+220C)	4
-∌	elemként nem tartalmazza (jel)	4
-∌	halmaz (kategória)	4
-∌	matematikai jelek (kategória)	4
 tervez	betervez	4
 tervez	beütemez	4
 tervez	szándékozik	4
@@ -81798,10 +81288,6 @@ tervez	tervel	4
 tervez	tervezget	4
 tervez	tervbe vesz	4
 tervez	tervet sző	4
-∍	(U+220D)	4
-∍	elemként tartalmazza (jel)	4
-∍	halmaz (kategória)	4
-∍	matematikai jelek (kategória)	4
 mérgelődik	morgolódik	4
 mérgelődik	bosszankodik	4
 mérgelődik	dühöng	4
@@ -81839,10 +81325,6 @@ legalább	minimum	4
 legalább	legalábbis	4
 gríz	búzadara	4
 gríz	dara	4
-∎	(U+220E)	4
-∎	bizonyítás vége (jel)	4
-∎	qed.	4
-∎	matematikai jelek (kategória)	4
 érvényes	fennáll	4
 érvényes	hatályos	4
 érvényes	fennálló	4
@@ -81858,9 +81340,6 @@ messzelátó	távcső	4
 messzelátó	látcső	4
 zsargon	csoportnyelv	4
 zsargon	szakmai zsargon	4
-∏	(U+220F)	4
-∏	produktum (jel)	4
-∏	matematikai jelek (kategória)	4
 leírás	amortizáció	4
 télies	dermesztő	4
 télies	fagyos	4
@@ -81885,9 +81364,6 @@ kicsinyel	fittyet hány	4
 kicsinyel	fütyül rá	4
 kicsinyel	semmibe vesz	4
 kicsinyel	semmibe sem vesz	4
-∑	(U+2211)	4
-∑	szumma (jel)	4
-∑	matematikai jelek (kategória)	4
 útlevél	személyi okmány	4
 vakmerő	bátor	4
 vakmerő	derék	4
@@ -81912,10 +81388,6 @@ vakmerő	könnyelmű	4
 vakmerő	meggondolatlan	4
 vakmerő	vigyázatlan	4
 vakmerő	kalandos	4
-−	(U+2212)	4
-−	mínusz (jel)	4
-−	mínuszjel	4
-−	matematikai jelek (kategória)	4
 titkolt	titkos	4
 titkolt	leplezett	4
 titkolt	palástolt	4
@@ -81925,10 +81397,6 @@ rámenős	nőcsábász	4
 rámenős	tolakodó	4
 rámenős	nagy kan	4
 rámenős	erőszakos	4
-∓	(U+2213)	4
-∓	mínusz-plusz jel	4
-∓	mínusz-plusz	4
-∓	matematikai jelek (kategória)	4
 salak	hamu	4
 salak	pernye	4
 salak	kohósalak	4
@@ -81964,10 +81432,6 @@ iszonyú	elrémítő	4
 ájult	eszméletlen	4
 ájult	öntudatlan	4
 ájult	elalélt	4
-∕	(U+2215)	4
-∕	osztásjel	4
-∕	perjel	4
-∕	matematikai jelek (kategória)	4
 egyhatod	(U+2159)	4
 egyhatod	⅙	4
 egyhatod	hatod	4
@@ -82003,11 +81467,6 @@ elbírál	értékel	4
 elbírál	megbecsül	4
 elbírál	felbecsül	4
 elbírál	felmér	4
-∖	(U+2216)	4
-∖	halmazkivonás	4
-∖	kivonás	4
-∖	halmaz (kategória)	4
-∖	matematikai jelek (kategória)	4
 rothadás	felbomlás	4
 rothadás	oszlás	4
 lakomázás	dáridó	4
@@ -82087,14 +81546,6 @@ viskó	víkendház	4
 viskó	kaliba	4
 viskó	kulipintyó	4
 viskó	vityilló	4
-√	(U+221A)	4
-√	négyzetgyök (jel)	4
-√	gyök (jel)	4
-√	matematikai jelek (kategória)	4
-∛	(U+221B)	4
-∛	köbgyök (jel)	4
-∛	gyök (jel)	4
-∛	matematikai jelek (kategória)	4
 évi	évenkénti	4
 nem	dehogy	4
 nem	soha	4
@@ -82127,10 +81578,6 @@ nem	zsáner	4
 nem	nemzet	4
 nem	nép	4
 nem	nemzetség	4
-∜	(U+221C)	4
-∜	negyedik gyök (jel)	4
-∜	gyök (jel)	4
-∜	matematikai jelek (kategória)	4
 mocsoktalan	ártatlan	4
 mocsoktalan	fehér	4
 mocsoktalan	friss	4
@@ -82233,9 +81680,6 @@ bagázs	horda	4
 bagázs	kompánia	4
 bagázs	bűnszövetkezet	4
 bagázs	csőcselék	4
-∞	(U+221E)	4
-∞	végtelen (jel)	4
-∞	matematikai jelek (kategória)	4
 bordélyház	bordély	4
 bordélyház	kupi	4
 bordélyház	kupleráj	4
@@ -82256,9 +81700,6 @@ bepakol	csomagol	4
 bepakol	pakol	4
 bepakol	összepakol	4
 bepakol	dobozol	4
-∠	(U+2220)	4
-∠	szög (jel)	4
-∠	matematikai jelek (kategória)	4
 konzultatív	tanácsadó	4
 konzultatív	tanácsadói	4
 béna	merev	4
@@ -82272,10 +81713,6 @@ béna	ügyetlen	4
 béna	balkezes	4
 béna	suta	4
 béna	kétbalkezes	4
-∡	(U+2221)	4
-∡	mért szög (jel)	4
-∡	szög (jel)	4
-∡	matematikai jelek (kategória)	4
 mulatozik	dorbézol	4
 mulatozik	mulat	4
 mulatozik	szórakozik	4
@@ -82325,13 +81762,7 @@ gondolkodik	gondol	4
 behozatal	import	4
 behozatal	árubehozatal	4
 behozatal	importálás	4
-∣	(U+2223)	4
-∣	osztója (jel)	4
-∣	matematikai jelek (kategória)	4
 körpálya	kör	4
-∤	(U+2224)	4
-∤	nem osztója (jel)	4
-∤	matematikai jelek (kategória)	4
 ügynökség	képviselet	4
 ügynökség	iroda	4
 nekirugaszkodik	belekezd	4
@@ -82351,29 +81782,15 @@ nekirugaszkodik	nekifekszik	4
 nekirugaszkodik	nekigyürkőzik	4
 nekirugaszkodik	összeszedi magát	4
 nekirugaszkodik	vállalkozik	4
-∥	(U+2225)	4
-∥	párhuzamos (jel)	4
-∥	matematikai jelek (kategória)	4
-∦	(U+2226)	4
-∦	nem párhuzamos (jel)	4
-∦	matematikai jelek (kategória)	4
 némaság	csend	4
 némaság	hallgatás	4
 némaság	csendesség	4
 némaság	csöndesség	4
 némaság	nyugalom	4
-∧	(U+2227)	4
-∧	logikai és (jel)	4
-∧	és (jel)	4
-∧	matematikai jelek (kategória)	4
 radírgumi	radír	4
 radírgumi	gumi	4
 radírgumi	törlőgumi	4
 cipész	suszter	4
-∨	(U+2228)	4
-∨	logikai vagy (jel)	4
-∨	vagy (jel)	4
-∨	matematikai jelek (kategória)	4
 rendelvény	recept	4
 rendelvény	vény	4
 lerövidít	megrövidít	4
@@ -82422,21 +81839,10 @@ bourbon-liliom	⚜	4
 bourbon-liliom	fleur de lis (jel)	4
 bourbon-liliom	Bourbon-liliom (jel)	4
 bourbon-liliom	egyéb (jel)	4
-∩	(U+2229)	4
-∩	metszet (jel)	4
-∩	halmaz (kategória)	4
-∩	matematikai jelek (kategória)	4
 szittya	szkíta	4
 hintőpor	púder	4
 hintőpor	talkum	4
 hintőpor	rizspor	4
-∪	(U+222A)	4
-∪	unió (jel)	4
-∪	halmaz (kategória)	4
-∪	matematikai jelek (kategória)	4
-∫	(U+222B)	4
-∫	integrál (jel)	4
-∫	matematikai jelek (kategória)	4
 henyél	lustálkodik	4
 henyél	lóg	4
 henyél	pang	4
@@ -82447,12 +81853,6 @@ henyél	lopja a napot	4
 henyél	lazsál	4
 politúroz	fényez	4
 politúroz	lakkoz	4
-∬	(U+222C)	4
-∬	kettős integrál (jel)	4
-∬	matematikai jelek (kategória)	4
-∭	(U+222D)	4
-∭	hármas integrál (jel)	4
-∭	matematikai jelek (kategória)	4
 hallgat	fogad	4
 hallgat	követ	4
 hallgat	megfogad	4
@@ -82922,10 +82322,6 @@ megkapó	ellenállhatatlan	4
 megkapó	elragadó	4
 megkapó	megragadó	4
 megkapó	hatásos	4
-≈	(U+2248)	4
-≈	közel egyenlő (jel)	4
-≈	egyenlő (kategória)	4
-≈	matematikai jelek (kategória)	4
 gomolyog	kavarog	4
 alkudozik	alkuszik	4
 alkudozik	egyezkedik	4
@@ -83271,10 +82667,6 @@ dob	repít	4
 dob	hajít	4
 dob	kilő	4
 dob	szór	4
-≠	(U+2260)	4
-≠	nem egyenlő (jel)	4
-≠	egyenlő (kategória)	4
-≠	matematikai jelek (kategória)	4
 megrendít	megdöbbent	4
 megrendít	földhöz vág	4
 marcangol	mardos	4
@@ -83290,10 +82682,6 @@ felmelegít	fűt	4
 felmelegít	bemelegít	4
 felmelegít	tüzel	4
 csalódás	kiábrándulás	4
-≤	(U+2264)	4
-≤	kisebb vagy egyenlő (jel)	4
-≤	egyenlő (kategória)	4
-≤	matematikai jelek (kategória)	4
 strandol	fürdik	4
 zabolátlan	féktelen	4
 zabolátlan	határtalan	4
@@ -83322,10 +82710,6 @@ alkatrész	részlet	4
 alkatrész	kellék	4
 alkatrész	komponens	4
 alkatrész	alkotórész	4
-≥	(U+2265)	4
-≥	nagyobb vagy egyenlő (jel)	4
-≥	egyenlő (kategória)	4
-≥	matematikai jelek (kategória)	4
 kórus	énekkar	4
 kórus	karének	4
 gyógy-	gyógyító	4
@@ -83349,19 +82733,11 @@ megkopaszt	levág	4
 megkopaszt	megnyír	4
 megkopaszt	lekopaszt	4
 megkopaszt	lecsupaszít	4
-≪	(U+226A)	4
-≪	sokkal kisebb (jel)	4
-≪	kisebb	4
-≪	matematikai jelek (kategória)	4
 megsértődött	bosszús	4
 megsértődött	haragos	4
 megsértődött	sértődött	4
 megsértődött	megorrolt	4
 tömés	bélés	4
-≫	(U+226B)	4
-≫	sokkal nagyobb (jel)	4
-≫	nagyobb	4
-≫	matematikai jelek (kategória)	4
 szörnyeteg	szörny	4
 szerelmi	szerelmes	4
 mindahányan	minden	4
@@ -83767,21 +83143,9 @@ lüke	dilinós	4
 lüke	stikkes	4
 lüke	kötnivaló bolond	4
 lüke	sötét	4
-⊂	(U+2282)	4
-⊂	részhalmaza (jel)	4
-⊂	halmaz (kategória)	4
-⊂	matematikai jelek (kategória)	4
 felegyenesedik	felemelkedik	4
 felegyenesedik	kiegyenesedik	4
-⊃	(U+2283)	4
-⊃	részhalmazként tartalmazza (jel)	4
-⊃	halmaz (kategória)	4
-⊃	matematikai jelek (kategória)	4
 flóta	fuvola	4
-⊄	(U+2284)	4
-⊄	nem részhalmaza (jel)	4
-⊄	halmaz (kategória)	4
-⊄	matematikai jelek (kategória)	4
 reklám	hirdetés	4
 reklám	propaganda	4
 reklám	reklámozás	4
@@ -83803,10 +83167,6 @@ vezet	terel	4
 vezet	küld	4
 vezet	kalauzol	4
 vezet	kísér	4
-⊅	(U+2285)	4
-⊅	részhalmazként nem tartalmazza (jel)	4
-⊅	halmaz (kategória)	4
-⊅	matematikai jelek (kategória)	4
 mezőgazdaságtan	agrártudomány	4
 mezőgazdaságtan	agronómia	4
 monokli	kék folt	4
@@ -95935,10 +95295,6 @@ ténykörülmény	valóság	4
 ténykörülmény	tényállás	4
 ténykörülmény	tényálladék	4
 ténykörülmény	szituáció	4
-■	(U+25A0)	4
-■	fekete négyzet (jel)	4
-■	négyzet (jel)	4
-■	geometriai jelek (jel)	4
 delejez	mágnesez	4
 delejez	hipnotizál	4
 delejez	vonzóerőt gyakorol	4
@@ -95952,10 +95308,6 @@ szaglóérzék	előérzet	4
 szaglóérzék	szimat	4
 szaglóérzék	hatodik érzék	4
 szaglóérzék	szaglás	4
-□	(U+25A1)	4
-□	fehér négyzet (jel)	4
-□	négyzet (jel)	4
-□	geometriai jelek (jel)	4
 fatörzs	szár	4
 fatörzs	törzs	4
 meglazít	megzavar	4
@@ -96058,10 +95410,6 @@ periódus	fázis	4
 periódus	korszak	4
 periódus	szakasz	4
 periódus	etap	4
-▪	(U+25AA)	4
-▪	kis fekete négyzet (jel)	4
-▪	négyzet (jel)	4
-▪	geometriai jelek (jel)	4
 kölcsönös	kétoldalú	4
 zseblámpa	elemlámpa	4
 zseblámpa	kézilámpa	4
@@ -96075,10 +95423,6 @@ políroz	dörzsöl	4
 políroz	kefél	4
 políroz	fényez	4
 políroz	tisztít	4
-▮	(U+25AE)	4
-▮	fekete téglalap (jel)	4
-▮	téglalap (jel)	4
-▮	geometriai jelek (jel)	4
 tünékeny	ideiglenes	4
 tünékeny	rövid	4
 tünékeny	átmeneti	4
@@ -96112,10 +95456,6 @@ tudósítás	híresztelés	4
 tudósítás	hírközlés	4
 tudósítás	újszerűség	4
 tudósítás	újdonság	4
-▯	(U+25AF)	4
-▯	fehér téglalap	4
-▯	téglalap (jel)	4
-▯	geometriai jelek (jel)	4
 hátszín	vesepecsenye	4
 ifjonc	gyerek	4
 ifjonc	gyermek	4
@@ -96125,10 +95465,6 @@ ifjonc	kissrác	4
 ifjonc	lurkó	4
 ifjonc	poronty	4
 ifjonc	kölyök	4
-▰	(U+25B0)	4
-▰	fekete paralelogramma	4
-▰	paralelogramma (jel)	4
-▰	geometriai jelek (jel)	4
 mérnöki	gépészi	4
 mérnöki	gépészeti	4
 felvázol	ecsetel	4
@@ -96137,10 +95473,6 @@ felvázol	leír	4
 felvázol	vázol	4
 felvázol	skiccel	4
 felvázol	körvonalaz	4
-▱	(U+25B1)	4
-▱	fehér paralelogramma	4
-▱	paralelogramma (jel)	4
-▱	geometriai jelek (jel)	4
 találomra	vaktában	4
 találomra	meggondolatlanul	4
 találomra	véletlenül	4
@@ -96159,16 +95491,8 @@ hivalkodik	hősködik	4
 hivalkodik	fitogtat	4
 hivalkodik	nagyzol	4
 hivalkodik	tetszeleg	4
-▲	(U+25B2)	4
-▲	fekete háromszög (jel)	4
-▲	háromszög (jel)	4
-▲	geometriai jelek (jel)	4
 házasélet	házasság	4
 bugyi	nadrág	4
-△	(U+25B3)	4
-△	fehér háromszög (jel)	4
-△	háromszög (jel)	4
-△	geometriai jelek (jel)	4
 hajlott	hajlított	4
 hajlott	görbített	4
 hajlott	görbe	4
@@ -96561,10 +95885,6 @@ hegyes	dermesztő	4
 hegyes	fürkésző	4
 hegyes	metsző	4
 hegyes	szúrós	4
-◊	(U+25C5)	4
-◊	fehér rombusz (jel)	4
-◊	rombusz (jel)	4
-◊	geometriai jelek (jel)	4
 önző	egoista	4
 önző	önös	4
 önző	egocentrikus	4
@@ -96605,10 +95925,6 @@ bonyodalom	sztori	4
 bonyodalom	história	4
 bonyodalom	meseszövés	4
 bonyodalom	rege	4
-○	(U+25CB)	4
-○	fehér kör (jel)	4
-○	kör (jel)	4
-○	geometriai jelek (jel)	4
 feléleszt	éleszt	4
 feléleszt	elevenít	4
 feléleszt	felélénkít	4
@@ -96648,10 +95964,6 @@ skiccel	leír	4
 skiccel	vázol	4
 skiccel	felvázol	4
 skiccel	körvonalaz	4
-●	(U+25CF)	4
-●	fekete kör (jel)	4
-●	kör (jel)	4
-●	geometriai jelek (jel)	4
 hóförgeteg	hóesés	4
 hóförgeteg	hófúvás	4
 hóförgeteg	hózápor	4
@@ -96663,17 +95975,9 @@ elér	utolér	4
 elér	megközelít	4
 billencs	dömper	4
 billencs	dzsömper	4
-◐	(U+25D0)	4
-◐	fekete-fehér kör (jel)	4
-◐	kör (jel)	4
-◐	geometriai jelek (jel)	4
 égetés	kalcinálás	4
 égetés	pörkölés	4
 hebeg	dadog	4
-◑	(U+25D1)	4
-◑	fehér-fekete kör (jel)	4
-◑	kör (jel)	4
-◑	geometriai jelek (jel)	4
 muszáj	kell	4
 muszáj	szükséges	4
 muszáj	kénytelen	4
@@ -97371,16 +96675,8 @@ orgonavirág	orgona	4
 értekezés	esszé	4
 értekezés	monográfia	4
 értekezés	vizsgálódás	4
-☀	(U+2600)	4
-☀	fekete nap sugarakkal (jel)	4
-☀	napos idő (jel)	4
-☀	egyéb (jel)	4
 ribiszke	ribizli	4
 meglep	meghökkent	4
-☁	(U+2601)	4
-☁	felhő (jel)	4
-☁	borús idő (jel)	4
-☁	egyéb (jel)	4
 párlat	pálinka	4
 párlat	gyümölcspárlat	4
 párlat	alkohol (kategória)	4
@@ -97390,11 +96686,6 @@ búslakodik	bánkódik	4
 búslakodik	emésztődik	4
 búslakodik	emészti magát	4
 búslakodik	gyötrődik	4
-☂	(U+2602)	4
-☂	esernyő (jel)	4
-☂	csapadékos idő (jel)	4
-☂	eső (jel)	4
-☂	egyéb (jel)	4
 közelében	mellett	4
 megszégyenítve	megszégyenülve	4
 kegy	grácia	4
@@ -97445,13 +96736,6 @@ tivornyázás	tivornya	4
 tivornyázás	tobzódás	4
 tivornyázás	trakta	4
 tivornyázás	kikapcsolódás	4
-☃	(U+2603)	4
-☃	hóember (jel)	4
-☃	havazás (jel)	4
-☃	egyéb (jel)	4
-☄	(U+2604)	4
-☄	üstökös (jel)	4
-☄	egyéb (jel)	4
 kötél	lasszó	4
 kötél	kötőfék	4
 kötél	pányva	4
@@ -97461,10 +96745,6 @@ kötél	spárga	4
 kötél	zsinór	4
 izé	hogy is hívják	4
 izé	mi a neve	4
-★	(U+2605)	4
-★	fekete csillag (jel)	4
-★	csillag (jel)	4
-★	egyéb (jel)	4
 forduló	átalakulás	4
 forduló	változás	4
 forduló	fordulat	4
@@ -97474,10 +96754,6 @@ forduló	ugrás	4
 forduló	kanyar	4
 forduló	kanyarulat	4
 forduló	menet	4
-☆	(U+2606)	4
-☆	fehér csillag (jel)	4
-☆	csillag (jel)	4
-☆	egyéb (jel)	4
 fárad	buzgólkodik	4
 fárad	dolgozik	4
 fárad	igyekszik	4
@@ -97499,17 +96775,7 @@ fárad	vesződik	4
 fárad	strapálja magát	4
 fárad	töri magát	4
 fárad	tesz-vesz	4
-☇	(U+2607)	4
-☇	villámlás (jel)	4
-☇	villám (jel)	4
-☇	egyéb (jel)	4
 egyenruhás	libériás	4
-☈	(U+2608)	4
-☈	vihar (jel)	4
-☈	egyéb (jel)	4
-☉	(U+2609)	4
-☉	Nap (jel)	4
-☉	egyéb (jel)	4
 elcsábít	elcsal	4
 panaszkodik	nyafog	4
 panaszkodik	jajgat	4
@@ -97538,10 +96804,6 @@ afro-amerikai	afroamerikai	4
 afro-amerikai	fekete	4
 afro-amerikai	néger	4
 afro-amerikai	színes bőrű (kategória)	4
-☎	(U+260E)	4
-☎	fekete telefon (jel)	4
-☎	telefon (jel)	4
-☎	egyéb (jel)	4
 képletes	jelképes	4
 képletes	szimbolikus	4
 képletes	allegorikus	4
@@ -97551,15 +96813,7 @@ reped	hasad	4
 reped	hasadozik	4
 reped	szakad	4
 reped	repedezik	4
-☏	(U+260F)	4
-☏	fehér telefon (jel)	4
-☏	telefon (jel)	4
-☏	egyéb (jel)	4
 kiegészítő	pótló	4
-☐	(U+2610)	4
-☐	jelölőnégyzet (jel)	4
-☐	négyzet (kategória)	4
-☐	egyéb (jel)	4
 diagram	grafikon	4
 diagram	görbe	4
 diagram	ábra	4
@@ -97589,10 +96843,6 @@ elvégre	voltaképpen	4
 elvégre	tulajdonképp	4
 elvégre	alapjában véve	4
 elvégre	végeredményben	4
-☑	(U+2611)	4
-☑	kipipált jelölőnégyzet (jel)	4
-☑	négyzet (kategória)	4
-☑	egyéb (jel)	4
 kiszorít	kierőszakol	4
 kiszorít	érvényesít	4
 kiszorít	kihajt	4
@@ -97604,10 +96854,6 @@ kiszorít	kivasal	4
 kiszorít	kizsarol	4
 kiszorít	érvényre juttat	4
 kiszorít	keresztülvisz	4
-☒	(U+2612)	4
-☒	beikszelt jelölőnégyzet (jel)	4
-☒	négyzet (kategória)	4
-☒	egyéb (jel)	4
 eltérő	különböző	4
 eltérő	másfajta	4
 eltérő	másféle	4
@@ -97624,25 +96870,13 @@ italbolt	ivó	4
 italbolt	csapszék	4
 italbolt	italmérés	4
 italbolt	vendéglő	4
-☓	(U+2613)	4
-☓	andráskereszt (jel)	4
-☓	kereszt (jel)	4
-☓	egyéb (jel)	4
 termosz	hőpalack	4
 kever	kavar	4
 kever	ötvöz	4
 kever	vegyít	4
 kever	elegyít	4
 kever	egyesít	4
-☔	(U+2614)	4
-☔	esernyő esőcseppekkel (jel)	4
-☔	felhőszakadás	4
-☔	egyéb (jel)	4
 ajzószer	doppingszer	4
-☕	(U+2615)	4
-☕	forró ital (jel)	4
-☕	pihenőhely (jel)	4
-☕	egyéb (jel)	4
 fed	takar	4
 fed	borít	4
 hossz	hosszúság	4
@@ -97798,18 +97032,10 @@ zenedarab	darab	4
 kezdődik	beáll	4
 kezdődik	beköszönt	4
 kezdődik	indul	4
-☚	(U+261A)	4
-☚	balra mutató fekete kéz (jel)	4
-☚	balra (jel)	4
-☚	egyéb (jel)	4
 kóc	csepű	4
 kóc	szösz	4
 kóc	kenderkóc	4
 kóc	tömítés	4
-☛	(U+261B)	4
-☛	jobbra mutató fekete kéz (jel)	4
-☛	jobbra (jel)	4
-☛	egyéb (jel)	4
 építőművészet	építészet	4
 talk	zsírkő	4
 talk	talkum	4
@@ -97824,10 +97050,6 @@ fej	koponya	4
 fej	kobak	4
 fej	fő	4
 fej	pumpol	4
-☜	(U+261C)	4
-☜	balra mutató fehér kéz (jel)	4
-☜	balra (jel)	4
-☜	egyéb (jel)	4
 véglegesít	végső formába önt	4
 söntés	ivó	4
 söntés	pult	4
@@ -97889,10 +97111,6 @@ fel	(U+261D)	4
 fel	☝	4
 fel	felfelé mutató fehér kéz (jel)	4
 fel	egyéb (jel)	4
-☝	(U+261D)	4
-☝	felfelé mutató fehér kéz (jel)	4
-☝	fel (jel)	4
-☝	egyéb (jel)	4
 jajveszékel	jajgat	4
 rendetlen	borzas	4
 rendetlen	elhanyagolt	4
@@ -97943,10 +97161,6 @@ rendetlen	piszkos	4
 rendetlen	kopott	4
 rendetlen	rendszertelen	4
 rendetlen	nem módszeres	4
-☞	(U+261E)	4
-☞	jobbra mutató fehér kéz (jel)	4
-☞	jobbra (jel)	4
-☞	egyéb (jel)	4
 jócskán	eléggé	4
 jócskán	nagyon	4
 jócskán	alaposan	4
@@ -97981,10 +97195,6 @@ bejelentés	tájékoztató	4
 bejelentés	hirdetmény	4
 bejelentés	kommüniké	4
 bejelentés	kihirdetés	4
-☟	(U+261F)	4
-☟	lefelé mutató fehér kéz (jel)	4
-☟	le (jel)	4
-☟	egyéb (jel)	4
 fen	köszörül	4
 fen	élez	4
 fen	élesít	4
@@ -98034,12 +97244,6 @@ egyetértés	összhang	4
 egyetértés	egyezség	4
 egyetértés	kiegyezés	4
 egyetértés	összehangoltság	4
-☠	(U+2620)	4
-☠	halálfej (jel)	4
-☠	méreg (jel)	4
-☠	koponya (jel)	4
-☠	mérgező (jel)	4
-☠	egyéb (jel)	4
 talp	talapzat	4
 talp	alapzat	4
 talp	lábazat	4
@@ -98062,11 +97266,6 @@ forgatag	örvény	4
 forgatag	forgó	4
 forgatag	örvénylés	4
 forgatag	kavargás	4
-☢	(U+2622)	4
-☢	radioaktív (jel)	4
-☢	radioaktivitás (jel)	4
-☢	sugárzó anyag (jel)	4
-☢	egyéb (jel)	4
 valójában	tulajdonképpen	4
 valójában	alapjában	4
 valójában	elvégre	4
@@ -98096,18 +97295,10 @@ rémség	irtózás	4
 rémség	borzalmasság	4
 rémség	iszonyodás	4
 rémség	iszonyatosság	4
-☣	(U+2623)	4
-☣	biológiai veszély (jel)	4
-☣	fertőző anyag (jel)	4
-☣	fertőzésveszély (jel)	4
-☣	egyéb (jel)	4
 bepótol	behoz	4
 bepótol	pótol	4
 bepótol	fölzárkózik	4
 bepótol	felzárkózik	4
-☤	(U+2624)	4
-☤	caduceus (jel)	4
-☤	egyéb (jel)	4
 toborzás	sorozás	4
 toborzás	besorozás	4
 búbánatos	szomorú	4
@@ -98122,10 +97313,6 @@ búbánatos	mélabús	4
 búbánatos	örömtelen	4
 búbánatos	rosszkedvű	4
 búbánatos	logó orrú	4
-☥	(U+2625)	4
-☥	ankh (jel)	4
-☥	anh (jel)	4
-☥	egyéb (jel)	4
 érvényesít	kierőszakol	4
 érvényesít	kihajt	4
 érvényesít	kikényszerít	4
@@ -98154,10 +97341,6 @@ információ	útmutató	4
 információ	útmutatás	4
 információ	útbaigazítás	4
 információ	eligazítás	4
-☦	(U+2626)	4
-☦	ortodox kereszt (jel)	4
-☦	kereszt (jel)	4
-☦	egyéb (jel)	4
 mértani	geometriai	4
 rém	kísértet	4
 rém	árnyék	4
@@ -98173,11 +97356,6 @@ rém	gonosz szellem	4
 rém	agyrém	4
 rém	rémlátomás	4
 rém	képzelődés	4
-☧	(U+2627)	4
-☧	khi-ró kereszt (jel)	4
-☧	Krisztus-monogrammos kereszt (jel)	4
-☧	kereszt (jel)	4
-☧	egyéb (jel)	4
 lám	íme	4
 díjtáblázat	árlista	4
 csuklya	kapucni	4
@@ -98226,9 +97404,6 @@ rét	legelő	4
 rét	rétség	4
 rét	mező	4
 testvériség	barátság	4
-☮	(U+262E)	4
-☮	béke (jel)	4
-☮	egyéb (jel)	4
 karcolás	vájat	4
 karcolás	barázda	4
 karcolás	bemetszés	4
@@ -98268,11 +97443,6 @@ lát	szemlél	4
 lát	stíröl	4
 lát	mustrál	4
 gyutacs	gyújtószerkezet	4
-☯	(U+262F)	4
-☯	jin és jang (jel)	4
-☯	jin (jel)	4
-☯	jang (jel)	4
-☯	egyéb (jel)	4
 szintúgy	is	4
 szintúgy	még	4
 szintúgy	szintén	4
@@ -98391,11 +97561,6 @@ zuhanyzik	tusol	4
 zuhanyzik	fürdik	4
 sportszer	sportcikk	4
 kocsis	hajtó	4
-☹	(U+2639)	4
-☹	fehér bánatos arc (jel)	4
-☹	bánat (jel)	4
-☹	hangulatjel (kategória)	4
-☹	egyéb (kategória)	4
 nyakas	fegyelmezetlen	4
 nyakas	csapongó	4
 nyakas	engedetlen	4
@@ -98433,19 +97598,7 @@ vékonyít	mérsékel	4
 vékonyít	könnyebbít	4
 vékonyít	türtőztet	4
 vékonyít	segít	4
-☺	(U+2639)	4
-☺	fehér mosolygó arc (jel)	4
-☺	öröm (jel)	4
-☺	mosolyjel (jel)	4
-☺	hangulatjel (kategória)	4
-☺	egyéb (jel)	4
 meglehet	lehet	4
-☻	(U+263B)	4
-☻	fekete mosolygó arc (jel)	4
-☻	öröm (jel)	4
-☻	mosolyjel (jel)	4
-☻	hangulatjel (kategória)	4
-☻	egyéb (jel)	4
 árnyalat	színárnyalat	4
 árnyalat	tónus	4
 kan	kandisznó	4
@@ -98584,19 +97737,10 @@ jó	rendben	4
 jó	oké	4
 jó	nem bánom	4
 jó	rendben van	4
-☼	(U+263C)	4
-☼	fehér nap sugarakkal (jel)	4
-☼	iránytű (jel)	4
-☼	egyéb (jel)	4
 delegáció	küldöttség	4
 delegáció	követség	4
 kiókumlál	kiszámít	4
 kiókumlál	kiszámol	4
-☽	(U+263D)	4
-☽	első negyed (jel)	4
-☽	holdfázis (jel)	4
-☽	hold (jel)	4
-☽	egyéb (jel)	4
 hóesés	havazás	4
 hóesés	hófúvás	4
 hóesés	hózápor	4
@@ -98610,18 +97754,10 @@ kap	nyer	4
 kap	részesül	4
 kap	osztozik	4
 kap	részesedik	4
-☾	(U+263E)	4
-☾	utolsó negyed (jel)	4
-☾	holdfázis (jel)	4
-☾	hold (jel)	4
-☾	egyéb (jel)	4
 impregnált	vízhatlan	4
 impregnált	vízálló	4
 impregnált	esőálló	4
 feminin	nőies	4
-☿	(U+263F)	4
-☿	Merkur (jel)	4
-☿	egyéb (jel)	4
 önműködő	automatikus	4
 önműködő	automata	4
 kar	dalárda	4
@@ -98667,25 +97803,10 @@ extravertált	nyitott személyiség	4
 extravertált	nyitott	4
 mérleghinta	libikóka	4
 kompatibilis	csereszabatos	4
-♀	(U+2640)	4
-♀	Vénusz (jel)	4
-♀	nő (jel)	4
-♀	nőnemű (jel)	4
-♀	nőivarú (jel)	4
-♀	egyéb (jel)	4
-♁	(U+2641)	4
-♁	Föld (jel)	4
-♁	egyéb (jel)	4
 robbanás	detonáció	4
 beállít	becsavar	4
 beállít	besrófol	4
 beállít	rögzít	4
-♂	(U+2642)	4
-♂	Mars (jel)	4
-♂	férfi (jel)	4
-♂	hímnemű (jel)	4
-♂	hímivarú (jel)	4
-♂	egyéb (jel)	4
 diviz	(U+002D)	4
 diviz	-	4
 diviz	kiskötőjel	4
@@ -98710,12 +97831,6 @@ félszeg	élhetetlen	4
 félszeg	erélytelen	4
 félszeg	célszerűtlen	4
 előkelősködő	finomkodó	4
-♃	(U+2643)	4
-♃	Jupiter (jel)	4
-♃	egyéb (jel)	4
-♄	(U+2644)	4
-♄	Szaturnusz (jel)	4
-♄	egyéb (jel)	4
 ódon	elavult	4
 ódon	régi	4
 ódon	ó	4
@@ -98732,9 +97847,6 @@ előkelősködő	finomkodó	4
 ódon	özönvíz előtti	4
 ódon	ősi	4
 ódon	antik	4
-♅	(U+2645)	4
-♅	Uránusz (jel)	4
-♅	egyéb (jel)	4
 akasztófavirág	bűnöző	4
 akasztófavirág	rabló	4
 akasztófavirág	bandita	4
@@ -98751,9 +97863,6 @@ akasztófavirág	gazfickó	4
 akasztófavirág	haramia	4
 akasztófavirág	útonálló	4
 akasztófavirág	briganti	4
-♆	(U+2646)	4
-♆	Neptunusz (jel)	4
-♆	egyéb (jel)	4
 robaj	moraj	4
 robaj	morgás	4
 robaj	zúgás	4
@@ -98761,9 +97870,6 @@ robaj	morajlás	4
 robaj	zaj	4
 robaj	zörej	4
 robaj	zörgés	4
-♇	(U+2647)	4
-♇	Plútó (jel)	4
-♇	egyéb (jel)	4
 tizenkettő	tizenkét	4
 meghosszabbítás	kiterjesztés	4
 meghosszabbítás	bővítés	4
@@ -98774,10 +97880,6 @@ irreguláris	rendhagyó	4
 irreguláris	szabálytalan	4
 irreguláris	abnormális	4
 irreguláris	természetellenes	4
-♈	(U+2648)	4
-♈	kos (jel)	4
-♈	állatövi jegy (kategória)	4
-♈	egyéb (jel)	4
 vérengzés	vadság	4
 vérengzés	kegyetlenkedés	4
 kolonc	nyűg	4
@@ -98791,14 +97893,6 @@ elhamarkodott	meggondolatlan	4
 elhamarkodott	vakmerő	4
 elhamarkodott	vigyázatlan	4
 elhamarkodott	kalandos	4
-♉	(U+2649)	4
-♉	bika (jel)	4
-♉	állatövi jegy (kategória)	4
-♉	egyéb (jel)	4
-♊	(U+264A)	4
-♊	ikrek (jel)	4
-♊	állatövi jegy (kategória)	4
-♊	egyéb (jel)	4
 zagyvalék	egyveleg	4
 zagyvalék	keverék	4
 zagyvalék	elegy	4
@@ -98806,20 +97900,12 @@ zagyvalék	vegyes felvágott	4
 zagyvalék	kotyvalék	4
 zagyvalék	zagyvaság	4
 zagyvalék	összevisszaság	4
-♋	(U+264B)	4
-♋	rák (jel)	4
-♋	állatövi jegy (kategória)	4
-♋	egyéb (jel)	4
 közhiedelem	közvélemény	4
 közhiedelem	közvélekedés	4
 gyermekkor	fiatalság	4
 gyermekkor	ifjúság	4
 gyermekkor	gyerekkor	4
 gyermekkor	ifjúkor	4
-♌	(U+264C)	4
-♌	oroszlán (jel)	4
-♌	állatövi jegy (kategória)	4
-♌	egyéb (jel)	4
 kétoldali	kétrétű	4
 szia	helló	4
 szia	heló	4
@@ -98840,19 +97926,7 @@ csődület	csoportosulás	4
 csődület	kavarodás	4
 csődület	tumultus	4
 csődület	sereglet	4
-♍	(U+264D)	4
-♍	szűz (jel)	4
-♍	állatövi jegy (kategória)	4
-♍	egyéb (jel)	4
-♎	(U+264E)	4
-♎	mérleg (jel)	4
-♎	állatövi jegy (kategória)	4
-♎	egyéb (jel)	4
 költözködik	költözik	4
-♏	(U+264F)	4
-♏	skorpió (jel)	4
-♏	állatövi jegy (kategória)	4
-♏	egyéb (jel)	4
 vízfestmény	akvarell	4
 szívesség	jóindulat	4
 szívesség	jóakarat	4
@@ -98909,10 +97983,6 @@ szid	leszid	4
 szid	megdorgál	4
 szid	megszid	4
 szid	pirongat	4
-♐	(U+2650)	4
-♐	nyilas (jel)	4
-♐	állatövi jegy (kategória)	4
-♐	egyéb (jel)	4
 árukészlet	készlet	4
 árukészlet	kínálat	4
 árukészlet	választék	4
@@ -98952,10 +98022,6 @@ jókora	terjedelmes	4
 összeakad	nekiütközik	4
 összeakad	összeütközik	4
 összeakad	szembekerül	4
-♑	(U+2651)	4
-♑	bak (jel)	4
-♑	állatövi jegy (kategória)	4
-♑	egyéb (jel)	4
 mázsál	mér	4
 mázsál	gondolkodik	4
 mázsál	számol	4
@@ -98973,25 +98039,12 @@ sablon	szólam	4
 sablon	öntőminta	4
 sablon	minta	4
 végmoréna	homlokmoréna	4
-♒	(U+2652)	4
-♒	vízöntő (jel)	4
-♒	állatövi jegy (kategória)	4
-♒	egyéb (jel)	4
 makaróni	csőtészta	4
 szentírás	biblia	4
-♓	(U+2653)	4
-♓	halak (jel)	4
-♓	állatövi jegy (kategória)	4
-♓	egyéb (jel)	4
 közhivatalnok	köztisztviselő	4
 évfolyam	osztály	4
 évfolyam	korosztály	4
 évfolyam	évjárat	4
-♔	(U+2654)	4
-♔	fehér király (jel)	4
-♔	király (jel)	4
-♔	sakkfigura (kategória)	4
-♔	egyéb (jel)	4
 aritmetika	számtan	4
 elbágyad	elfárad	4
 elbágyad	kimerül	4
@@ -99002,16 +98055,6 @@ elbágyad	ellankad	4
 elbágyad	kifárad	4
 elbágyad	elpilled	4
 elbágyad	legyengül	4
-♕	(U+2655)	4
-♕	fehér vezér (jel)	4
-♕	vezér (jel)	4
-♕	sakkfigura (kategória)	4
-♕	egyéb (jel)	4
-♖	(U+2656)	4
-♖	fehér bástya (jel)	4
-♖	bástya (jel)	4
-♖	sakkfigura (kategória)	4
-♖	egyéb (jel)	4
 feldarabol	csoportosít	4
 feldarabol	oszt	4
 feldarabol	rendez	4
@@ -99050,11 +98093,6 @@ egyúttal	meg	4
 egyúttal	s	4
 egyúttal	plusz	4
 egyúttal	& (jel)	4
-♗	(U+2657)	4
-♗	fehér futó (jel)	4
-♗	futó (jel)	4
-♗	sakkfigura (kategória)	4
-♗	egyéb (jel)	4
 entellektüel	értelmiségi	4
 entellektüel	intellektuel	4
 pucér	meztelen	4
@@ -99063,11 +98101,6 @@ pucér	fedetlen	4
 pucér	mezítelen	4
 pucér	ruhátlan	4
 pucér	anyaszült meztelen	4
-♘	(U+2658)	4
-♘	fehér huszár (jel)	4
-♘	huszár (jel)	4
-♘	sakkfigura (kategória)	4
-♘	egyéb (jel)	4
 vörhenyes	rőt	4
 vörhenyes	vörös	4
 szobafestő	festőművész	4
@@ -99082,17 +98115,7 @@ fukar	szűkmarkú	4
 fukar	zsugori	4
 fukar	krajcároskodó	4
 fukar	kapzsi (kategória)	4
-♙	(U+2659)	4
-♙	fehér gyalog (jel)	4
-♙	gyalog (jel)	4
-♙	sakkfigura (kategória)	4
-♙	egyéb (jel)	4
 opportunizmus	megalkuvás	4
-♚	(U+265A)	4
-♚	fekete király (jel)	4
-♚	király (jel)	4
-♚	sakkfigura (kategória)	4
-♚	egyéb (jel)	4
 szakadatlanul	mindig	4
 szakadatlanul	állandóan	4
 szakadatlanul	folyamatosan	4
@@ -99110,11 +98133,6 @@ szakadatlanul	örökösen	4
 szakadatlanul	szakadatlan	4
 szakadatlanul	öröktől fogva	4
 szakadatlanul	egyre	4
-♛	(U+265B)	4
-♛	fekete vezér (jel)	4
-♛	vezér (jel)	4
-♛	sakkfigura (kategória)	4
-♛	egyéb (jel)	4
 felszentel	megkeresztel	4
 ajándéktárgy	ajándék	4
 ajándéktárgy	emlék	4
@@ -99124,11 +98142,6 @@ ajándéktárgy	szuvenír	4
 ajándéktárgy	ereklye	4
 öklöz	bokszol	4
 öklöz	bunyózik	4
-♜	(U+265C)	4
-♜	fekete bástya (jel)	4
-♜	bástya (jel)	4
-♜	sakkfigura (kategória)	4
-♜	egyéb (jel)	4
 leszáll	alámerül	4
 leszáll	elmerül	4
 leszáll	lebukik	4
@@ -99143,29 +98156,14 @@ leszáll	süllyed	4
 leszáll	merül	4
 leszáll	ereszkedik	4
 leszáll	süpped	4
-♝	(U+265D)	4
-♝	fekete futó (jel)	4
-♝	futó (jel)	4
-♝	sakkfigura (kategória)	4
-♝	egyéb (jel)	4
 írogat	fogalmaz	4
 írogat	ír	4
 írogat	szerkeszt	4
 írogat	irkál	4
 írogat	kompilál	4
-♞	(U+265E)	4
-♞	fekete huszár (jel)	4
-♞	huszár (jel)	4
-♞	sakkfigura (kategória)	4
-♞	egyéb (jel)	4
 áldozat	mártír	4
 áldozat	vértanú	4
 hízelgés	rábeszélés	4
-♟	(U+265F)	4
-♟	fekete gyalog (jel)	4
-♟	gyalog (jel)	4
-♟	sakkfigura (kategória)	4
-♟	egyéb (jel)	4
 technikai	műszaki	4
 technikai	(U+2699)	4
 technikai	⚙	4
@@ -99176,11 +98174,6 @@ krumpli	burgonya	4
 krumpli	pommes frites	4
 krumpli	sült hasábburgonya	4
 krumpli	sült krumpli	4
-♠	(U+2660)	4
-♠	fekete pikk (jel)	4
-♠	pikk (jel)	4
-♠	francia kártya (kategória)	4
-♠	egyéb (jel)	4
 spejz	éléskamra	4
 spejz	kamra	4
 spejz	éléstár	4
@@ -99208,12 +98201,6 @@ trakta	tivornya	4
 trakta	tobzódás	4
 trakta	tivornyázás	4
 trakta	kikapcsolódás	4
-♡	(U+2661)	4
-♡	fehér kőr (jel)	4
-♡	kőr (jel)	4
-♡	szív (jel)	4
-♡	francia kártya (kategória)	4
-♡	egyéb (jel)	4
 rőt	vörhenyes	4
 rőt	vörös	4
 pótló	kiegészítő	4
@@ -99223,11 +98210,6 @@ szeparál	szétválaszt	4
 szeparál	különválaszt	4
 szeparál	kettéválaszt	4
 szeparál	leválaszt	4
-♢	(U+2662)	4
-♢	fehér káró (jel)	4
-♢	káró (jel)	4
-♢	francia kártya (kategória)	4
-♢	egyéb (jel)	4
 katedrális	székesegyház	4
 katedrális	dóm	4
 kormányrúd	botkormány	4
@@ -99267,11 +98249,6 @@ könnyelmű	slampos	4
 könnyelmű	slendrián	4
 könnyelmű	nem óvatos	4
 könnyelmű	léha	4
-♣	(U+2663)	4
-♣	fekete treff (jel)	4
-♣	treff (jel)	4
-♣	francia kártya (kategória)	4
-♣	egyéb (jel)	4
 kőszikla	hegy	4
 kőszikla	kő	4
 kőszikla	szikla	4
@@ -99282,11 +98259,6 @@ kőszikla	sziklaorom	4
 kőszikla	szirt	4
 kőszikla	kőszirt	4
 kőszikla	hegycsúcs	4
-♤	(U+2664)	4
-♤	fehér pikk (jel)	4
-♤	pikk (jel)	4
-♤	francia kártya (kategória)	4
-♤	egyéb (jel)	4
 tolakodik	nyomul	4
 tolakodik	hatol	4
 tolakodik	tolakszik	4
@@ -99311,34 +98283,14 @@ csevegés	csicsergés	4
 csevegés	fecsegés	4
 csevegés	csiripelés	4
 csevegés	karattyolás	4
-♥	(U+2665)	4
-♥	fekete kőr (jel)	4
-♥	kőr (jel)	4
-♥	szív (jel)	4
-♥	francia kártya (kategória)	4
-♥	egyéb (jel)	4
 helyettesítő	pótlék	4
 helyettesítő	pótszer	4
 miért	ok	4
 miért	eredet	4
 kvantum	mennyiség	4
 kvantum	kvantitás	4
-♦	(U+2666)	4
-♦	fekete káró (jel)	4
-♦	káró (jel)	4
-♦	francia kártya (kategória)	4
-♦	egyéb (jel)	4
 sikkasztás	korrupció	4
 sikkasztás	hűtlen kezelés	4
-♧	(U+2667)	4
-♧	fehér treff (jel)	4
-♧	treff (jel)	4
-♧	francia kártya (kategória)	4
-♧	egyéb (jel)	4
-♨	(U+2668)	4
-♨	termálvíz (jel)	4
-♨	hévforrás (jel)	4
-♨	egyéb (jel)	4
 görvélykór	skrofula	4
 érsekség	püspökség	4
 érsekség	egyházmegye	4
@@ -99444,9 +98396,6 @@ csakhogy	viszont	4
 csakhogy	ellenben	4
 csakhogy	ezzel szemben	4
 csakhogy	mégis	4
-♲	(U+2652)	4
-♲	újrahasznosítás (jel)	4
-♲	egyéb (jel)	4
 likacsos	szivacsos	4
 likacsos	porózus	4
 közelharc	dulakodás	4
@@ -99578,9 +98527,6 @@ példás	példaadó	4
 példás	példaszerű	4
 példás	mintás	4
 ajánlható	dicséretes	4
-♿	(U+267F)	4
-♿	kerekes szék (jel)	4
-♿	egyéb (jel)	4
 beköp	árulkodik	4
 beköp	bejelent	4
 beköp	felad	4
@@ -99905,10 +98851,6 @@ zagyvaság	szamárság	4
 zagyvaság	elmebaj	4
 zagyvaság	összevisszaság	4
 zagyvaság	zagyvalék	4
-⚐	(U+2690)	4
-⚐	fehér zászló (jel)	4
-⚐	zászló (jel)	4
-⚐	egyéb (jel)	4
 tanácsház	városháza	4
 tanácsház	polgármesteri hivatal	4
 sulykol	ver	4
@@ -99920,10 +98862,6 @@ elbúcsúzás	búcsúzás	4
 elbúcsúzás	elválás	4
 elbúcsúzás	búcsúzkodás	4
 elbúcsúzás	eltávozás	4
-⚑	(U+2691)	4
-⚑	fekete zászló (jel)	4
-⚑	zászló (jel)	4
-⚑	egyéb (jel)	4
 végre	végül	4
 végre	utoljára	4
 végre	végezetül	4
@@ -99934,11 +98872,6 @@ tepsi	serpenyő	4
 mangalica	disznó (kategória)	4
 előhírnök	előfutár	4
 előhírnök	hírnök	4
-⚒	(U+2692)	4
-⚒	csákány és kalapács (jel)	4
-⚒	bányászat (jel)	4
-⚒	munkanap (jel)	4
-⚒	egyéb (jel)	4
 vessző	gally	4
 vessző	ág	4
 vessző	hajtás	4
@@ -99960,22 +98893,10 @@ fennkölt	magasztos	4
 fennkölt	szárnyaló	4
 fennkölt	ünnepies	4
 fennkölt	ünnepi	4
-⚓	(U+2693)	4
-⚓	horgony (jel)	4
-⚓	tengerészeti (jel)	4
-⚓	tengeri (jel)	4
-⚓	hajózási (jel)	4
-⚓	kikötő (jel)	4
-⚓	egyéb (jel)	4
 vízcsap	tűzcsap	4
 vízcsap	hidráns	4
 piros	pirospozsgás	4
 piros	vörös	4
-⚔	(U+2694)	4
-⚔	keresztezett kardok (jel)	4
-⚔	katonai (jel)	4
-⚔	csata (jel)	4
-⚔	egyéb (jel)	4
 elhasznál	elnyű	4
 elhasznál	elvisel	4
 elhasznál	elhord	4
@@ -99987,11 +98908,6 @@ csillám	zsírkő	4
 csillám	talk	4
 csillám	talkum	4
 csillám	ásvány (kategória)	4
-⚕	(U+2695)	4
-⚕	Aszklépiosz botja (jel)	4
-⚕	orvosi (jel)	4
-⚕	gyógyászati (jel)	4
-⚕	egyéb (jel)	4
 penicillin	penicillinszármazék	4
 penicillin	antibiotikum	4
 hivatkozik	célozgat	4
@@ -100000,10 +98916,6 @@ hivatkozik	utal	4
 hivatkozik	céloz	4
 hivatkozik	sejtet	4
 hivatkozik	jelez	4
-⚖	(U+2696)	4
-⚖	mérleg (jel)	4
-⚖	jogi (jel)	4
-⚖	egyéb (jel)	4
 megerősítés	állítás	4
 megerősítés	igenlés	4
 megerősítés	megállapítás	4
@@ -100018,21 +98930,10 @@ földműves	gazda	4
 földműves	farmer	4
 földműves	szántóvető	4
 földműves	paraszt	4
-⚗	(U+2697)	4
-⚗	lombik (jel)	4
-⚗	vegyészeti (jel)	4
-⚗	vegyi (jel)	4
-⚗	kémiai (jel)	4
-⚗	egyéb (jel)	4
 prototípus	minta	4
 prototípus	modell	4
 prototípus	mutatvány	4
 prototípus	mintapéldány	4
-⚘	(U+2698)	4
-⚘	virág (jel)	4
-⚘	botanikai (jel)	4
-⚘	növénytani (jel)	4
-⚘	egyéb (jel)	4
 karbolsav	fenol	4
 fékez	akadályoz	4
 fékez	fenntart	4
@@ -100059,11 +98960,6 @@ fékez	visszatart	4
 fékez	visszafog	4
 fékez	mérsékel	4
 fékez	lefog	4
-⚙	(U+2699)	4
-⚙	fogaskerék (jel)	4
-⚙	technikai (jel)	4
-⚙	technológiai (jel)	4
-⚙	egyéb (jel)	4
 csillár	lámpa	4
 csillár	lámpás	4
 vallástalan	ateista	4
@@ -100071,10 +98967,6 @@ vallástalan	hitetlen	4
 vallástalan	istentelen	4
 vallástalan	istentagadó	4
 vallástalan	pogány	4
-⚚	(U+269A)	4
-⚚	hírnökbot (jel)	4
-⚚	kereskedelmi (jel)	4
-⚚	egyéb (jel)	4
 vélelmezett	vélt	4
 öngyilkosság	harakiri	4
 megkárosít	becsap	4
@@ -100108,10 +99000,6 @@ megkárosít	tévútra vezet	4
 megkárosít	tévútra visz	4
 megkárosít	túljár az eszén	4
 megkárosít	szédít	4
-⚛	(U+269B)	4
-⚛	atom (jel)	4
-⚛	nukleáris létesítmény (jel)	4
-⚛	egyéb (jel)	4
 nyelvcsap	uvula	4
 nemzet	nem	4
 nemzet	nép	4
@@ -100127,10 +99015,6 @@ tank	tartály	4
 tank	harckocsi	4
 autóbusz	busz	4
 autóbusz	jármű (kategória)	4
-⚜	(U+269C)	4
-⚜	fleur de lis (jel)	4
-⚜	Bourbon-liliom (jel)	4
-⚜	egyéb (jel)	4
 mosószóda	kristályszóda	4
 elbocsát	elküld	4
 elbocsát	eltávolít	4
@@ -100173,10 +99057,6 @@ barikád	fék	4
 barikád	gát	4
 barikád	torlasz	4
 barikád	béklyó	4
-⚠	(U+26A0)	4
-⚠	figyelmeztetés (jel)	4
-⚠	vigyázat (jel)	4
-⚠	egyéb (jel)	4
 gonosztett	gazság	4
 gonosztett	bűn	4
 gonosztett	galádság	4
@@ -100187,10 +99067,6 @@ halott	elhunyt	4
 halott	holt	4
 halott	néhai	4
 halott	élettelen	4
-⚡	(U+26A1)	4
-⚡	magasfeszültség (jel)	4
-⚡	áram (jel)	4
-⚡	egyéb (jel)	4
 illemszabályok	illem	4
 illemszabályok	illendőség	4
 ártalmas	egészségtelen	4
@@ -101882,10 +100758,6 @@ igazolt	indokolt	4
 igazolt	jogos	4
 dinnye	görögdinnye	4
 dinnye	sárgadinnye	4
-✁	(U+2701)	4
-✁	ollózás felülről (jel)	4
-✁	olló (kategória)	4
-✁	egyéb (jel)	4
 fi	(U+03C6)	4
 fi	φ	4
 fi	Φ (nagybetű)	4
@@ -101896,17 +100768,9 @@ irodalomjegyzék	szakirodalom	4
 irodalomjegyzék	bibliográfia	4
 irodalomjegyzék	könyvlista	4
 irodalomjegyzék	irodalom	4
-✂	(U+2702)	4
-✂	fekete olló (jel)	4
-✂	olló (kategória)	4
-✂	egyéb (jel)	4
 komód	sublód	4
 komód	sublót	4
 komód	fiókos szekrény	4
-✃	(U+2703)	4
-✃	ollózás alulról (jel)	4
-✃	olló (kategória)	4
-✃	egyéb (jel)	4
 gyászszertartás	temetés	4
 pökhendiség	gőg	4
 pökhendiség	dölyf	4
@@ -101921,10 +100785,6 @@ pökhendiség	dölyfösség	4
 pökhendiség	gőgösség	4
 pökhendiség	pöffeszkedés	4
 fametszés	fametszet	4
-✄	(U+2704)	4
-✄	fehér olló (jel)	4
-✄	olló (kategória)	4
-✄	egyéb (jel)	4
 ránctalan	redőtlen	4
 ránctalan	sima	4
 zsémbes	házsártos	4
@@ -101961,10 +100821,6 @@ zilált	kuszált	4
 zilált	loncsos	4
 zilált	rendezetlen	4
 zilált	összezilált	4
-✆	(U+2606)	4
-✆	telefonálási lehetőség (jel)	4
-✆	telefon (jel)	4
-✆	egyéb (jel)	4
 markoló	markológép	4
 markoló	exkavátor	4
 málé	bamba	4
@@ -101981,10 +100837,6 @@ málé	lüke	4
 málé	mafla	4
 málé	mamlasz	4
 málé	tartalmatlan	4
-✈	(U+2708)	4
-✈	repülőtér (jel)	4
-✈	repülőgép (jel)	4
-✈	egyéb (jel)	4
 ünnepség	ünnepély	4
 ünnepség	ünnep	4
 ünnepség	vidámság	4
@@ -102009,10 +100861,6 @@ helytelen	hamis	4
 helytelen	pontatlan	4
 helytelen	téves	4
 helytelen	hibás	4
-✉	(U+2709)	4
-✉	boríték (jel)	4
-✉	levél (jel)	4
-✉	egyéb (jel)	4
 szélirányjelző	szélzsák	4
 billentyűzet	klaviatúra	4
 aláás	aláaknáz	4
@@ -102027,16 +100875,8 @@ elnyújt	lassít	4
 elnyújt	elhúz	4
 elnyújt	meglassít	4
 elnyújt	késleltet	4
-✌	(U+270C)	4
-✌	viktória (jel)	4
-✌	győzelem (jel)	4
-✌	egyéb (jel)	4
 ft	forint	4
 ft	Ft (röv.)	4
-✍	(U+270D)	4
-✍	író kéz (jel)	4
-✍	írás (jel)	4
-✍	egyéb (jel)	4
 egynegyed	(U+00BC)	4
 egynegyed	¼	4
 egynegyed	negyed	4
@@ -102072,14 +100912,6 @@ feddhetetlen	megbízható	4
 feddhetetlen	rendes	4
 feddhetetlen	szavahihető	4
 feddhetetlen	biztos	4
-✎	(U+270E)	4
-✎	jobbra le mutató ceruza (jel)	4
-✎	ceruza (kategória)	4
-✎	egyéb (jel)	4
-✏	(U+270F)	4
-✏	jobbra mutató ceruza (jel)	4
-✏	ceruza (kategória)	4
-✏	egyéb (jel)	4
 omladék	rom	4
 jövés-menés	nyüzsgés	4
 boszorkányság	bűvészet	4
@@ -102112,10 +100944,6 @@ tehetetlen	élhetetlen	4
 tehetetlen	erélytelen	4
 tehetetlen	célszerűtlen	4
 tehetetlen	impotens	4
-✐	(U+2710)	4
-✐	jobbra fel mutató ceruza (jel)	4
-✐	ceruza (kategória)	4
-✐	egyéb (jel)	4
 szeghúzó	harapófogó	4
 hivatás	foglalkozás	4
 hivatás	út	4
@@ -102131,10 +100959,6 @@ hivatás	hivatottság	4
 hivatás	elhivatottság	4
 szunyál	alszik	4
 szunyál	durmol	4
-✑	(U+2711)	4
-✑	fehér tollhegy (jel)	4
-✑	toll (jel)	4
-✑	egyéb (jel)	4
 karosszék	fotel	4
 gonosz	alattomos	4
 gonosz	álnok	4
@@ -102183,19 +101007,8 @@ gonosz	kísértő	4
 gonosz	sátán	4
 gonosz	gonosz lélek	4
 gonosz	rossz szellem	4
-✒	(U+2712)	4
-✒	fekete tollhegy (jel)	4
-✒	toll (jel)	4
-✒	egyéb (jel)	4
 bütyköl	barkácsol	4
 bütyköl	fúr-farag	4
-✓	(U+2713)	4
-✓	pipa (jel)	4
-✓	egyéb (jel)	4
-✔	(U+2714)	4
-✔	félkövér pipa (jel)	4
-✔	pipa (jel)	4
-✔	egyéb (jel)	4
 érintetlen	ártatlan	4
 érintetlen	fehér	4
 érintetlen	friss	4
@@ -103203,10 +102016,6 @@ közöl	szól	4
 közöl	elhangzik	4
 közöl	hangzik	4
 közöl	nyilatkozik	4
-❄	(U+2744)	4
-❄	hópehely (jel)	4
-❄	hópihe (jel)	4
-❄	egyéb (jel)	4
 lángelme	lángész	4
 lángelme	tehetség	4
 lángelme	géniusz	4
@@ -103610,10 +102419,6 @@ kártalanít	jóvátesz	4
 gigászi	emberfeletti	4
 gigászi	titáni	4
 gigászi	óriási	4
-❤	(U+2764)	4
-❤	félkövér fekete szív (jel)	4
-❤	szív (kategória)	4
-❤	egyéb (jel)	4
 kerekező	kerékpáros	4
 kerekező	biciklis	4
 kerekező	biciklista	4
