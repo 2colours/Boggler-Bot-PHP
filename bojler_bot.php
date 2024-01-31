@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+use Discord\Builders\MessageBuilder;
 use Symfony\Component\Dotenv\Dotenv;
 use Discord\DiscordCommandClient;
 use Discord\Parts\Channel\Message;
@@ -115,6 +116,64 @@ function translator_command($src_lang = null, $target_lang = null)
     };
 }
 
+# internal context-dependent functions that aren't really related to command handling
+
+#Determines which emoji reaction a certain word deserves - it doesn't remove special characters
+function achievements(Message $ctx, $word, $type)
+{
+    $reactions = [];
+    if ($type == 's' && (GAME_STATUS->longest_solutions->contains($word))) {
+        $reactions = ["🇳", "🇮", "🇨", "🇪"];
+    } elseif ($type == "add" && $ctx->author->id === '185430750667997184') { # TODO another grotesque hack here
+        # TODO sort this out once GAME_STATUS is ready
+        /*GAME_STATUS->rev_counter++;
+        if (GAME_STATUS->rev_counter % 20 == 0)
+            $ctx->channel->sendMessage('https://tenor.com/view/nick-wilde-zootopia-fox-disney-smug-gif-5225055');*/
+    }
+    return $reactions;
+}
+
+
+function s_reactions(Message $ctx, $word)
+{
+    $reaction_list = [acknowledgement_reaction(word), approval_reaction(word)];
+    # zsemle special
+    if ($ctx->author->id === '400894576577085460' && $reaction_list[1] === '❔') {
+        $reaction_list[] = '<:blobpeep:393319772076376066>';
+    }
+    $reaction_list = array_merge($reaction_list, achievements($ctx, $word, "s"));
+    return $reaction_list;
+}
+
+
+# "predicate-ish" functions (not higher order, takes context, performs a check)
+function channel_valid(Message $ctx)
+{
+    return $ctx->guild?->id == HOME_SERVER && $ctx->channel?->id == HOME_CHANNEL;
+}
+
+#Checks if dice are thrown, thrown_the_dice exists just for this
+function needs_thrown_dice()
+{
+    return GAME_STATUS->thrown_the_dice; # TODO really not nice dependency, especially if we want to move the function
+    #or: '_Please load game using_ **b!load** _or start a new game using_ **b!new**'
+}
+
+# TODO may be unneeded in the new system
+function savefile_valid()
+{
+    return GAME_STATUS->fileValid();
+}
+
+# TODO this definitely should be a method provided by GameStatus
+function enough_found()
+{
+    return GAME_STATUS->found_words->count() >= GAME_STATUS->end_amount;
+    #or: 'You have to find ' . GAME_STATUS->end_amount . ' words first.')
+}
+
+# "handler-ish" functions (not higher order, takes context, DC side effects)
+
 function try_send_msg(Message $ctx, $content)
 {
     $can_be_sent = mb_strlen($content) <= 2000; # TODO this magic constant should be moved from here and other places as well
@@ -123,16 +182,50 @@ function try_send_msg(Message $ctx, $content)
     return $can_be_sent;
 }
 
-function channel_valid(Message $ctx)
+# sends the small game board with the found words if they fit into one message
+function simple_board(Message $ctx)
 {
-    return $ctx->guild?->id == HOME_SERVER && $ctx->channel?->id == HOME_CHANNEL;
+    $message = '**Already found words:** ' . found_words_output();
+    if (!(try_send_msg($ctx, $message))) {
+        $ctx->channel->sendMessage('_Too many found words. Please use b!see._');
+    }
+    $ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL)); # TODO is this really binary-safe?
+}
+
+
+# "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
+# TODO does one have to manually lift await or is it auto-detected in called functions?
+function needs_counting($handler)
+{
+    return function ($ctx, ...$args) use ($handler) {
+        $handler($ctx, ...$args);
+        if (COUNTER->trigger())
+            simple_board($ctx);
+    };
+}
+
+# $refusalMessageProducer is a function that can take $ctx
+function ensure_predicate($predicate, $refusalMessageProducer)
+{
+    return fn ($handler) => function (Message $ctx, ...$args) use ($handler, $predicate, $refusalMessageProducer) {
+        if ($predicate($ctx))
+            $handler($ctx, ...$args);
+        else
+            $ctx->reply($refusalMessageProducer($ctx));
+    };
+}
+
+# [d1, d2, d3, ..., dn], h -> d1 ∘ d2 ∘ d3 ∘ ... ∘ dn ∘ h
+function decorate_handler(array $decorators, $handler)
+{
+    array_reduce(array_reverse($decorators), fn ($aggregate, $current) => $current($aggregate), $handler);
 }
 
 # TODO it's dubious whether these are actually constants; gotta think about it
 # TODO constructor not ported yet
-# define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
+#define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
 # define('easter_egg_handler', new EasterEggHandler(GAME_STATUS->found_words_set));
-define('counter', new Counter(10));
+define('COUNTER', new Counter(10));
 
 # bot=commands.Bot(command_prefix=('b!','B!'), owner_ids=[745671966266228838, 297037173541175296], help_command=commands.DefaultHelpCommand(verify_checks=False), intents=discord.Intents.all())
 $bot = new DiscordCommandClient([
@@ -271,9 +364,6 @@ def acknowledgement_reaction(word):
     word=remove_special_char(word)
     return '💯' if len(word)> 9 else '🤯' if len(word) > 8 else '🎉' if len(word) > 5 else '👍'
 
-async def savefile_valid(ctx): # TODO may be unneeded in the new system
-    return game_status.file_valid()
-
 */
 
 
@@ -303,28 +393,8 @@ from EasterEgg_Adventure import Adventure
 
 #adventure=Adventure(game_status.letters.list, game_status.solutions)
 adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.current_lang].keys()))
-def needs_counting(func): async def action(ctx, *args, **kwargs): await func(ctx, *args, **kwargs) if counter.trigger(): await simple_board(ctx) action.__name__=func.__name__ sig=inspect.signature(func) action.__signature__=sig.replace(parameters=tuple(sig.parameters.values())) return action
 
-    # sends the small game board with the found words if they fit into one message async def simple_board(ctx): message="**Already found words:** " + found_words_output() if not (await ctx.try_send(message)): await ctx.send("_Too many found words. Please use b!see._") with open(image_filepath_small, 'rb' ) as f: await ctx.send(file=discord.File(f))  #Checks if dice are thrown, thrown_the_dice exists just for this async def thrown_dice(ctx): if not game_status.thrown_the_dice: await ctx.send("_Please load game using_ **b!load** _or start a new game using_ **b!new**") return game_status.thrown_the_dice #Checks if current_game savefile is correctly formatted  #Checks if the current message is in the tracked channel async def bojler(ctx): messages=easter_eggs["bojler"] times=[0,1.5,1.5,1.5,1.5,0.3,0.3] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(times[i]) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def quick_walk(ctx, arg): messages=easter_eggs[arg] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(0.3) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def easter_egg_trigger(ctx, word, add='' ): # handle_easter_eggs decides which one to trigger, this here triggers it then type=easter_egg_handler.handle_easter_eggs(word, add) if not type: return print("Easter Egg") # to tell us when this might be responsible for anything if type=="nyan" : await quick_walk(ctx, "nyan" ) elif type=="bojler" : await bojler(ctx) elif type=="tongue" : message=await ctx.send("😝") await sleep(0.3) await message.delete() elif type=="varázsló" : await quick_walk(ctx, "varázsló" ) elif type=="huszár" : message=await ctx.send(easter_eggs["nagyhuszár"][0]) await sleep(2) await message.delete() #Determines which emoji reaction a certain word deserves - it doesn't remove special characters
-
-      async def achievements(ctx, word, type):
-      reactions = []
-      if type == "s":
-      if word in game_status.longest_solutions:
-      reactions = ["🇳","🇮", "🇨","🇪"]
-      elif type == "add" and ctx.author.id == 185430750667997184:
-      game_status.rev_counter += 1
-      if game_status.rev_counter % 20 == 0:
-      await ctx.send("https://tenor.com/view/nick-wilde-zootopia-fox-disney-smug-gif-5225055")
-      return reactions
-
-      async def s_reactions(ctx, word):
-        reaction_list = [acknowledgement_reaction(word), approval_reaction(word)]
-        # zsemle special
-        if (ctx.author.id == 400894576577085460) and (reaction_list[1]=='❔'):
-            reaction_list.append("<:blobpeep:393319772076376066>")
-        reaction_list += await achievements(ctx, word, "s")
-        return reaction_list
+    #Checks if current_game savefile is correctly formatted  #Checks if the current message is in the tracked channel async def bojler(ctx): messages=easter_eggs["bojler"] times=[0,1.5,1.5,1.5,1.5,0.3,0.3] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(times[i]) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def quick_walk(ctx, arg): messages=easter_eggs[arg] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(0.3) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def easter_egg_trigger(ctx, word, add='' ): # handle_easter_eggs decides which one to trigger, this here triggers it then type=easter_egg_handler.handle_easter_eggs(word, add) if not type: return print("Easter Egg") # to tell us when this might be responsible for anything if type=="nyan" : await quick_walk(ctx, "nyan" ) elif type=="bojler" : await bojler(ctx) elif type=="tongue" : message=await ctx.send("😝") await sleep(0.3) await message.delete() elif type=="varázsló" : await quick_walk(ctx, "varázsló" ) elif type=="huszár" : message=await ctx.send(easter_eggs["nagyhuszár"][0]) await sleep(2) await message.delete()
 
         # async def test(ctx, *, arg): for more than one word (whole message)
         @bot.command(brief='add solution', aliases=['', 'S'])
@@ -467,12 +537,6 @@ def needs_counting(func): async def action(ctx, *args, **kwargs): await func(ctx
         async def oldgames(ctx):
         with open(saves_filepath, 'r') as f:
         await ctx.send(file=discord.File(f))
-
-        async def enough_found(ctx):
-        res = len(game_status.found_words_set) >= game_status.end_amount
-        if not res:
-        await ctx.send("You have to find " + str(int(game_status.end_amount)) + " words first.")
-        return res
 
         @bot.command(brief='send unfound Scrabble solutions')
         @commands.check(enough_found)
