@@ -28,7 +28,6 @@ define('COMMUNITY_WORDLIST_PATHS', array_map(fn ($value) => "live_data/$value", 
 define('CUSTOM_EMOJIS', CONFIG->get('custom_emojis'));
 define('EASTER_EGGS', CONFIG->get('easter_eggs'));
 
-
 class LetterList
 {
     public const SIZE = 16;
@@ -84,6 +83,7 @@ class GameStatus
 {
     # TODO refined permissions (including readonly)
     private $file;
+    private $archive_file;
     public LetterList $letters;
     public Set $found_words;
     public $game_number;
@@ -92,12 +92,54 @@ class GameStatus
     public $planned_lang;
     public $max_saved_game;
     private $changes_to_save;
+    private $thrown_the_dice;
+    private $end_amount;
+    private $custom_emoji_solution;
     public Set $longest_solutions;
     public Set $solutions;
     public Set $wordlist_solutions;
+    public $community_list;
+    public $communitylist_solutions;
+    public $custom_emoji_solutions;
     public $available_hints;
     public $amount_approved_words;
 
+    public function __construct($file, $archive_file)
+    {
+        $this->archive_file = $archive_file;
+        $this->file = $file;
+        $this->letters = new LetterList(array_fill(0, 16, null));
+        $this->found_words = new Set();
+        # complete lists
+        $this->community_list = [];
+        # solution lists
+        $this->wordlist_solutions = [];
+        #dependent data
+        $this->communitylist_solutions = [];
+        $this->available_hints = array_map(fn () => [], array_flip(AVAILABLE_LANGUAGES));
+        $this->custom_emoji_solutions = [];
+        #dependent data
+        $this->solutions = new Set();
+        $this->end_amount = DEFAULT_END_AMOUNT;
+        #dependent data
+        $this->amount_approved_words = 0;
+        # changes_to_save determines if we have to save sth in saves.txt. Always true for a loaded current_game or new games (might not be saved yet). False when loading old games. Becomes true with every adding or removing word.
+        $this->changes_to_save = false;
+        $this->thrown_the_dice = false;
+        $this->planned_lang = DEFAULT_TRANSLATION[0];
+        $this->current_lang = DEFAULT_TRANSLATION[0];
+        $this->base_lang = DEFAULT_TRANSLATION[1];
+        $this->game_number = 0;
+        #dependent data
+        $this->max_saved_game = 0;
+
+        # achievement stuff
+        $this->longest_solutions = [];
+
+        $this->loadGame();
+    }
+
+    // TODO(vxern): Clean up
     public function fileValid()
     {
         #return true;
@@ -155,6 +197,7 @@ class GameStatus
         $this->getLongestWords();
     }
 
+    // TODO(vxern): Performance? Why perform the same operation of removing special characters and getting the length twice?
     private function getLongestWords()
     {
         $length = max(array_map(fn ($item) => mb_strlen(remove_special_char($item)), $this->solutions->toArray()));
@@ -163,6 +206,7 @@ class GameStatus
         #var_dump($this->longest_solutions);
     }
 
+    // TODO(vxern): Complete.
     private function findSolutions()
     {
         $refdict = $this->letters->lower_cntdict;
@@ -180,12 +224,6 @@ class GameStatus
         self._find_custom_emojis(refdict)
         self.solutions.update(self.custom_emoji_solution)
         print("Custom reactions: " + str(len(self.custom_emoji_solution)))   */
-    }
-
-    private function findWordlistSolutions($refdict)
-    {
-        $content = file(WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES);
-        $this->wordlist_solutions = new Set(array_filter($content, fn ($item) => $this->wordValidFast($item, $refdict)));
     }
 
     private function findHints()
@@ -261,7 +299,7 @@ class GameStatus
     public function currentEntry()
     {
         $space_separated_letters = implode(' ', $this->letters->list);
-        $space_separated_found_words = implode(' ', $this->found_words);
+        $space_separated_found_words = implode(' ', $this->found_words->toArray());
         return <<<END
         #Current Game
         $space_separated_letters
@@ -295,321 +333,278 @@ class GameStatus
         $this->collator()->sort($result);
         return $result;
     }
-}
 
-/*
-from numpy import random as rnd
-import icu
-
-  def try_load_oldgame(self, number):
-    self._save_old()
-    if number not in range(1,self.max_saved_game + 1):
-      return False
-    PlayerHandler.new_game()
-    with open(self.archive_file, 'r') as f:
-      content = f.readlines()
-    linenumber = 3*(number-1)
-    languages = content[linenumber].strip()
-    letters = content[linenumber+1].strip()
-    words = content[linenumber+2].strip()
-    self.letters = LetterList(letters.split(' '), True)
-    if self.letters.is_abnormal():
-      print("Game might be damaged.")
-    self.found_words_set.clear()
-    # safe already found words
-    if words:
-      wordlist = words.split(' ')
-      for item in wordlist:
-        self.found_words_set.add(item)
-    # set language and number
-    if languages:
-      languages_list = languages.split(' ')
-      read_number = languages_list[0]
-      read_number = read_number[:-1]
-      read_lang = languages_list[1]
-      read_lang = read_lang[1:-1]
-      self.current_lang = read_lang
-      self.game_number = int(read_number)
-      # this game doesn't have to be saved again in saves.txt yet (changes_to_save), we have a loaded game (thrown_the_dice)
-    self._game_setup()
-    self.changes_to_save = False
-    self.save_game()
-    return True
-
-  def check_newest_game(self):
-    # answer to: should we load the newest game instead of creating a new one?
-    if self.game_number == self.max_saved_game:
-      return False
-    with open(self.archive_file, 'r') as f:
-      content = f.readlines()
-    last_found_words = content[len(content)-1].split(' ')
-    language = content[len(content)-3].split(' ')[1][1:-2]
-    print(language)
-    if language != self.current_lang:
-      return False
-    if len(last_found_words) <= 10:
-      return True
-    return False
-
-  def __init__(self, file, archive_file):
-    self.archive_file = archive_file
-    self.file = file
-    self.letters = LetterList([None]*16)
-    self.found_words_set = set()
-    # complete lists
-    self.communitylist = []
-    # solution lists
-    self.wordlist_solutions = []
-    #dependent data
-    self.communitylist_solutions = []
-    self.available_hints = {lang:[] for lang in available_languages}
-    self.custom_emoji_solutions = []
-    #dependent data
-    self.solutions = set()
-    self.end_amount = default_end_amount
-    # dependent data
-    self.amount_approved_words = 0
-    # changes_to_save determines if we have to save sth in saves.txt. Always true for a loaded current_game or new games (might not be saved yet). False when loading old games. Becomes true with every adding or removing word.
-    self.changes_to_save = False
-    # just false when no game is loaded or created yet
-    self.thrown_the_dice = False
-    self.planned_lang = default_translation[0]
-    self.current_lang = default_translation[0]
-    self.base_lang = default_translation[1]
-    self.game_number = 0
-    #dependent data
-    self.max_saved_game = 0
-
-    # achievement stuff
-    self.longest_solutions = []
-    self.rev_counter = 0
-    
-    self.load_game()
-
-  def get_translation(self, arg, dt = DictionaryType(*default_translation)):
-    entry = DatabaseHandler.translate(arg, dt)
-    for word, item in entry:
-      if item:
-        return item
-    return ''
-
-  def approval_status(self, word):
-    approval_dict = dict()
-    approval_dict["word"] = word
-    approval_dict["valid"] = self.word_valid(word)
-    approval_dict["any"] = False
-    approval_dict["wordlist"] = word in self.wordlist_solutions
-    approval_dict["community"] = word in self.communitylist
-    approval_dict["custom_reactions"] = word in custom_emojis[self.current_lang]
-    for language in available_languages:
-      approval_dict[language] = False
-    for language in self.available_dictionaries_from(self.current_lang):
-      approval_dict[language] = (word in self.available_hints[language]) and self.get_translation(word, DictionaryType(self.current_lang, language))
-    # set "any"
-    for x in ["wordlist", "community", "custom_reactions"] + available_languages:
-      approval_dict["any"] = bool(approval_dict[x]) or approval_dict["any"]
-    return approval_dict
-  
-  def word_valid(self, word):
-    if self.current_lang == "German":
-      word = self.german_letters(word)
-    word = word.lower()
-    refdict = self.letters.lower_cntdict
-    #print(refdict)
-    wdict = CntDict(word)
-    # Hope this works - ignoring "-"s
-    del wdict['-']
-    del wdict['.']
-    del wdict["'"]
-    if any(wdict - refdict):
-      return False
-    return True
-
-  def _load_communitylist(self):
-    with open(community_wordlist_paths[self.current_lang], 'r') as f:
-      self.communitylist = f.read().splitlines()
-
-  def _find_custom_emojis(self, refdict):
-    self.custom_emoji_solution = [item for item in custom_emojis[self.current_lang].keys() if self._word_valid_fast(item, refdict)]
-
-
-  def save_game(self):
-    with open(self.file, 'w') as f:
-      f.write(self.current_entry())
-
-  #should be called when the current game is overwritten (by a load or starting a new game etc.)
-  def _save_old(self):
-    # unchanged loaded old games are not saved; if the game is not saved yet in saves.txt, it is appended (determined by game_number compared to max_saved_game and number of lines in saves.txt)
-    if self.changes_to_save:
-      # determines if game is already saved in saves.txt
-      if self.game_number <= self.max_saved_game:
-        archive_temp = []
-        linenumber = 3*(int(self.game_number)-1)
-        with open(self.archive_file, 'r') as f:
-          archive_temp = f.readlines()
-        with open(self.archive_file, 'w') as f:
-          # older games
-          for i in range(0,linenumber):
-            f.write(archive_temp[i])
-          # loaded game
-          print(self.archive_entry(), file=f)
-          # newer games
-          for i in range(linenumber + 3, len(archive_temp)):
-            f.write(archive_temp[i])
-      # New game is appended (if game_number > max_saved_game)
-      else:
-        with open(self.archive_file, 'a') as f:
-          print(self.archive_entry(), file=f)
-        # one more saved game
-        self.max_saved_game += 1
-        self.save_game()
-  
-  def new_game(self):
-    self._save_old()
-    PlayerHandler.new_game()
-    self._update_current_lang()
-    if self.check_newest_game():
-      self.try_load_oldgame(self.max_saved_game)
-      return
-    self.found_words_set.clear()
-    # before creating a new one, old ones are saved, so max_saved_game contains all games
-    self.game_number = self.max_saved_game + 1
-    self.throw_dice()
-    self._game_setup()
-    # we have a game (thrown_the_dice), this new game will be saved, even if empty and is not yet in saves.txt (changes_to_save)
-    self.changes_to_save = True
-
-  def throw_dice(self):
-    used_permutation = rnd.permutation(16)
-    current_dice = dice_dict[self.current_lang]
-    self.letters = LetterList([current_dice[dice_index][rnd.randint(0,6)] for dice_index in used_permutation], just_regenerate=True)
-    self.save_game()
-
-  def shuffle_letters(self):
-    self.letters.shuffle()
-    self.save_game()
-
-  def add_word(self, word):
-    starter_amount = self.amount_approved_words
-    self.found_words_set.add(word)
-    # added word has always to be saved (changes_to_save)
-    self.changes_to_save = True
-    if word in self.solutions:
-      self.amount_approved_words += 1
-    self.save_game()
-    return starter_amount < self.end_amount and self.amount_approved_words == self.end_amount
-    
-  def try_add_community(self, word):
-    if word in self.communitylist:
-      return False
-    with open(community_wordlist_paths[self.current_lang], 'a') as f:
-      f.write(word + "\n")
-    self.communitylist.append(word)
-    if self.word_valid(word):
-      self.communitylist_solutions.append(word)
-      self.solutions.add(word)
-      if word in self.found_words_set:
-        self.amount_approved_words += 1
-    return True
-
-  def remove_word(self, word):
-    self.found_words_set.discard(word)
-    # removed words have always to be saved (changes_to_save)
-    self.changes_to_save = True
-    if word in self.solutions:
-      self.amount_approved_words -= 1
-    self.save_game()
-
-  def clear_words(self):
-    self.found_words_set.clear()
-    self.save_game()
-
-  def set_lang(self, word):
-    self.planned_lang = word
-    self.save_game()
-
-  def _update_current_lang(self):
-    self.current_lang = self.planned_lang
-    self.save_game()
-    # Is just called in next, thus doesn't need an own save_game
-  
-  
-  def game_awards(self):
-    highscore = dict()
-    awards = {
-      "First place" : [],
-      "Second place" : [],
-      "Third place" : [],
-      "Newcomer" : [],
-      "Best Beginner" : [],
-      "Most solved hints" : []
+    public function saveGame()
+    {
+        file_put_contents($this->file, $this->currentEntry());
     }
-    for p_key, p_value in PlayerHandler.player_dict.items():
-      if len(p_value["found_words"]) in highscore:
-        highscore[len(p_value["found_words"])].append(p_key)
-      # don't save people who didn't participate
-      elif len(p_value["found_words"]):
-        highscore[len(p_value["found_words"])] = [p_key]
-    highscore_list = sorted(highscore.keys(), reverse=True)
-    # Places 1,2,3
-    places = ["First place", "Second place", "Third place"]
-    for i in range(min(len(highscore_list), 3)):
-      awards[places[i]] = highscore[highscore_list[i]]
-    # Best Beginner
-    for i in range(len(highscore_list)):
-      for player in highscore[highscore_list[i]]:
-        if PlayerHandler.player_dict[player]["role"] == "Beginner":
-          awards["Best Beginner"].append(player)
-      if awards["Best Beginner"]:
-        break
-    # Newcomer
-    for i in range(len(highscore_list)):
-      for player in highscore[highscore_list[i]]:
-        if len(PlayerHandler.player_dict[player]["found_words"]) == PlayerHandler.player_dict[player]["all_time_found"]:
-          awards["Newcomer"].append(player)
-    # Most solved hints
-    amount = 1
-    for i in range(len(highscore_list)):
-      for player in highscore[highscore_list[i]]:
-        amount = max(amount, len(set(PlayerHandler.player_dict[player]["found_words"]) & set(PlayerHandler.player_dict[player]["used_hints"])))
-    for i in range(len(highscore_list)):
-      for player in highscore[highscore_list[i]]:
-        if len(set(PlayerHandler.player_dict[player]["found_words"]).intersection(set(PlayerHandler.player_dict[player]["used_hints"]))) == amount:
-          awards["Most solved hints"].append(player)
-    print(awards)
-    return(awards)
 
-class EasterEggHandler():
-  
-  def __init__(self, found_words_set):
-    self.amount_ny = 0
-    self.huszár_counter = 0
-    self._count_ny(found_words_set)
-    
-  def _count_ny(self, found_words_set):
-    amount = 0
-    for item in found_words_set:
-      if "ny" in item:
-        amount += 1
-    self.amount_ny = amount
-  
-  def handle_easter_eggs(self, arg='', add=''):
-    if arg:
-      if arg == "bojler":
-        if add == "_Rev":
-          return "tongue"
-        return "bojler"
-      if "ny" in arg:
-        self.amount_ny +=1
-        if self.amount_ny % 7 == 0:
-          return "nyan"
-      if arg == "gulyáságyú":
-        self.huszár_counter += 1
-        print(self.huszár_counter)
-        if self.huszár_counter == 3:
-          self.huszár_counter = 0
-          return "huszár"
-    return ''
+    private function findWordlistSolutions($refdict)
+    {
+        $content = file(WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES);
+        $this->wordlist_solutions = array_filter($content, fn ($line) => $this->wordValidFast($line, $refdict));
+    }
 
+    private function tryLoadOldGame($number)
+    {
+        $this->saveOld();
+        if (1 <= $number && $number <= $this->max_saved_game + 1) {
+            return True;
+        }
+        $handler = new PlayerHandler();
+        $handler->newGame();
+        $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
+        $offset = 3 * ($number - 1);
+        list($languages, $letters, $words) = array_slice($lines, $offset, 3);
+        $this->letters = new LetterList(explode(' ', $letters), true);
+        if ($this->letters->isAbnormal()) {
+            echo "Game might be damaged.";
+        }
+        $this->found_words = new Set(!empty($words) ? explode(' ', $words) : []);
+        # set language and game number
+        $language_list = explode(' ', $languages);
+        $read_number = $language_list
+        /*
+            read_number = languages_list[0]
+            read_number = read_number[:-1]
+            read_lang = languages_list[1]
+            read_lang = read_lang[1:-1]
+            self.current_lang = read_lang
+            self.game_number = int(read_number)
+            # this game doesn't have to be saved again in saves.txt yet (changes_to_save), we have a loaded game (thrown_the_dice)
+        */
+        $this->gameSetup();
+        $this->changes_to_save = false;
+        $this->saveGame();
+        return true;
+    }
 
-*/
+    public function checkNewestGame()
+    {
+        # answer to: should we load the newest game instead of creating a new one?
+        if ($this->game_number == $this->max_saved_game) {
+            return false;
+        }
+        $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
+        $last_found_words = explode(' ', $lines[array_key_last($lines)]);
+        $language_in_parens = explode(' ', $lines[count($lines) - 3])[1];
+        $language = mb_substr($language_in_parens, 1, mb_strlen($language_in_parens) - 1);
+        echo $language;
+        if ($language != $this->current_lang) {
+            return false;
+        }
+        if (count($last_found_words) <= 10) {
+            return true;
+        }
+        return false;
+    }
+
+    public function approvalStatus($word, $refdict)
+    {
+        $approval_dict = [];
+        $approval_dict["word"] = $word;
+        $approval_dict["valid"] = $this->wordValidFast($word, $refdict);
+        $approval_dict["any"] = false;
+        $approval_dict["wordlist"] = $this->wordlist_solutions->contains($word);
+        $approval_dict["community"] = in_array($word, $this->community_list);
+        $approval_dict["custom_reactions"] = CUSTOM_EMOJIS[$this->current_lang]->contains($word);
+        foreach (AVAILABLE_LANGUAGES as $language) {
+            $approval_dict[$language] = false;
+        }
+        foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
+            if (in_array($word, $this->available_hints[$language])) {
+                $approval_dict[$language] = $word;
+            }
+        }
+        foreach (array_merge(["wordlist", "community", "custom_reactions"], AVAILABLE_LANGUAGES) as $key) {
+            // TODO(vxern): $approval_dict[$key] might need a conversion to boolean.
+            $approval_dict["any"] = $approval_dict[$key] ?? $approval_dict["any"];
+        }
+        return $approval_dict;
+    }
+
+    private function loadCommunityList()
+    {
+        $this->community_list = file(COMMUNITY_WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES);
+    }
+
+    private function findCustomEmojis($refdict)
+    {
+        $this->custom_emoji_solution = array_filter(array_keys(CUSTOM_EMOJIS[$this->current_lang]), fn ($word) => $this->wordValidFast($word, $refdict));
+    }
+
+    private function saveOld()
+    {
+        # unchanged loaded old games are not saved; if the game is not saved yet in saves.txt, it is appended (determined by game_number compared to max_saved_game and number of lines in saves.txt)
+        if (!$this->changes_to_save) {
+            return;
+        }
+
+        # determines if game is already saved in saves.txt
+        if ($this->game_number <= $this->max_saved_game) {
+            $archive_temp = file($this->archive_file, FILE_IGNORE_NEW_LINES);
+            $line_number = 3 * ($this->game_number - 1);
+            $file = fopen($this->archive_file, 'w');
+            # older games
+            for ($i = 0; $i < $line_number; $i++) {
+                fwrite($file, $archive_temp[$i]);
+            }
+            # loaded game
+            fwrite($file, $this->archiveEntry());
+            # newer games
+            for ($i = $line_number + 3; $i < count($archive_temp); $i++) {
+                fwrite($file, $archive_temp[$i]);
+            }
+            fclose($file);
+            return;
+        }
+
+        # New game is appended (if game_number > max_saved_game)
+        $file = fopen($this->archive_file, 'a');
+        fwrite($file, $this->archiveEntry());
+        fclose($file);
+        $this->max_saved_game++;
+        $this->saveGame();
+    }
+
+    public function newGame()
+    {
+        $this->saveOld();
+        $handler = new PlayerHandler();
+        $handler->newGame();
+        $this->updateCurrentLang();
+        if ($this->checkNewestGame()) {
+            $this->tryLoadOldGame($this->max_saved_game);
+            return;
+        }
+        $this->found_words->clear();
+        # before creating a new one, old ones are saved, so max_saved_game contains all games
+        $this->game_number = $this->max_saved_game + 1;
+        $this->throwDice();
+        $this->gameSetup();
+        # we have a game (thrown_the_dice), this new game will be saved, even if empty and is not yet in saves.txt (changes_to_save)
+        $this->changes_to_save = true;
+    }
+
+    public function shuffleLetters()
+    {
+        $this->letters->shuffle();
+        $this->saveGame();
+    }
+
+    public function addWord($word)
+    {
+        $starter_amount = $this->amount_approved_words;
+        $this->found_words->add($word);
+        $this->changes_to_save = true;
+        if ($this->solutions->contains($word)) {
+            $this->amount_approved_words++;
+        }
+        $this->saveGame();
+        return $starter_amount < $this->end_amount && $this->amount_approved_words == $this->end_amount;
+    }
+
+    public function tryAddCommunity($word, $refdict)
+    {
+        if (in_array($word, $this->community_list)) {
+            return false;
+        }
+        $file = fopen(COMMUNITY_WORDLIST_PATHS[$this->current_lang], 'a');
+        fwrite($file, $word + "\n");
+        fclose($file);
+        array_push($this->community_list, $word);
+        if ($this->wordValidFast($word, $refdict)) {
+            array_push($this->communitylist_solutions, $word);
+            $this->solutions->add($word);
+            if ($this->found_words->contains($word)) {
+                $this->amount_approved_words++;
+            }
+        }
+        return true;
+    }
+
+    public function removeWord($word)
+    {
+        $this->found_words->remove($word);
+        # removed words have always to be saved (changes_to_save)
+        $this->changes_to_save = true;
+        if (in_array($this->solutions, $word)) {
+            $this->amount_approved_words--;
+        }
+        $this->saveGame();
+    }
+
+    public function clearWords()
+    {
+        $this->found_words->clear();
+        $this->saveGame();
+    }
+
+    public function setLang($word)
+    {
+        $this->planned_lang = $word;
+        $this->saveGame();
+    }
+
+    private function updateCurrentLang()
+    {
+        $this->current_lang = $this->planned_lang;
+        $this->saveGame();
+    }
+
+    public function throwDice()
+    {
+        $used_permutation = range(0, 16);
+        shuffle($used_permutation);
+        $current_dice = DICE_DICT[$this->current_lang];
+        $this->letters = new LetterList(array_map(fn ($dice_index) => $current_dice[$dice_index][rand(0, 6)], $used_permutation), false, true);
+        $this->saveGame();
+    }
+
+    public function gameAwards()
+    {
+        $highscore = [];
+        $awards = [
+            "First place" => [],
+            "Second place" => [],
+            "Third place" => [],
+            "Newcomer" => [],
+            "Best Beginner" => [],
+            "Most solved hints" => []
+        ];
+        foreach (PlayerHandler::player_dict->entries() as $key => $value) {
+            $found_words = count($value["found_words"]);
+            if (key_exists($found_words, $highscore)) {
+                array_push($highscore[$found_words], $key);
+                // TODO(vxern): Verify this does the same thing as Python if len(p_value["found_words"])
+                # don't save people who didn't participate
+            } else if ($found_words > 0) {
+                $highscore[$found_words] = [$key];
+            }
+        }
+        $highscore_list = array_keys($highscore);
+        arsort($highscore_list);
+        # Places 1,2,3
+        $places = ["First place", "Second place", "Third place"];
+        for ($i = 0; $i < min(count($highscore_list), 3); $i++) {
+            $awards[$places[$i]] = $highscore[$highscore_list[$i]];
+        }
+        for ($i = 0; $i < count($highscore_list); $i++) {
+            foreach ($highscore[$highscore_list[$i]] as $player) {
+                $info = PlayerHandler::player_dict[$player];
+                # Best Beginner
+                if ($info["role"] == "Beginner") {
+                    array_push($awards["Best beginner"], $player);
+                }
+                # Newcomer
+                if (count($info["found_words"]) == $info["all_time_found"]) {
+                    array_push($awards["Newcomer"], $player);
+                }
+                $amount = max(1, count(new Set(array_merge($info["found_words"], $info["used_hints"]))));
+                if (count(new Set(array_intersect($info["found_words"], $info["used_hints"]))) == $amount) {
+                    array_push($awards["Most solved hints"], $player);
+                }
+            }
+        }
+    }
+}
