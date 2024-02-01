@@ -141,12 +141,12 @@ function s_reactions(Message $ctx, $word)
     if ($ctx->author->id === '400894576577085460' && $reaction_list[1] === '❔') {
         $reaction_list[] = '<:blobpeep:393319772076376066>';
     }
-    $reaction_list = array_merge($reaction_list, achievements($ctx, $word, "s"));
-    return $reaction_list;
+    return array_merge($reaction_list, achievements($ctx, $word, "s"));
 }
 
 
 # "predicate-ish" functions (not higher order, takes context, performs a check)
+#Checks if the current message is in the tracked channel
 function channel_valid(Message $ctx)
 {
     return $ctx->guild?->id == HOME_SERVER && $ctx->channel?->id == HOME_CHANNEL;
@@ -159,6 +159,7 @@ function needs_thrown_dice()
     #or: '_Please load game using_ **b!load** _or start a new game using_ **b!new**'
 }
 
+#Checks if current_game savefile is correctly formatted
 # TODO may be unneeded in the new system
 function savefile_valid()
 {
@@ -388,13 +389,12 @@ from EasterEgg_Adventure import Adventure
 
 
 
-#for player in player_dict:
-#player_dict[player]["all_time_found"] = len(player_dict[player]["found_words"])
-
 #adventure=Adventure(game_status.letters.list, game_status.solutions)
 adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.current_lang].keys()))
 
-    #Checks if current_game savefile is correctly formatted  #Checks if the current message is in the tracked channel async def bojler(ctx): messages=easter_eggs["bojler"] times=[0,1.5,1.5,1.5,1.5,0.3,0.3] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(times[i]) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def quick_walk(ctx, arg): messages=easter_eggs[arg] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(0.3) await message.edit(content=messages[i]) await sleep(0.3) await message.delete() async def easter_egg_trigger(ctx, word, add='' ): # handle_easter_eggs decides which one to trigger, this here triggers it then type=easter_egg_handler.handle_easter_eggs(word, add) if not type: return print("Easter Egg") # to tell us when this might be responsible for anything if type=="nyan" : await quick_walk(ctx, "nyan" ) elif type=="bojler" : await bojler(ctx) elif type=="tongue" : message=await ctx.send("😝") await sleep(0.3) await message.delete() elif type=="varázsló" : await quick_walk(ctx, "varázsló" ) elif type=="huszár" : message=await ctx.send(easter_eggs["nagyhuszár"][0]) await sleep(2) await message.delete()
+    async def bojler(ctx): messages=easter_eggs["bojler"] times=[0,1.5,1.5,1.5,1.5,0.3,0.3] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(times[i]) await message.edit(content=messages[i]) await sleep(0.3) await message.delete()
+    async def quick_walk(ctx, arg): messages=easter_eggs[arg] message=await ctx.send(messages[0]) for i in range(1,len(messages)): await sleep(0.3) await message.edit(content=messages[i]) await sleep(0.3) await message.delete()
+    async def easter_egg_trigger(ctx, word, add='' ): # handle_easter_eggs decides which one to trigger, this here triggers it then type=easter_egg_handler.handle_easter_eggs(word, add) if not type: return print("Easter Egg") # to tell us when this might be responsible for anything if type=="nyan" : await quick_walk(ctx, "nyan" ) elif type=="bojler" : await bojler(ctx) elif type=="tongue" : message=await ctx.send("😝") await sleep(0.3) await message.delete() elif type=="varázsló" : await quick_walk(ctx, "varázsló" ) elif type=="huszár" : message=await ctx.send(easter_eggs["nagyhuszár"][0]) await sleep(2) await message.delete()
 
         # async def test(ctx, *, arg): for more than one word (whole message)
         @bot.command(brief='add solution', aliases=['', 'S'])
