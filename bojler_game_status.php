@@ -23,7 +23,6 @@ define('AVAILABLE_LANGUAGES', array_keys(DICE_DICT));
 define('DEFAULT_END_AMOUNT', CONFIG->get('default_end_amount'));
 define('WORDLIST_PATHS', array_map(fn ($value) => "param/$value", CONFIG->get('wordlists')));
 define('DICTIONARIES', CONFIG->get('dictionaries'));
-define('AVAILABLE_DICTIONARIES', array_keys(DICTIONARIES)); # TODO is this still needed?
 define('COMMUNITY_WORDLIST_PATHS', array_map(fn ($value) => "live_data/$value", CONFIG->get('community_wordlists')));
 define('CUSTOM_EMOJIS', CONFIG->get('custom_emojis'));
 define('EASTER_EGGS', CONFIG->get('easter_eggs'));
