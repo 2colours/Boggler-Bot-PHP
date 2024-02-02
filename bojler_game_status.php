@@ -38,7 +38,7 @@ class LetterList
     public function __construct($data, $preshuffle = false, $just_regenerate = false)
     {
         $this->list = $data;
-        $this->lower_cntdict = array_count_values(array_map(mb_strtolower(...), $data)); # TODO there was some None filtering - watch out with the input
+        $this->lower_cntdict = array_count_values(array_map(mb_strtolower(...), array_filter($data, fn ($letter) => isset($letter))));
         if ($preshuffle)
             $this->shuffle();
         elseif ($just_regenerate) {
@@ -82,6 +82,7 @@ class LetterList
 class GameStatus
 {
     # TODO refined permissions (including readonly)
+    private readonly PlayerHandler $player_handler;
     private $file;
     private $archive_file;
     public LetterList $letters;
@@ -106,6 +107,7 @@ class GameStatus
 
     public function __construct($file, $archive_file)
     {
+        $this->player_handler = PlayerHandler::getInstance(); # TODO better injection?
         $this->archive_file = $archive_file;
         $this->file = $file;
         $this->letters = new LetterList(array_fill(0, 16, null));
@@ -113,7 +115,7 @@ class GameStatus
         # complete lists
         $this->community_list = [];
         # solution lists
-        $this->wordlist_solutions = [];
+        $this->wordlist_solutions = new Set();
         #dependent data
         $this->communitylist_solutions = [];
         $this->available_hints = array_map(fn () => [], array_flip(AVAILABLE_LANGUAGES));
@@ -134,7 +136,7 @@ class GameStatus
         $this->max_saved_game = 0;
 
         # achievement stuff
-        $this->longest_solutions = [];
+        $this->longest_solutions = new Set();
 
         $this->loadGame();
     }
@@ -168,7 +170,7 @@ class GameStatus
     public function loadGame()
     {
         $content = file($this->file, FILE_IGNORE_NEW_LINES);
-        if (count($content) < 9) {
+        if ($content === false || count($content) < 9) {
             echo 'Save file wrong.';
             return;
         }
@@ -279,7 +281,7 @@ class GameStatus
 
     private function setEndAmount()
     {
-        if (!empty($this->solutions))
+        if (!$this->solutions->isEmpty())
             $this->end_amount = 100;
         else
             $this->end_amount = min(DEFAULT_END_AMOUNT, intdiv($this->solutions->count() * 2, 3));
@@ -342,7 +344,7 @@ class GameStatus
     private function findWordlistSolutions($refdict)
     {
         $content = file(WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES);
-        $this->wordlist_solutions = array_filter($content, fn ($line) => $this->wordValidFast($line, $refdict));
+        $this->wordlist_solutions = new Set(array_filter($content, fn ($line) => $this->wordValidFast($line, $refdict)));
     }
 
     private function tryLoadOldGame($number)
@@ -351,8 +353,7 @@ class GameStatus
         if (1 <= $number && $number <= $this->max_saved_game + 1) {
             return True;
         }
-        $handler = new PlayerHandler();
-        $handler->newGame();
+        $this->player_handler->newGame();
         $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
         $offset = 3 * ($number - 1);
         list($languages, $letters, $words) = array_slice($lines, $offset, 3);
@@ -363,7 +364,7 @@ class GameStatus
         $this->found_words = new Set(!empty($words) ? explode(' ', $words) : []);
         # set language and game number
         $language_list = explode(' ', $languages);
-        $read_number = $language_list
+        $read_number = $language_list;
         /*
             read_number = languages_list[0]
             read_number = read_number[:-1]
@@ -470,8 +471,7 @@ class GameStatus
     public function newGame()
     {
         $this->saveOld();
-        $handler = new PlayerHandler();
-        $handler->newGame();
+        $this->player_handler->newGame();
         $this->updateCurrentLang();
         if ($this->checkNewestGame()) {
             $this->tryLoadOldGame($this->max_saved_game);
@@ -572,7 +572,7 @@ class GameStatus
             "Best Beginner" => [],
             "Most solved hints" => []
         ];
-        foreach (PlayerHandler::player_dict->entries() as $key => $value) {
+        foreach ($this->player_handler->player_dict as $key => $value) {
             $found_words = count($value["found_words"]);
             if (key_exists($found_words, $highscore)) {
                 array_push($highscore[$found_words], $key);
@@ -591,7 +591,7 @@ class GameStatus
         }
         for ($i = 0; $i < count($highscore_list); $i++) {
             foreach ($highscore[$highscore_list[$i]] as $player) {
-                $info = PlayerHandler::player_dict[$player];
+                $info = $this->player_handler->player_dict[$player];
                 # Best Beginner
                 if ($info["role"] == "Beginner") {
                     array_push($awards["Best beginner"], $player);
