@@ -212,13 +212,14 @@ function needs_counting($handler)
 }
 
 # $refusalMessageProducer is a function that can take $ctx
-function ensure_predicate($predicate, $refusalMessageProducer)
+function ensure_predicate($predicate, $refusalMessageProducer = null)
 {
     return fn ($handler) => function (Message $ctx, ...$args) use ($handler, $predicate, $refusalMessageProducer) {
-        if ($predicate($ctx))
+        if ($predicate($ctx)) {
             $handler($ctx, ...$args);
-        else
+        } elseif (isset($refusalMessageProducer)) {
             $ctx->reply($refusalMessageProducer($ctx));
+        }
     };
 }
 
