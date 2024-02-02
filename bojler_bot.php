@@ -234,7 +234,6 @@ define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
 # define('easter_egg_handler', new EasterEggHandler(GAME_STATUS->found_words_set));
 define('COUNTER', new Counter(10));
 
-# bot=commands.Bot(command_prefix=('b!','B!'), owner_ids=[745671966266228838, 297037173541175296], help_command=commands.DefaultHelpCommand(verify_checks=False), intents=discord.Intents.all())
 $bot = new DiscordCommandClient([
     'prefix' => 'b!',
     'token' => $_ENV['DC_TOKEN'],
@@ -271,6 +270,36 @@ $bot->registerCommand('stats', function (Message $ctx) {
     *Words found in current game:* $found_words
     END);
 }, ['description' => 'send user stats']);
+
+$bot->registerCommand(
+    'trigger',
+    decorate_handler([ensure_predicate(from_creator(...), fn () => 'This would be very silly now, wouldn\'t it.')], 'trigger'),
+    ['description' => 'testing purposes only']
+);
+function trigger(Message $ctx, $args)
+{
+    $ctx->reply('Congrats, Master.');
+}
+
+$bot->registerCommand(
+    'nextlang',
+    decorate_handler([ensure_predicate(channel_valid(...))], 'next_language'),
+    ['description' => 'change language']
+);
+function next_language(Message $ctx, $args)
+{
+    $lang = $args[0];
+    if (is_null($lang) || !in_array($lang, AVAILABLE_LANGUAGES)) {
+        $languages = implode(', ', AVAILABLE_LANGUAGES);
+        $ctx->reply(<<<END
+        Please provide an argument <language>.
+        <language> should be one of the values [$languages].
+        END);
+        return;
+    }
+    GAME_STATUS->setLang($lang);
+    $ctx->channel->sendMessage("Changed language to $lang for the next games.");
+}
 
 # Blocks the code - has to be at the bottom
 $bot->run();
@@ -525,24 +554,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         # for line in file:
         # print(line)
 
-        @bot.command(brief='change language')
-        @commands.check(channel_valid)
-        async def german(ctx):
-        game_status.set_lang("German")
-        await ctx.send("Changed language to German for the next games.")
-
-        @bot.command(brief='change language')
-        @commands.check(channel_valid)
-        async def hungarian(ctx):
-        game_status.set_lang("Hungarian")
-        await ctx.send("Changed language to Hungarian for the next games.")
-
-        @bot.command(brief='change language')
-        @commands.check(channel_valid)
-        async def english(ctx):
-        game_status.set_lang("English")
-        await ctx.send("Changed language to English for the next games.")
-
         @bot.command(brief='send saved games')
         async def oldgames(ctx):
         with open(saves_filepath, 'r') as f:
@@ -723,28 +734,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         global home_channel
         home_channel = ctx.channel.id
         print(ctx.channel.id)
-
-        @bot.command(hidden=True,brief='testing purposes only')
-        @commands.is_owner()
-        async def trigger(ctx, arg = ''):
-        #custom_reaction_list = custom_emojis[game_status.current_lang][arg]
-        #custom_reaction = custom_reaction_list[rnd.randint(0,len(custom_reaction_list))]
-        #await ctx.message.add_reaction(custom_reaction)
-        #await ctx.send(progress_bar_version_list[int(arg)][0] + ":\n" + progress_bar(progress_bar_version_list[int(arg)][1]))
-        #game_status.load_game_new()
-        #game_status.load_game()
-        #game_status.save_game_test()
-        #await quick_walk(ctx, "varázsló")
-        #await ctx.send(game_highscore())
-        import icu
-        word = icu.UnicodeString(arg)
-        bri = icu.BreakIterator.createCharacterInstance(icu.Locale('hu_HU'))
-        bri.setText(word)
-        points = [0, *bri]
-        parts = [str(word[points[idx]:points[idx+1]]) for idx in range(len(points)-1)]
-        await ctx.send(' | '.join(parts))
-        # parts now contains the recognized characters that you would see at pasting
-        pass
 
 
         @bot.event
