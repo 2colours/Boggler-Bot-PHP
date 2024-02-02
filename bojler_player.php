@@ -39,14 +39,20 @@ class PlayerHandler
     }
 
 
-    public const PLAYER_SAVES_PATH = 'live_data/player_saves.json'; # TODO can this be used through instances?
+    public const PLAYER_SAVES_PATH = 'live_data/player_saves.json';
     public $player_dict;
 
     private function __construct()
     {
-        $this->player_dict = json_decode(file_get_contents(self::PLAYER_SAVES_PATH), true);
-        foreach ($this->player_dict as &$player_data)
+        $read_content = file_get_contents(self::PLAYER_SAVES_PATH);
+        if ($read_content === false) {
+            $read_content = '{}';
+            file_put_contents(self::PLAYER_SAVES_PATH, $read_content);
+        }
+        $this->player_dict = json_decode($read_content, true);
+        foreach ($this->player_dict as &$player_data) {
             $player_data = array_merge($this->player_dict['default_user'], $player_data);
+        }
         $this->saveFile();
     }
 
@@ -63,7 +69,7 @@ class PlayerHandler
 
     public function saveFile()
     {
-        file_put_contents(self::PLAYER_SAVES_PATH, json_encode($this->player_dict));
+        file_put_contents(self::PLAYER_SAVES_PATH, json_encode($this->player_dict, JSON_FORCE_OBJECT));
     }
 
     public function newPlayer(Member $member)
