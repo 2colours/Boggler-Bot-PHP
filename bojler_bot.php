@@ -30,8 +30,8 @@ define('DICE_DICT', CONFIG->get('dice'));
 define('WORDLISTS', CONFIG->get('wordlists'));
 define('COMMUNITY_WORDLISTS', CONFIG->get('community_wordlists'));
 define('DICTIONARIES', CONFIG->get('dictionaries'));
-define('HOME_SERVER', CONFIG->get('home_server'));
-define('HOME_CHANNEL', CONFIG->get('home_channel'));
+define('HOME_SERVER', (string) CONFIG->get('home_server'));
+define('HOME_CHANNEL', (string) CONFIG->get('home_channel'));
 define('PROGRESS_BAR_VERSION_DICT', CONFIG->get('progress_bar_version_dict'));
 define('CUSTOM_EMOJIS', CONFIG->get('custom_emojis'));
 define('EASTER_EGGS', CONFIG->get('easter_eggs'));
@@ -225,7 +225,7 @@ function ensure_predicate($predicate, $refusalMessageProducer)
 # [d1, d2, d3, ..., dn], h -> d1 ∘ d2 ∘ d3 ∘ ... ∘ dn ∘ h
 function decorate_handler(array $decorators, $handler)
 {
-    array_reduce(array_reverse($decorators), fn ($aggregate, $current) => $current($aggregate), $handler);
+    return array_reduce(array_reverse($decorators), fn ($aggregate, $current) => $current($aggregate), $handler);
 }
 
 # TODO it's dubious whether these are actually constants; gotta think about it
