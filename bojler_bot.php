@@ -35,7 +35,6 @@ define('PROGRESS_BAR_VERSION_DICT', CONFIG->get('progress_bar_version_dict'));
 define('CUSTOM_EMOJIS', CONFIG->get('custom_emojis'));
 define('EASTER_EGGS', CONFIG->get('easter_eggs'));
 #useful stuff
-define('AVAILABLE_DICTIONARIES', array_keys(DICTIONARIES)); # TODO is this still needed?
 define('AVAILABLE_LANGUAGES', array_keys(DICE_DICT));
 # next is not necessary, used for testing purposes still
 define('PROGRESS_BAR_VERSION_LIST',  PROGRESS_BAR_VERSION_DICT["default"]);
@@ -256,13 +255,13 @@ $bot->registerCommand('stats', function (Message $ctx) {
         return;
     }
     $found_words = implode(', ', $infos['found_words']);
-    return <<<END
+    $ctx->channel->sendMessage(<<<END
     **Player stats for $infos[server_name]:**
     *Total found words:* $infos[all_time_found]
     *Approved words in previous games:* $infos[all_time_approved]
     *Personal emoji:* $infos[personal_emoji]
     *Words found in current game:* $found_words
-    END;
+    END);
 }, ['description' => 'send user stats']);
 
 # Blocks the code - has to be at the bottom
