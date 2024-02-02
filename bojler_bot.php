@@ -15,6 +15,7 @@ require_once __DIR__ . '/bojler_player.php'; # TODO PlayerHandler with PSR-4 aut
 $dotenv = new Dotenv();
 $dotenv->load('./.env');
 
+const CREATORS = ['297037173541175296', '217319536485990400'];
 # TODO better dependency injection surely...
 define('CONFIG', ConfigHandler::getInstance());
 define('DISPLAY', CONFIG->get('display'));
@@ -141,6 +142,11 @@ function s_reactions(Message $ctx, $word)
 
 
 # "predicate-ish" functions (not higher order, takes context, performs a check)
+function from_creator(Message $ctx)
+{
+    return in_array($ctx->author->id, CREATORS, true);
+}
+
 #Checks if the current message is in the tracked channel
 function channel_valid(Message $ctx)
 {
