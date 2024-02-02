@@ -15,12 +15,6 @@ require_once __DIR__ . '/bojler_player.php'; # TODO PlayerHandler with PSR-4 aut
 $dotenv = new Dotenv();
 $dotenv->load('./.env');
 
-# TODO should be in a file that serves as the entry point
-set_exception_handler(function (Throwable $exception) {
-    echo $exception->getTraceAsString();
-});
-
-
 # TODO better dependency injection surely...
 define('CONFIG', ConfigHandler::getInstance());
 define('DISPLAY', CONFIG->get('display'));
