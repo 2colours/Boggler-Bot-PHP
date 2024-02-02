@@ -127,7 +127,8 @@ function achievements(Message $ctx, $word, $type)
     return $reactions;
 }
 
-
+# TODO allow this when the necessary functions are ready
+/*
 function s_reactions(Message $ctx, $word)
 {
     $reaction_list = [acknowledgement_reaction(word), approval_reaction(word)];
@@ -137,6 +138,7 @@ function s_reactions(Message $ctx, $word)
     }
     return array_merge($reaction_list, achievements($ctx, $word, "s"));
 }
+*/
 
 
 # "predicate-ish" functions (not higher order, takes context, performs a check)
@@ -185,6 +187,11 @@ function simple_board(Message $ctx)
         $ctx->channel->sendMessage('_Too many found words. Please use b!see._');
     }
     $ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL)); # TODO is this really binary-safe?
+}
+
+# TODO actually implement it
+function found_words_output()
+{
 }
 
 
@@ -244,6 +251,10 @@ $bot->registerCommand('t', function (Message $ctx, $args) {
 }, ['description' => 'translate given word']);
 $bot->registerCommand('stats', function (Message $ctx) {
     $infos = PlayerHandler::getInstance()->player_dict[$ctx->author->id]; # TODO better injection
+    if (is_null($infos)) {
+        $ctx->reply('You don\'t have any statistics registered.');
+        return;
+    }
     $found_words = implode(', ', $infos['found_words']);
     return <<<END
     **Player stats for $infos[server_name]:**
