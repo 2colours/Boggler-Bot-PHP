@@ -145,7 +145,7 @@ class DatabaseHandler
     {
         $statement = $this->db->prepare('SELECT DISTINCT word FROM dictionary WHERE dictionarycode = :dictcode');
         $statement->bindValue(':dictcode', $dtype->asDictcode(), SQLITE3_INTEGER);
-        return array_column($this->db->exec()->fetchArray(SQLITE3_NUM), 0);
+        return array_column($statement->execute()->fetchArray(SQLITE3_NUM), 0);
     }
 
     private function __construct()
