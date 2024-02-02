@@ -20,10 +20,10 @@ function output_split_cursive($arg)
 {
     $open_cursive = false;
     $output_array = output_split($arg);
-    if (count($output_array) == 1) {
+    if (count($output_array) === 1) {
         return $output_array;
     }
-    if (mb_substr_count($output_array[0], '_') % 2 == 1) {
+    if (mb_substr_count($output_array[0], '_') % 2 === 1) {
         $output_array[0] .= '_';
         $open_cursive = true;
     }
@@ -31,7 +31,7 @@ function output_split_cursive($arg)
         if ($open_cursive) {
             $current_part = '_' . $current_part;
         }
-        $open_cursive ^= mb_substr_count($current_part, '_') % 2 == 1;
+        $open_cursive ^= mb_substr_count($current_part, '_') % 2 === 1;
         if ($open_cursive) {
             $current_part .= '_';
         }

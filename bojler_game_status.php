@@ -202,7 +202,7 @@ class GameStatus
     private function getLongestWords()
     {
         $length = max(array_map(fn ($item) => mb_strlen(remove_special_char($item)), $this->solutions->toArray()));
-        $this->longest_solutions = $this->solutions->filter(fn ($item) => mb_strlen(remove_special_char($item)) == $length);
+        $this->longest_solutions = $this->solutions->filter(fn ($item) => mb_strlen(remove_special_char($item)) === $length);
         echo 'Longest solution: ' . $length . ' letters';
         #var_dump($this->longest_solutions);
     }
@@ -248,7 +248,7 @@ class GameStatus
     {
         # Pre-processing word for validity check
         $word = mb_ereg_replace("/[.'-]/", '', $word);
-        if ($this->current_lang == "German")
+        if ($this->current_lang === "German")
             $word = $this->germanLetters($word);
         $word = mb_strtolower($word);
 
@@ -382,7 +382,7 @@ class GameStatus
     public function checkNewestGame()
     {
         # answer to: should we load the newest game instead of creating a new one?
-        if ($this->game_number == $this->max_saved_game) {
+        if ($this->game_number === $this->max_saved_game) {
             return false;
         }
         $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
@@ -500,7 +500,7 @@ class GameStatus
             $this->amount_approved_words++;
         }
         $this->saveGame();
-        return $starter_amount < $this->end_amount && $this->amount_approved_words == $this->end_amount;
+        return $starter_amount < $this->end_amount && $this->amount_approved_words === $this->end_amount;
     }
 
     public function tryAddCommunity($word, $refdict)
@@ -592,15 +592,15 @@ class GameStatus
             foreach ($highscore[$highscore_list[$i]] as $player) {
                 $info = $this->player_handler->player_dict[$player];
                 # Best Beginner
-                if ($info["role"] == "Beginner") {
+                if ($info["role"] === "Beginner") {
                     array_push($awards["Best beginner"], $player);
                 }
                 # Newcomer
-                if (count($info["found_words"]) == $info["all_time_found"]) {
+                if (count($info["found_words"]) === $info["all_time_found"]) {
                     array_push($awards["Newcomer"], $player);
                 }
                 $amount = max(1, count(new Set(array_merge($info["found_words"], $info["used_hints"]))));
-                if (count(new Set(array_intersect($info["found_words"], $info["used_hints"]))) == $amount) {
+                if (count(new Set(array_intersect($info["found_words"], $info["used_hints"]))) === $amount) {
                     array_push($awards["Most solved hints"], $player);
                 }
             }

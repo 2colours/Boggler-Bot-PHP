@@ -79,7 +79,7 @@ class Counter
     public function trigger()
     {
         $this->current_value++;
-        if ($this->current_value == $this->threshold) {
+        if ($this->current_value === $this->threshold) {
             $this->current_value = 0;
             return true;
         }
@@ -115,12 +115,12 @@ function translator_command($src_lang = null, $target_lang = null)
 function achievements(Message $ctx, $word, $type)
 {
     $reactions = [];
-    if ($type == 's' && (GAME_STATUS->longest_solutions->contains($word))) {
+    if ($type === 's' && (GAME_STATUS->longest_solutions->contains($word))) {
         $reactions = ["🇳", "🇮", "🇨", "🇪"];
-    } elseif ($type == "add" && $ctx->author->id === '185430750667997184') { # TODO another grotesque hack here
+    } elseif ($type === "add" && $ctx->author->id === '185430750667997184') { # TODO another grotesque hack here
         # TODO sort this out
         /*GAME_STATUS->rev_counter++;
-        if (GAME_STATUS->rev_counter % 20 == 0)
+        if (GAME_STATUS->rev_counter % 20 === 0)
             $ctx->channel->sendMessage('https://tenor.com/view/nick-wilde-zootopia-fox-disney-smug-gif-5225055');*/
     }
     return $reactions;
@@ -144,7 +144,7 @@ function s_reactions(Message $ctx, $word)
 #Checks if the current message is in the tracked channel
 function channel_valid(Message $ctx)
 {
-    return $ctx->guild?->id == HOME_SERVER && $ctx->channel?->id == HOME_CHANNEL;
+    return $ctx->guild?->id === HOME_SERVER && $ctx->channel?->id === HOME_CHANNEL;
 }
 
 #Checks if dice are thrown, thrown_the_dice exists just for this

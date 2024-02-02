@@ -9,7 +9,7 @@ function hungarian_role(Member $member)
     $roles = $member->roles;
     foreach ($roles as $item)
         foreach ($hungarian_roles as $hu_role)
-            if ($item->name == $hu_role)
+            if ($item->name === $hu_role)
                 return $hu_role;
     return '';
 }
