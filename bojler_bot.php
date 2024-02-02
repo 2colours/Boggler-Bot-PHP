@@ -119,7 +119,7 @@ function achievements(Message $ctx, $word, $type)
     if ($type == 's' && (GAME_STATUS->longest_solutions->contains($word))) {
         $reactions = ["🇳", "🇮", "🇨", "🇪"];
     } elseif ($type == "add" && $ctx->author->id === '185430750667997184') { # TODO another grotesque hack here
-        # TODO sort this out once GAME_STATUS is ready
+        # TODO sort this out
         /*GAME_STATUS->rev_counter++;
         if (GAME_STATUS->rev_counter % 20 == 0)
             $ctx->channel->sendMessage('https://tenor.com/view/nick-wilde-zootopia-fox-disney-smug-gif-5225055');*/
@@ -217,8 +217,7 @@ function decorate_handler(array $decorators, $handler)
 }
 
 # TODO it's dubious whether these are actually constants; gotta think about it
-# TODO constructor not ported yet
-#define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
+define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
 # define('easter_egg_handler', new EasterEggHandler(GAME_STATUS->found_words_set));
 define('COUNTER', new Counter(10));
 
@@ -233,15 +232,14 @@ $bot = new DiscordCommandClient([
     ]
 ]);
 
-# TODO instructions(GAME_STATUS->current_lang)
 # TODO more consistency about how the functions send the message? (not super important if we move to slash commands)
-$bot->registerCommand('info', fn () => instructions('Hungarian'), ['description' => 'show instructions']);
+$bot->registerCommand('info', fn () => instructions(GAME_STATUS->current_lang), ['description' => 'show instructions']);
 $bot->registerCommand('teh', translator_command('English', 'Hungarian'), ['description' => 'translate given word Eng-Hun']);
 $bot->registerCommand('thg', translator_command('Hungarian', 'German'), ['description' => 'translate given word Hun-Ger']);
 $bot->registerCommand('tgh', translator_command('German', 'Hungarian'), ['description' => 'translate given word Ger-Hun']);
 $bot->registerCommand('thh', translator_command('Hungarian', 'Hungarian'), ['description' => 'translate given word Hun-Hun']);
 $bot->registerCommand('t', function (Message $ctx, $args) {
-    $translator_args = channel_valid($ctx) ? [/*GAME_STATUS->current_lang, GAME_STATUS->base_lang*/] : []; # TODO uncomment when GameStatus is ready to construct
+    $translator_args = channel_valid($ctx) ? [GAME_STATUS->current_lang, GAME_STATUS->base_lang] : [];
     translator_command(...$translator_args)($ctx, $args);
 }, ['description' => 'translate given word']);
 $bot->registerCommand('stats', function (Message $ctx) {
