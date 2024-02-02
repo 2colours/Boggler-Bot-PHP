@@ -85,7 +85,7 @@ class DatabaseHandler
     private function tableSetup()
     {
         foreach (self::TABLES as $name => $entry_class) {
-            $typed_columns = []; # TODO is this require_onced?
+            $typed_columns = [];
             for ($i = 0; $i < min(count($entry_class::TABLE_TYPES), count($entry_class::TABLE_COLUMNS)); $i++) {
                 $typed_columns[] = $entry_class::TABLE_COLUMNS[$i] . ' ' . $entry_class::TABLE_TYPES[$i];
             }
@@ -110,8 +110,9 @@ class DatabaseHandler
             $column_placeholders = implode(', ', array_map(fn () => '?', $current_row));
             $statement = $this->db->prepare("INSERT INTO $table_name ($column_names) VALUES ($column_placeholders)");
             $column_types = $current_table_class::TABLE_TYPES;
-            foreach ($current_row as $i => $value)
+            foreach ($current_row as $i => $value) {
                 $statement->bindValue($i + 1, $value, constant("SQLITE3_{$column_types[$i]}"));
+            }
             $statement->execute();
         }
     }
@@ -154,8 +155,9 @@ class DatabaseHandler
         $this->tableSetup();
         foreach ($this->dictionaries as $dictstring => $dictcode) {
             $dtype = DictionaryType::fromDictstring($dictstring);
-            if (!$this->importSucceeded($dtype))
+            if (!$this->importSucceeded($dtype)) {
                 $this->importData('dictionary', "param/dict_import{$dictcode}.txt");
+            }
         }
     }
 }
