@@ -16,12 +16,15 @@ function hungarian_role(Member $member)
 
 function name_shortened($name)
 {
-    if (mb_strlen($name) >= 15)
-        $name = mb_substr($name, 0, mb_strpos($name, '|'));
-    if (mb_strlen($name) >= 15)
-        $name = mb_substr($name, 0, mb_strpos($name, ' '));
-    if (mb_strlen($name) >= 15)
-        $name = mb_substr($name, 0, 15);
+    if (grapheme_strlen($name) >= 15) {
+        $name = grapheme_substr($name, 0, grapheme_strpos($name, '|'));
+    }
+    if (grapheme_strlen($name) >= 15) {
+        $name = grapheme_substr($name, 0, grapheme_strpos($name, ' '));
+    }
+    if (grapheme_strlen($name) >= 15) {
+        $name = grapheme_substr($name, 0, 15);
+    }
     return $name;
 }
 

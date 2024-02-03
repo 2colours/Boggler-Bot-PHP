@@ -149,7 +149,7 @@ class GameStatus
         $f = fopen($this->file, 'r'); # TODO cleaner resource management (try-finally at the very least instead of goto)
         $first_line = fgets($f);
         # Current check: 16 letter + 15 spaces + 1 line break = 32
-        if (mb_strlen($first_line) != 32) {
+        if (grapheme_strlen($first_line) != 32) {
             echo 'Wrong amount of letters saved in current_game.';
             goto cleanup;
         }
@@ -201,8 +201,8 @@ class GameStatus
     // TODO(vxern): Performance? Why perform the same operation of removing special characters and getting the length twice?
     private function getLongestWords()
     {
-        $length = max(array_map(fn ($item) => mb_strlen(remove_special_char($item)), $this->solutions->toArray()));
-        $this->longest_solutions = $this->solutions->filter(fn ($item) => mb_strlen(remove_special_char($item)) === $length);
+        $length = max(array_map(fn ($item) => grapheme_strlen(remove_special_char($item)), $this->solutions->toArray()));
+        $this->longest_solutions = $this->solutions->filter(fn ($item) => grapheme_strlen(remove_special_char($item)) === $length);
         echo 'Longest solution: ' . $length . ' letters';
         #var_dump($this->longest_solutions);
     }
@@ -388,7 +388,7 @@ class GameStatus
         $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
         $last_found_words = explode(' ', $lines[array_key_last($lines)]);
         $language_in_parens = explode(' ', $lines[count($lines) - 3])[1];
-        $language = mb_substr($language_in_parens, 1, mb_strlen($language_in_parens) - 1);
+        $language = grapheme_substr($language_in_parens, 1, grapheme_strlen($language_in_parens) - 1);
         echo $language;
         if ($language != $this->current_lang) {
             return false;

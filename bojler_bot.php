@@ -178,7 +178,7 @@ function enough_found()
 
 function try_send_msg(Message $ctx, $content)
 {
-    $can_be_sent = mb_strlen($content) <= 2000; # TODO this magic constant should be moved from here and other places as well
+    $can_be_sent = grapheme_strlen($content) <= 2000; # TODO this magic constant should be moved from here and other places as well
     if ($can_be_sent)
         await($ctx->channel->sendMessage($content));
     return $can_be_sent;
@@ -435,7 +435,7 @@ function found_words_output()
 function acknowledgement_reaction($word)
 {
     $word = remove_special_char($word);
-    $word_length = mb_strlen($word);
+    $word_length = grapheme_strlen($word);
     if ($word_length >= 10) {
         return "💯";
     } else if ($word_length === 9) {
