@@ -396,7 +396,7 @@ function current_emoji_version()
     } else {
         $current_list = PROGRESS_BAR_VERSION_DICT["default"];
     }
-    return $current_list[gmp_intval(gmp_mod($hash, count($current_list)))];
+    return $current_list[gmp_intval(gmp_mod(gmp_init($hash, 16), count($current_list)))];
 }
 
 function progress_bar($emoji_scale = null)
