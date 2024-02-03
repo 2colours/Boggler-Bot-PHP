@@ -604,7 +604,7 @@ class GameStatus
                 $info = $this->player_handler->player_dict[$player];
                 # Best Beginner
                 if ($info["role"] === "Beginner") {
-                    array_push($awards["Best beginner"], $player);
+                    array_push($awards["Best Beginner"], $player);
                 }
                 # Newcomer
                 if (count($info["found_words"]) === $info["all_time_found"]) {
