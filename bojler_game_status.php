@@ -147,7 +147,7 @@ class GameStatus
     public function fileValid()
     {
         try {
-            $file = fopen($this->file, 'r'); # TODO cleaner resource management (try-finally at the very least instead of goto)
+            $file = fopen($this->file, 'r');
             $first_line = fgets($file);
             # Current check: 16 letter + 15 spaces + 1 line break = 32
             if (grapheme_strlen($first_line) !== 32) {
