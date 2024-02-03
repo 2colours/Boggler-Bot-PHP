@@ -194,12 +194,6 @@ function simple_board(Message $ctx)
     $ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL)); # TODO is this really binary-safe?
 }
 
-# TODO actually implement it
-function found_words_output()
-{
-}
-
-
 # "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
 # TODO does one have to manually lift await or is it auto-detected in called functions?
 function needs_counting($handler)
@@ -304,108 +298,154 @@ function next_language(Message $ctx, $args)
 # Blocks the code - has to be at the bottom
 $bot->run();
 
-# Discord agnostic bits
-/*
-def highscore_names(ids):
-    if not ids:
-        return " - "
-    names = []
-    for item in ids:
-        if PlayerHandler.player_dict[item]["server_name"]:
-            names.append(PlayerHandler.player_dict[item]["server_name"]) # + " (" + str(len(PlayerHandler.player_dict[item]["found_words"])) + ")")
-        else:
-            names.append(PlayerHandler.player_dict[item]["name"])
-    return ", ".join(names)
+function highscore_names($ids)
+{
+    if (count($ids) === 0) {
+        return " - ";
+    }
+    $names = [];
+    $handler = PlayerHandler::getInstance();
+    foreach ($ids as $id) {
+        if (array_key_exists("server_name", $handler->player_dict[$id])) {
+            array_push($handler->player_dict[$id]["server_name"], $names);
+        } else {
+            array_push($handler->player_dict[$id]["name"], $names);
+        }
+    }
+    return implode(", ", $names);
+}
 
-def game_highscore():
-    awards = game_status.game_awards()
-    message = ''
-    message += "⬛⬛⬛" + on_podium(awards["First place"]) + "⬛⬛⬛" + "⬛***HIGHSCORE***" + "\n"
-    message += on_podium(awards["Second place"]) + "🟨🟨🟨" + "⬛⬛⬛" + "⬛**1.** " + highscore_names(awards["First place"]) + "\n"
-    message += "🟨🟨🟨" + "🟨🟨🟨" + on_podium(awards["Third place"]) + "⬛**2.** " + highscore_names(awards["Second place"]) + "\n"
-    message += "🟨🟨🟨" + "🟨🟨🟨" + "🟨🟨🟨" + "⬛**3.** " + highscore_names(awards["Third place"]) + "\n"
-    message += "\n"
-    message += "*Most Solved Hints:* " + "\t" + highscore_names(awards["Most solved hints"]) + "\n"
-    message += "*Hard-Working Beginner:* " + "\t" + highscore_names(awards["Best Beginner"]) + "\n"
-    if awards["Newcomer"]:
-        message += "*Newcomer of the day:* " + highscore_names(awards["Newcomer"])
-    return message
+function game_highscore()
+{
+    $awards = GAME_STATUS->gameAwards();
+    $message = '';
+    $message .= "⬛⬛⬛" . on_podium($awards["First place"]) . "⬛⬛⬛" . "⬛***HIGHSCORE***" . "\n";
+    $message .= on_podium($awards["Second place"]) . "🟨🟨🟨" . "⬛⬛⬛" . "⬛**1.** " . highscore_names($awards["First place"]) . "\n";
+    $message .= "🟨🟨🟨" . "🟨🟨🟨" . on_podium($awards["Third place"]) . "⬛**2.** " . highscore_names($awards["Second place"]) . "\n";
+    $message .= "🟨🟨🟨" . "🟨🟨🟨" . "🟨🟨🟨" . "⬛**3.** " . highscore_names($awards["Third place"]) . "\n";
+    $message .= "\n";
+    $message .= "*Most Solved Hints:* " . "\t" . highscore_names($awards["Most solved hints"]) . "\n";
+    $message .= "*Hard-Working Beginner:* " . "\t" . highscore_names($awards["Best Beginner"]) . "\n";
+    if (array_key_exists("Newcomer", $awards) && !empty($awards["Newcomer"])) {
+        $message .= "*Newcomer of the day:* " . highscore_names($awards["Newcomer"]);
+    }
+    return $message;
+}
 
-def on_podium(people):
-    if len(people)==1:
-        return "⬛" + PlayerHandler.player_dict[people[0]]["personal_emoji"] + "⬛"
-    if len(people)==2:
-        return PlayerHandler.player_dict[people[0]]["personal_emoji"] + "⬛" + PlayerHandler.player_dict[people[1]]["personal_emoji"]
-    if len(people)==3:
-        return PlayerHandler.player_dict[people[0]]["personal_emoji"] + PlayerHandler.player_dict[people[1]]["personal_emoji"] + PlayerHandler.player_dict[people[2]]["personal_emoji"]
-    if len(people)==4:
-        return "🧍" + "🧑‍🤝‍🧑" + "🧍"
-    if len(people)==5:
-        return "🧑‍🤝‍🧑🧍🧑‍🤝‍🧑"
-    if len(people)>= 6:
-        return "🧑‍🤝‍🧑🧑‍🤝‍🧑🧑‍🤝‍🧑"
-    return "⬛⬛⬛"
+function on_podium($people)
+{
+    switch (count($people)) {
+        case 0:
+            return "⬛⬛⬛";
+        case 1:
+            $handler = PlayerHandler::getInstance();
+            return "⬛" . $handler->player_dict[$people[0]]["personal_emoji"] . "⬛";
+        case 2:
+            $handler = PlayerHandler::getInstance();
+            return $handler->player_dict[$people[0]]["personal_emoji"] . "⬛" . $handler->player_dict[$people[1]]["personal_emoji"];
+        case 3:
+            $handler = PlayerHandler::getInstance();
+            return $handler->player_dict[$people[0]]["personal_emoji"] . $handler->player_dict[$people[1]]["personal_emoji"] . $handler->player_dict[$people[2]]["personal_emoji"];
+        case 4:
+            return "🧍🧑‍🤝‍🧑🧍";
+        case 5:
+            return "🧑‍🤝‍🧑🧍🧑‍🤝‍🧑";
+        default:
+            return "🧑‍🤝‍🧑🧑‍🤝‍🧑🧑‍🤝‍🧑";
+    }
+}
 
-def approval_reaction(word):
-    if word in custom_emojis[game_status.current_lang]:
-        custom_reaction_list = custom_emojis[game_status.current_lang][word]
-        return custom_reaction_list[rnd.randint(0,len(custom_reaction_list))]
-    approval_status = game_status.approval_status(word)
-    if approval_status["any"]:
-        if approval_status[game_status.base_lang]:
-            return '☑️'
-        if approval_status["wordlist"]:
-            return '✅'
-        for item in available_languages:
-            if approval_status[item]:
-                return '✅'
-        if approval_status["community"]:
-            return '✔'
-    else:
-        return '❔'
+function approval_reaction($word)
+{
+    if (array_key_exists($word, CUSTOM_EMOJIS[GAME_STATUS->current_lang])) {
+        $custom_reaction_list = CUSTOM_EMOJIS[GAME_STATUS->current_lang][$word];
+        return $custom_reaction_list[array_rand($custom_reaction_list)];
+    }
+    $approval_status = GAME_STATUS->approvalStatus($word);
+    if (array_key_exists("any", $approval_status) && !empty($approval_status["any"])) {
+        if (array_key_exists(GAME_STATUS->base_lang, $approval_status) && $approval_status[GAME_STATUS->base_lang]) {
+            return "☑️";
+        }
+        if (array_key_exists("word_list", $approval_status) && $approval_status["word_list"]) {
+            return "✅";
+        }
+        foreach (AVAILABLE_LANGUAGES as $language) {
+            if (array_key_exists($language, $approval_status) && $approval_status[$language]) {
+                return "✅";
+            }
+        }
+        if (array_key_exists("community", $approval_status) && $approval_status["community"]) {
+            return "✔";
+        }
+    }
+
+    return "❔";
+}
 
 # emojis are retrieved in a deterministic way: (current date, sorted letters, emoji list) determine the value
 # special dates have a unique emoji list to be used
 # in general, the letters are hashed modulo the length of the emoji list, to obtain the index in the emoji list
-def current_emoji_version():
-    hash=int(md5(bytes(' '.join(sorted(game_status.letters.list, key=game_status._collator().getSortKey)), ' utf-8')).hexdigest(), base=16)
-    if date.today().strftime("%m%d") in progress_bar_version_dict:
-        current_list=progress_bar_version_dict[date.today().strftime("%m%d")]
-    else:
-        current_list=progress_bar_version_dict["default"]
-    return current_list[hash % len(current_list)]
+function current_emoji_version()
+{
+    $letter_list = GAME_STATUS->letters->list;
+    GAME_STATUS->collator()->sort($letter_list);
+    $hash = md5(implode(' ', $letter_list));
+    $date = date("md");
+    if (array_key_exists($date, PROGRESS_BAR_VERSION_DICT)) {
+        $current_list = PROGRESS_BAR_VERSION_DICT[$date];
+    } else {
+        $current_list = PROGRESS_BAR_VERSION_DICT["default"];
+    }
+    return $current_list[$hash % count($current_list)];
+}
 
-def progress_bar(emoji_scale = None):
-    if not emoji_scale:
-        emoji_scale = current_emoji_version()[1]
-    if len(emoji_scale)<2:
-        print("Error in config. Not enough symbols for progress bar.")
-        return ''
-    progress_bar_length = math.ceil(game_status.end_amount/10)
-    if game_status.amount_approved_words >= game_status.end_amount:
-        return progress_bar_length*emoji_scale[-1]
-    full_emoji_number = game_status.amount_approved_words //10
-    progressbar = full_emoji_number*emoji_scale[-1]
-    rest = game_status.end_amount - full_emoji_number*10
-    current_step_size = rest if rest < 10 else 10
-    progress_in_current_step = (game_status.amount_approved_words % 10)/current_step_size
-    progressbar += emoji_scale[math.floor(progress_in_current_step*(len(emoji_scale)-1))]
-    empty_emoji_number = progress_bar_length - full_emoji_number - 1
-    progressbar += empty_emoji_number*emoji_scale[0]
-    return progressbar
+function progress_bar($emoji_scale = null)
+{
+    if (!isset($emoji_scale)) {
+        $emoji_scale = current_emoji_version()[1];
+    }
+    if (count($emoji_scale) < 2) {
+        echo "Error in config. Not enough symbols for progress bar.";
+        return '';
+    }
+    $progress_bar_length = ceil(GAME_STATUS->end_amount / 10);
+    if (GAME_STATUS->amount_approved_words >= GAME_STATUS->end_amount) {
+        return $progress_bar_length * $emoji_scale[array_key_last($emoji_scale)];
+    }
+    $full_emoji_number = floor(GAME_STATUS->amount_approved_words / 10);
+    $progress_bar = $full_emoji_number * $emoji_scale[array_key_last($emoji_scale)];
+    $rest = GAME_STATUS->end_amount - $full_emoji_number * 10;
+    $current_step_size = $rest < 10 ? $rest : 10;
+    $progress_in_current_step = floor((GAME_STATUS->amount_approved_word % 10) / $current_step_size);
+    $empty_emoji_number = $progress_bar_length - $full_emoji_number - 1;
+    $progress_bar .= $emoji_scale[floor($progress_in_current_step * (count($emoji_scale) - 1))];
+    $progress_bar .= $empty_emoji_number * $emoji_scale[0];
+    return $progress_bar;
+}
 
-def found_words_output():
-    fw_list = game_status.found_words_sorted()
-    if not fw_list:
-        return "No words found yet 😭"
-    return "_" + ', '.join(fw_list) +  " (" + str(len(fw_list)) + ")_\n" + progress_bar() + " (" + str(game_status.amount_approved_words) + "/" + str(int(game_status.end_amount)) + ")"
+function found_words_output()
+{
+    $found_word_list = GAME_STATUS->foundWordsSorted();
+    if (empty($found_word_list)) {
+        return "No words found yet 😭";
+    }
+    return "_" . implode(", ", $found_word_list) .  " (" . count($found_word_list) . ")_\n" . progress_bar() . " (" . GAME_STATUS->amount_approved_words . "/" . GAME_STATUS->end_amount . ")";
+}
 
-def acknowledgement_reaction(word):
-    word=remove_special_char(word)
-    return '💯' if len(word)> 9 else '🤯' if len(word) > 8 else '🎉' if len(word) > 5 else '👍'
-
-*/
-
+function acknowledgement_reaction($word)
+{
+    $word = remove_special_char($word);
+    $word_length = mb_strlen($word);
+    if ($word_length >= 10) {
+        return "💯";
+    } else if ($word_length == 9) {
+        return "🤯";
+    } else if ($word_length > 5) {
+        return "🎉";
+    } else {
+        return "👍";
+    }
+}
 
 /*import math
 from numpy import random as rnd
