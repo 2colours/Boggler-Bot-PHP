@@ -123,11 +123,6 @@ function achievements(Message $ctx, $word, $type)
     $reactions = [];
     if ($type === 's' && (GAME_STATUS->longest_solutions->contains($word))) {
         $reactions = ["🇳", "🇮", "🇨", "🇪"];
-    } elseif ($type === "add" && $ctx->author->id === '185430750667997184') { # TODO another grotesque hack here
-        # TODO sort this out
-        /*GAME_STATUS->rev_counter++;
-        if (GAME_STATUS->rev_counter % 20 === 0)
-            $ctx->channel->sendMessage('https://tenor.com/view/nick-wilde-zootopia-fox-disney-smug-gif-5225055');*/
     }
     return $reactions;
 }
