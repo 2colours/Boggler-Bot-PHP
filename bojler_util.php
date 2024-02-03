@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 function remove_special_char($word)
 {
     return str_replace(['.', '-'], '', $word);

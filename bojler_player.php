@@ -1,5 +1,8 @@
 <?php
 
+declare(strict_types=1);
+
+
 use Discord\Parts\Channel\Message;
 use Discord\Parts\User\Member;
 
