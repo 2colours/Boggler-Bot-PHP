@@ -191,7 +191,8 @@ function try_send_msg(Message $ctx, $content)
 # sends the small game board with the found words if they fit into one message
 function simple_board(Message $ctx)
 {
-    $message = '**Already found words:** ' . found_words_output();
+    $found_words_display = found_words_output();
+    $message = "**Already found words:** $found_words_display";
     if (!(try_send_msg($ctx, $message))) {
         $ctx->channel->sendMessage('_Too many found words. Please use b!see._');
     }
@@ -323,16 +324,29 @@ function highscore_names($ids)
 function game_highscore()
 {
     $awards = GAME_STATUS->gameAwards();
+    [$on_podium_first, $on_podium_second, $on_podium_third] = [
+        on_podium($awards["First place"]),
+        on_podium($awards["Second place"]),
+        on_podium($awards["Third place"]),
+    ];
+    [$highscore_names_first, $highscore_names_second, $highscore_names_third] = [
+        highscore_names($awards["First place"]),
+        highscore_names($awards["Second place"]),
+        highscore_names($awards["Third place"]),
+    ];
+    $most_solved_hints = highscore_names($awards["Most solved hints"]);
+    $best_beginner = highscore_names($awards["Best Beginner"]);
     $message = '';
-    $message .= "⬛⬛⬛" . on_podium($awards["First place"]) . "⬛⬛⬛" . "⬛***HIGHSCORE***" . "\n";
-    $message .= on_podium($awards["Second place"]) . "🟨🟨🟨" . "⬛⬛⬛" . "⬛**1.** " . highscore_names($awards["First place"]) . "\n";
-    $message .= "🟨🟨🟨" . "🟨🟨🟨" . on_podium($awards["Third place"]) . "⬛**2.** " . highscore_names($awards["Second place"]) . "\n";
-    $message .= "🟨🟨🟨" . "🟨🟨🟨" . "🟨🟨🟨" . "⬛**3.** " . highscore_names($awards["Third place"]) . "\n";
+    $message .= "⬛⬛⬛{$on_podium_first}⬛⬛⬛⬛***HIGHSCORE***\n";
+    $message .= "{$on_podium_second}🟨🟨🟨⬛⬛⬛⬛**1.** $highscore_names_first\n";
+    $message .= "🟨🟨🟨🟨🟨🟨{$on_podium_third}⬛**2.** $highscore_names_second\n";
+    $message .= "🟨🟨🟨🟨🟨🟨🟨🟨🟨⬛**3.** $highscore_names_third\n";
     $message .= "\n";
-    $message .= "*Most Solved Hints:* " . "\t" . highscore_names($awards["Most solved hints"]) . "\n";
-    $message .= "*Hard-Working Beginner:* " . "\t" . highscore_names($awards["Best Beginner"]) . "\n";
+    $message .= "*Most Solved Hints:* \t$most_solved_hints\n";
+    $message .= "*Hard-Working Beginner:* \t$best_beginner\n";
     if (array_key_exists("Newcomer", $awards) && count($awards["Newcomer"]) !== 0) {
-        $message .= "*Newcomer of the day:* " . highscore_names($awards["Newcomer"]);
+        $newcomer_highscore_names = highscore_names($awards["Newcomer"]);
+        $message .= "*Newcomer of the day:* $newcomer_highscore_names";
     }
     return $message;
 }
@@ -344,13 +358,23 @@ function on_podium($people)
             return "⬛⬛⬛";
         case 1:
             $handler = PlayerHandler::getInstance();
-            return "⬛" . $handler->player_dict[$people[0]]["personal_emoji"] . "⬛";
+            $personal_emoji = $handler->player_dict[$people[0]]["personal_emoji"];
+            return "⬛{$personal_emoji}⬛";
         case 2:
             $handler = PlayerHandler::getInstance();
-            return $handler->player_dict[$people[0]]["personal_emoji"] . "⬛" . $handler->player_dict[$people[1]]["personal_emoji"];
+            [$personal_emoji_first, $personal_emoji_second] = [
+                $handler->player_dict[$people[0]]["personal_emoji"],
+                $handler->player_dict[$people[1]]["personal_emoji"],
+            ];
+            return "{$personal_emoji_first}⬛{$personal_emoji_second}";
         case 3:
             $handler = PlayerHandler::getInstance();
-            return $handler->player_dict[$people[0]]["personal_emoji"] . $handler->player_dict[$people[1]]["personal_emoji"] . $handler->player_dict[$people[2]]["personal_emoji"];
+            [$personal_emoji_first, $personal_emoji_second, $personal_emoji_third] = [
+                $handler->player_dict[$people[0]]["personal_emoji"],
+                $handler->player_dict[$people[1]]["personal_emoji"],
+                $handler->player_dict[$people[2]]["personal_emoji"],
+            ];
+            return "$personal_emoji_first$personal_emoji_second$personal_emoji_third";
         case 4:
             return "🧍🧑‍🤝‍🧑🧍";
         case 5:
@@ -434,7 +458,10 @@ function found_words_output()
     if (count($found_word_list) === 0) {
         return "No words found yet 😭";
     }
-    return "_" . implode(", ", $found_word_list) .  " (" . count($found_word_list) . ")_\n" . progress_bar() . " (" . GAME_STATUS->amount_approved_words . "/" . GAME_STATUS->end_amount . ")";
+    [$found_word_list_formatted, $found_word_list_length] = [implode(", ", $found_word_list), count($found_word_list)];
+    $progress_bar = progress_bar();
+    [$amount_approved_words, $end_amount] = [GAME_STATUS->amount_approved_words, GAME_STATUS->end_amount];
+    return "_$found_word_list_formatted ($found_word_list_length)_\n$progress_bar ($amount_approved_words/$end_amount)";
 }
 
 function acknowledgement_reaction($word)

@@ -24,7 +24,7 @@ function output_split_cursive($arg)
         return $output_array;
     }
     if (mb_substr_count($output_array[0], '_') % 2 === 1) {
-        $output_array[0] .= '_';
+        $output_array[0] = $output_array[0] . '_';
         $open_cursive = true;
     }
     foreach (array_slice($output_array, 1, count($output_array) - 2) as &$current_part) {
@@ -33,7 +33,7 @@ function output_split_cursive($arg)
         }
         $open_cursive ^= mb_substr_count($current_part, '_') % 2 === 1;
         if ($open_cursive) {
-            $current_part .= '_';
+            $current_part = $current_part . '_';
         }
     }
     if ($open_cursive) {

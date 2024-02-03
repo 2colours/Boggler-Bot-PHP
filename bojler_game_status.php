@@ -206,7 +206,7 @@ class GameStatus
     {
         $length = max(array_map(fn ($item) => grapheme_strlen(remove_special_char($item)), $this->solutions->toArray()));
         $this->longest_solutions = $this->solutions->filter(fn ($item) => grapheme_strlen(remove_special_char($item)) === $length);
-        echo 'Longest solution: ' . $length . ' letters';
+        echo "Longest solution: $length letters";
         #var_dump($this->longest_solutions);
     }
 

@@ -2,6 +2,8 @@
 
 include __DIR__ . '/vendor/autoload.php';
 
+declare(strict_types=1);
+
 use Discord\Discord;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Intents;

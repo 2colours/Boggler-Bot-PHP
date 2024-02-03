@@ -1,7 +1,7 @@
 <?php
+
 require_once __DIR__ . '/bojler_config.php'; # TODO ConfigHandler with PSR-4 autoloader
 require_once __DIR__ . '/bojler_util.php'; # TODO fetch_all with PSR-4 autoloader
-
 
 class DictionaryType
 {
@@ -88,7 +88,7 @@ class DatabaseHandler
         foreach (self::TABLES as $name => $entry_class) {
             $typed_columns = [];
             for ($i = 0; $i < min(count($entry_class::TABLE_TYPES), count($entry_class::TABLE_COLUMNS)); $i++) {
-                $typed_columns[] = $entry_class::TABLE_COLUMNS[$i] . ' ' . $entry_class::TABLE_TYPES[$i];
+                $typed_columns[] = "{$entry_class::TABLE_COLUMNS[$i]} {$entry_class::TABLE_TYPES[$i]}";
             }
             $column_string = implode(', ', $typed_columns);
             $query = "CREATE TABLE IF NOT EXISTS $name ($column_string)";
