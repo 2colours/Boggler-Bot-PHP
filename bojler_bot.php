@@ -438,7 +438,7 @@ function acknowledgement_reaction($word)
     $word_length = mb_strlen($word);
     if ($word_length >= 10) {
         return "💯";
-    } else if ($word_length == 9) {
+    } else if ($word_length === 9) {
         return "🤯";
     } else if ($word_length > 5) {
         return "🎉";
