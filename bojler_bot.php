@@ -326,7 +326,7 @@ function game_highscore()
     $message .= "\n";
     $message .= "*Most Solved Hints:* " . "\t" . highscore_names($awards["Most solved hints"]) . "\n";
     $message .= "*Hard-Working Beginner:* " . "\t" . highscore_names($awards["Best Beginner"]) . "\n";
-    if (array_key_exists("Newcomer", $awards) && !empty($awards["Newcomer"])) {
+    if (array_key_exists("Newcomer", $awards) && count($awards["Newcomer"]) !== 0) {
         $message .= "*Newcomer of the day:* " . highscore_names($awards["Newcomer"]);
     }
     return $message;
@@ -362,7 +362,7 @@ function approval_reaction($word)
         return $custom_reaction_list[array_rand($custom_reaction_list)];
     }
     $approval_status = GAME_STATUS->approvalStatus($word);
-    if (array_key_exists("any", $approval_status) && !empty($approval_status["any"])) {
+    if (array_key_exists("any", $approval_status) && count($approval_status["any"]) !== 0) {
         if (array_key_exists(GAME_STATUS->base_lang, $approval_status) && $approval_status[GAME_STATUS->base_lang]) {
             return "☑️";
         }
@@ -426,7 +426,7 @@ function progress_bar($emoji_scale = null)
 function found_words_output()
 {
     $found_word_list = GAME_STATUS->foundWordsSorted();
-    if (empty($found_word_list)) {
+    if (count($found_word_list) === 0) {
         return "No words found yet 😭";
     }
     return "_" . implode(", ", $found_word_list) .  " (" . count($found_word_list) . ")_\n" . progress_bar() . " (" . GAME_STATUS->amount_approved_words . "/" . GAME_STATUS->end_amount . ")";

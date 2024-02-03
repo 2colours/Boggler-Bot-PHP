@@ -360,7 +360,7 @@ class GameStatus
         if ($this->letters->isAbnormal()) {
             echo "Game might be damaged.";
         }
-        $this->found_words = new Set(!empty($words) ? explode(' ', $words) : []);
+        $this->found_words = new Set(count($words) !== 0 ? explode(' ', $words) : []);
         # set language and game number
         $language_list = explode(' ', $languages);
         $read_number = $language_list;
