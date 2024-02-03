@@ -143,32 +143,35 @@ class GameStatus
         $this->loadGame();
     }
 
-    // TODO(vxern): Clean up
+    # Does the minimum check if the current_game file is right: should be 3 lines and the first 32 characters
     public function fileValid()
     {
-        #return true;
-        $result = false;
-        # Does the minimum check if the current_game file is right: should be 3 lines and the first 32 characters
-        $f = fopen($this->file, 'r'); # TODO cleaner resource management (try-finally at the very least instead of goto)
-        $first_line = fgets($f);
-        # Current check: 16 letter + 15 spaces + 1 line break = 32
-        if (grapheme_strlen($first_line) != 32) {
-            echo 'Wrong amount of letters saved in current_game.';
-            goto cleanup;
+        try {
+            $file = fopen($this->file, 'r'); # TODO cleaner resource management (try-finally at the very least instead of goto)
+            $first_line = fgets($file);
+            # Current check: 16 letter + 15 spaces + 1 line break = 32
+            if (grapheme_strlen($first_line) !== 32) {
+                throw new Exception('Wrong amount of letters saved in current_game.');
+            }
+            # Checks if the right amount of letters is saved
+            if (count(explode(' ', $first_line)) != 16) {
+                throw new Exception('File might be damaged.');
+            }
+            for ($i = 0; $i < 2; $i++) {
+                if (fgets($file) === false) {
+                    throw new Exception('File is too short.');
+                }
+            }
+        } catch (Exception $exception) {
+            echo $exception;
+            return false;
+        } finally {
+            if (isset($file)) {
+                fclose($file);
+            }
         }
-        # Checks if the right amount of letters is saved
-        if (count(explode(' ', $first_line)) != 16) {
-            echo 'File might be damaged.';
-        }
-        for ($i = 0; fgets($f) !== false; $i++); #echo "Current counted line: $i"
-        # file has 3 lines
-        if ($i != 2) {
-            goto cleanup;
-        }
-        $result = true;
-        cleanup:
-        fclose($f);
-        return $result;
+
+        return true;
     }
 
     public function loadGame()
@@ -203,16 +206,16 @@ class GameStatus
         $this->getLongestWords();
     }
 
-    // TODO(vxern): Performance? Why perform the same operation of removing special characters and getting the length twice?
     private function getLongestWords()
     {
-        $length = max(array_map(fn ($item) => grapheme_strlen(remove_special_char($item)), $this->solutions->toArray()));
-        $this->longest_solutions = $this->solutions->filter(fn ($item) => grapheme_strlen(remove_special_char($item)) === $length);
-        echo "Longest solution: $length letters";
-        #var_dump($this->longest_solutions);
+        $solutions = $this->solutions->toArray();
+        $solutions_with_length = array_map(fn ($item) => [$item, grapheme_strlen(remove_special_char($item))], $solutions);
+        $longest_solution_length = max(array_map(fn ($item) => $item[1], $solutions_with_length));
+        $this->longest_solutions = array_filter($solutions, fn ($item) => $item[0] === $longest_solution_length);
+        echo "Longest solution: $longest_solution_length letters";
+        var_dump($this->longest_solutions);
     }
 
-    // TODO(vxern): Complete.
     private function findSolutions()
     {
         $refdict = $this->letters->lower_cntdict;
@@ -222,14 +225,13 @@ class GameStatus
         # dictionaries (hints)
         $this->findHints();
         $this->solutions->add($this->available_hints);
-        /*
         # communitylist
-        self._load_communitylist()
-        self.solutions.update(item for item in self.communitylist if self._word_valid_fast(item, refdict))
+        $this->loadCommunityList();
+        $this->solutions->add(array_filter($this->community_list, fn ($word) => $this->wordValidFast($word, $refdict)));
         # custom emojis
-        self._find_custom_emojis(refdict)
-        self.solutions.update(self.custom_emoji_solution)
-        print("Custom reactions: " + str(len(self.custom_emoji_solution)))   */
+        $this->findCustomEmojis($refdict);
+        $this->solutions->add($this->custom_emoji_solution);
+        echo "Custom reactions: " + count($this->custom_emoji_solution);
     }
 
     private function findHints()
@@ -428,8 +430,7 @@ class GameStatus
             }
         }
         foreach (array_merge(["wordlist", "community", "custom_reactions"], AVAILABLE_LANGUAGES) as $key) {
-            // TODO(vxern): $approval_dict[$key] might need a conversion to boolean.
-            $approval_dict["any"] = $approval_dict[$key] ?? $approval_dict["any"];
+            $approval_dict["any"] = array_key_exists($key, $approval_dict) ?? $approval_dict["any"];
         }
         return $approval_dict;
     }
@@ -587,9 +588,7 @@ class GameStatus
             $found_words = count($value["found_words"]);
             if (key_exists($found_words, $highscore)) {
                 array_push($highscore[$found_words], $key);
-                // TODO(vxern): Verify this does the same thing as Python if len(p_value["found_words"])
-                # don't save people who didn't participate
-            } else if ($found_words > 0) {
+            } elseif ($found_words > 0) { # don't save people who didn't participate
                 $highscore[$found_words] = [$key];
             }
         }
