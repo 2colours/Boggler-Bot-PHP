@@ -38,9 +38,9 @@ class LetterList
     {
         $this->list = $data;
         $this->lower_cntdict = array_count_values(array_map(mb_strtolower(...), array_filter($data, fn ($letter) => isset($letter))));
-        if ($preshuffle)
+        if ($preshuffle) {
             $this->shuffle();
-        elseif ($just_regenerate) {
+        } elseif ($just_regenerate) {
             $this->drawImageMatrix(...DISPLAY_NORMAL);
             $this->drawImageMatrix(...DISPLAY_SMALL);
         }
@@ -61,13 +61,14 @@ class LetterList
         $font->setSize($font_size);
         $font->setColor('rgb(0, 178, 238)');
 
-        foreach ($this->list as $i => $item)
+        foreach ($this->list as $i => $item) {
             $image->text(
                 $item,
                 $space_left + $distance_horizontal * ($i % 4),
                 $space_top + $distance_vertical * intdiv($i, 4),
                 $font
             );
+        }
 
         $image->save("live_data/$image_filename");
     }
@@ -154,12 +155,14 @@ class GameStatus
             goto cleanup;
         }
         # Checks if the right amount of letters is saved
-        if (count(explode(' ', $first_line)) != 16)
+        if (count(explode(' ', $first_line)) != 16) {
             echo 'File might be damaged.';
+        }
         for ($i = 0; fgets($f) !== false; $i++); #echo "Current counted line: $i"
         # file has 3 lines
-        if ($i != 2)
+        if ($i != 2) {
             goto cleanup;
+        }
         $result = true;
         cleanup:
         fclose($f);
@@ -248,19 +251,24 @@ class GameStatus
     {
         # Pre-processing word for validity check
         $word = mb_ereg_replace("/[.'-]/", '', $word);
-        if ($this->current_lang === "German")
+        if ($this->current_lang === "German") {
             $word = $this->germanLetters($word);
+        }
         $word = mb_strtolower($word);
 
         $word_letters = mb_str_split($word);
-        foreach ($word_letters as $letter)
-            if (!array_key_exists($letter, $this->letters->lower_cntdict))
+        foreach ($word_letters as $letter) {
+            if (!array_key_exists($letter, $this->letters->lower_cntdict)) {
                 return false;
+            }
+        }
         $wdict = array_count_values($word_letters);
 
-        foreach ($word_letters as $letter)
-            if ($wdict[$letter] > $refdict[$letter])
+        foreach ($word_letters as $letter) {
+            if ($wdict[$letter] > $refdict[$letter]) {
                 return false;
+            }
+        }
         return true;
     }
 
@@ -280,10 +288,11 @@ class GameStatus
 
     private function setEndAmount()
     {
-        if (!$this->solutions->isEmpty())
+        if (!$this->solutions->isEmpty()) {
             $this->end_amount = 100;
-        else
+        } else {
             $this->end_amount = min(DEFAULT_END_AMOUNT, intdiv($this->solutions->count() * 2, 3));
+        }
     }
 
     private function countApprovedWords()

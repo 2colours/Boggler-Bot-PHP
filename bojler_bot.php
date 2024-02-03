@@ -91,9 +91,11 @@ class Counter
 function get_translation($text, DictionaryType $dictionary)
 {
     $db = DatabaseHandler::getInstance(); # TODO better injection?
-    foreach ($db->translate($text, $dictionary) as $translation)
-        if (isset($translation))
+    foreach ($db->translate($text, $dictionary) as $translation) {
+        if (isset($translation)) {
             return $translation;
+        }
+    }
     return null;
 }
 
@@ -103,10 +105,11 @@ function translator_command($src_lang = null, $target_lang = null)
         $word = $args[0];
         $ctor_args = isset($src_lang) && isset($target_lang) ? [$src_lang, $target_lang] : DEFAULT_TRANSLATION;
         $translation = get_translation($word, new DictionaryType(...$ctor_args));
-        if (isset($translation))
+        if (isset($translation)) {
             await($ctx->channel->sendMessage("$word: ||$translation||"));
-        else
+        } else {
             await($ctx->react('😶'));
+        }
     };
 }
 
@@ -179,8 +182,9 @@ function enough_found()
 function try_send_msg(Message $ctx, $content)
 {
     $can_be_sent = grapheme_strlen($content) <= 2000; # TODO this magic constant should be moved from here and other places as well
-    if ($can_be_sent)
+    if ($can_be_sent) {
         await($ctx->channel->sendMessage($content));
+    }
     return $can_be_sent;
 }
 
@@ -200,8 +204,9 @@ function needs_counting($handler)
 {
     return function ($ctx, ...$args) use ($handler) {
         $handler($ctx, ...$args);
-        if (COUNTER->trigger())
+        if (COUNTER->trigger()) {
             simple_board($ctx);
+        }
     };
 }
 

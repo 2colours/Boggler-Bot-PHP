@@ -7,10 +7,13 @@ function hungarian_role(Member $member)
 {
     $hungarian_roles = ['Beginner', 'Native speaker', 'Intermediate', 'Fluent', 'Advanced', 'Distant native'];
     $roles = $member->roles;
-    foreach ($roles as $item)
-        foreach ($hungarian_roles as $hu_role)
-            if ($item->name === $hu_role)
+    foreach ($roles as $item) {
+        foreach ($hungarian_roles as $hu_role) {
+            if ($item->name === $hu_role) {
                 return $hu_role;
+            }
+        }
+    }
     return '';
 }
 
@@ -122,8 +125,9 @@ class PlayerHandler
         $this->playerUpdate($ctx->member);
         $this->player_dict[$ctx->author->id]['found_words'][] = $word_info['word'];
         $this->player_dict[$ctx->author->id]['all_time_found']++;
-        if (array_key_exists('any', $word_info))
+        if (array_key_exists('any', $word_info)) {
             $this->player_dict[$ctx->author->id]['all_time_approved']++;
+        }
         $this->saveFile();
     }
 
@@ -143,8 +147,9 @@ class PlayerHandler
             if (array_key_exists($word_info['word'], $player_data['found_words'])) {
                 $player_data['found_words'] = array_diff($player_data['found_words'], [$word_info['word']]);
                 $player_data['all_time_found']--;
-                if (array_key_exists('any', $word_info))
+                if (array_key_exists('any', $word_info)) {
                     $this->player_dict[$ctx->author->id]['all_time_approved']++;
+                }
             }
         # TODO only save when there is a change (Is that guaranteed at the call of this function?)
         $this->saveFile();
