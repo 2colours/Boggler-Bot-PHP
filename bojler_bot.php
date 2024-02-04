@@ -127,19 +127,11 @@ function achievements(Message $ctx, $word, $type)
     return $reactions;
 }
 
-# TODO allow this when the necessary functions are ready
-/*
 function s_reactions(Message $ctx, $word)
 {
-    $reaction_list = [acknowledgement_reaction(word), approval_reaction(word)];
-    # zsemle special
-    if ($ctx->author->id === '400894576577085460' && $reaction_list[1] === '❔') {
-        $reaction_list[] = '<:blobpeep:393319772076376066>';
-    }
+    $reaction_list = [acknowledgement_reaction($word), approval_reaction($word)];
     return array_merge($reaction_list, achievements($ctx, $word, "s"));
 }
-*/
-
 
 # "predicate-ish" functions (not higher order, takes context, performs a check)
 function from_creator(Message $ctx)
