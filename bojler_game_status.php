@@ -376,16 +376,13 @@ class GameStatus
         $this->found_words = new Set(count($words) !== 0 ? explode(' ', $words) : []);
         # set language and game number
         $language_list = explode(' ', $languages);
-        $read_number = $language_list;
-        /*
-            read_number = languages_list[0]
-            read_number = read_number[:-1]
-            read_lang = languages_list[1]
-            read_lang = read_lang[1:-1]
-            self.current_lang = read_lang
-            self.game_number = int(read_number)
-            # this game doesn't have to be saved again in saves.txt yet (changes_to_save), we have a loaded game (thrown_the_dice)
-        */
+        $read_number = $language_list[0];
+        $read_number = grapheme_substr($read_number, 0, grapheme_strlen($read_number) - 1);
+        $read_lang = $language_list[1];
+        $read_lang = grapheme_substr($read_lang, 1, grapheme_strlen($read_number) - 1);
+        $this->game_number = intval($read_number);
+        $this->current_lang = $read_lang;
+        # this game doesn't have to be saved again in saves.txt yet (changes_to_save), we have a loaded game (thrown_the_dice)
         $this->gameSetup();
         $this->changes_to_save = false;
         $this->saveGame();
