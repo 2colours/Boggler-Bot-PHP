@@ -12,8 +12,9 @@ class DictionaryType
         return new self(...explode('-', $dictstring));
     }
 
-    public readonly mixed $src_lang;
-    public readonly mixed $target_lang;
+    public readonly string $src_lang;
+    public readonly string $target_lang;
+
     public function __construct($src_lang, $target_lang)
     {
         $this->src_lang = $src_lang;
@@ -31,7 +32,6 @@ class DictionaryType
     }
 }
 
-
 #A dictionary entry that represents one record - needs to be changed when applying a migration
 class DictionaryEntry
 {
@@ -39,9 +39,9 @@ class DictionaryEntry
     public const TABLE_COLUMNS = ['word', 'description', 'dictionarycode'];
     public const INDEXES = ['dictindex' => ['word', 'dictionarycode']];
 
-    public readonly mixed $word;
-    public readonly mixed $description;
-    public readonly mixed $langcode;
+    public readonly string $word;
+    public readonly string $description;
+    public readonly string $langcode;
 
     public function __construct($line)
     {
@@ -82,7 +82,7 @@ class DatabaseHandler
 
     public const TABLES = ['dictionary' => DictionaryEntry::class];
 
-    public readonly mixed $db;
+    public readonly SQLite3 $db;
     public readonly mixed $dictionaries;
 
     private function tableSetup()
