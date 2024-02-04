@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 
-use Discord\Parts\Channel\Message;
-use Discord\Parts\User\Member;
+use Discord\Parts\{
+    Channel\Message,
+    User\Member,
+};
 
 function hungarian_role(Member $member)
 {
