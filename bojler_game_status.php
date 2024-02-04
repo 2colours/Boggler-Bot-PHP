@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+mb_internal_encoding('UTF-8');
+mb_regex_encoding('UTF-8');
+
 include __DIR__ . '/vendor/autoload.php';
 
 use Intervention\Image\ImageManager;
