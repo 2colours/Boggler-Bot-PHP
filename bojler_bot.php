@@ -43,7 +43,7 @@ define('EASTER_EGGS', CONFIG->get('easter_eggs'));
 #useful stuff
 define('AVAILABLE_LANGUAGES', array_keys(DICE_DICT));
 # next is not necessary, used for testing purposes still
-define('PROGRESS_BAR_VERSION_LIST',  PROGRESS_BAR_VERSION_DICT["default"]);
+define('PROGRESS_BAR_VERSION_LIST',  PROGRESS_BAR_VERSION_DICT['default']);
 const INSTRUCTION_TEMPLATE = <<<END
     __***Szórakodtató bot***__
     ***Rules:***
@@ -63,7 +63,7 @@ const INSTRUCTION_TEMPLATE = <<<END
 # lame emulation of Python str.format as PHP only has sprintf
 function instructions(string $lang)
 {
-    return str_replace(["{0}", "{1}"], [$lang, EXAMPLES[$lang]], INSTRUCTION_TEMPLATE);
+    return str_replace(['{0}', '{1}'], [$lang, EXAMPLES[$lang]], INSTRUCTION_TEMPLATE);
 }
 
 class Counter
@@ -125,7 +125,7 @@ function achievements(Message $ctx, string $word, string $command_type)
 {
     $reactions = [];
     if ($command_type === 's' && (GAME_STATUS->longest_solutions->contains($word))) {
-        $reactions = ["🇳", "🇮", "🇨", "🇪"];
+        $reactions = ['🇳', '🇮', '🇨', '🇪'];
     }
     return $reactions;
 }
@@ -133,7 +133,7 @@ function achievements(Message $ctx, string $word, string $command_type)
 function s_reactions(Message $ctx, string $word)
 {
     $reaction_list = [acknowledgement_reaction($word), approval_reaction($word)];
-    return array_merge($reaction_list, achievements($ctx, $word, "s"));
+    return array_merge($reaction_list, achievements($ctx, $word, 's'));
 }
 
 # "predicate-ish" functions (not higher order, takes context, performs a check)
@@ -299,18 +299,18 @@ $bot->run();
 function highscore_names(array $ids)
 {
     if (count($ids) === 0) {
-        return " - ";
+        return ' - ';
     }
     $names = [];
     $handler = PlayerHandler::getInstance();
     foreach ($ids as $id) {
-        if (array_key_exists("server_name", $handler->player_dict[$id])) {
-            array_push($handler->player_dict[$id]["server_name"], $names);
+        if (array_key_exists('server_name', $handler->player_dict[$id])) {
+            array_push($handler->player_dict[$id]['server_name'], $names);
         } else {
-            array_push($handler->player_dict[$id]["name"], $names);
+            array_push($handler->player_dict[$id]['name'], $names);
         }
     }
-    return implode(", ", $names);
+    return implode(', ', $names);
 }
 
 function game_highscore()
@@ -348,32 +348,32 @@ function on_podium(array $people)
 {
     switch (count($people)) {
         case 0:
-            return "⬛⬛⬛";
+            return '⬛⬛⬛';
         case 1:
             $handler = PlayerHandler::getInstance();
-            $personal_emoji = $handler->player_dict[$people[0]]["personal_emoji"];
+            $personal_emoji = $handler->player_dict[$people[0]]['personal_emoji'];
             return "⬛{$personal_emoji}⬛";
         case 2:
             $handler = PlayerHandler::getInstance();
             [$personal_emoji_first, $personal_emoji_second] = [
-                $handler->player_dict[$people[0]]["personal_emoji"],
-                $handler->player_dict[$people[1]]["personal_emoji"],
+                $handler->player_dict[$people[0]]['personal_emoji'],
+                $handler->player_dict[$people[1]]['personal_emoji'],
             ];
             return "{$personal_emoji_first}⬛{$personal_emoji_second}";
         case 3:
             $handler = PlayerHandler::getInstance();
             [$personal_emoji_first, $personal_emoji_second, $personal_emoji_third] = [
-                $handler->player_dict[$people[0]]["personal_emoji"],
-                $handler->player_dict[$people[1]]["personal_emoji"],
-                $handler->player_dict[$people[2]]["personal_emoji"],
+                $handler->player_dict[$people[0]]['personal_emoji'],
+                $handler->player_dict[$people[1]]['personal_emoji'],
+                $handler->player_dict[$people[2]]['personal_emoji'],
             ];
             return "$personal_emoji_first$personal_emoji_second$personal_emoji_third";
         case 4:
-            return "🧍🧑‍🤝‍🧑🧍";
+            return '🧍🧑‍🤝‍🧑🧍';
         case 5:
-            return "🧑‍🤝‍🧑🧍🧑‍🤝‍🧑";
+            return '🧑‍🤝‍🧑🧍🧑‍🤝‍🧑';
         default:
-            return "🧑‍🤝‍🧑🧑‍🤝‍🧑🧑‍🤝‍🧑";
+            return '🧑‍🤝‍🧑🧑‍🤝‍🧑🧑‍🤝‍🧑';
     }
 }
 
@@ -384,24 +384,24 @@ function approval_reaction(string $word)
         return $custom_reaction_list[array_rand($custom_reaction_list)];
     }
     $approval_status = GAME_STATUS->approvalStatus($word);
-    if (array_key_exists("any", $approval_status) && count($approval_status["any"]) !== 0) {
+    if (array_key_exists('any', $approval_status) && count($approval_status['any']) !== 0) {
         if (array_key_exists(GAME_STATUS->base_lang, $approval_status) && $approval_status[GAME_STATUS->base_lang]) {
-            return "☑️";
+            return '☑️';
         }
-        if (array_key_exists("word_list", $approval_status) && $approval_status["word_list"]) {
-            return "✅";
+        if (array_key_exists('word_list', $approval_status) && $approval_status['word_list']) {
+            return '✅';
         }
         foreach (AVAILABLE_LANGUAGES as $language) {
             if (array_key_exists($language, $approval_status) && $approval_status[$language]) {
-                return "✅";
+                return '✅';
             }
         }
-        if (array_key_exists("community", $approval_status) && $approval_status["community"]) {
-            return "✔";
+        if (array_key_exists('community', $approval_status) && $approval_status['community']) {
+            return '✔';
         }
     }
 
-    return "❔";
+    return '❔';
 }
 
 # emojis are retrieved in a deterministic way: (current date, sorted letters, emoji list) determine the value
@@ -412,11 +412,11 @@ function current_emoji_version()
     $letter_list = GAME_STATUS->letters->list;
     GAME_STATUS->collator()->sort($letter_list);
     $hash = md5(implode(' ', $letter_list));
-    $date = date("md");
+    $date = date('md');
     if (array_key_exists($date, PROGRESS_BAR_VERSION_DICT)) {
         $current_list = PROGRESS_BAR_VERSION_DICT[$date];
     } else {
-        $current_list = PROGRESS_BAR_VERSION_DICT["default"];
+        $current_list = PROGRESS_BAR_VERSION_DICT['default'];
     }
     return $current_list[gmp_intval(gmp_mod(gmp_init($hash, 16), count($current_list)))];
 }
@@ -452,9 +452,9 @@ function found_words_output()
 {
     $found_word_list = GAME_STATUS->foundWordsSorted();
     if (count($found_word_list) === 0) {
-        return "No words found yet 😭";
+        return 'No words found yet 😭';
     }
-    [$found_word_list_formatted, $found_word_list_length] = [implode(", ", $found_word_list), count($found_word_list)];
+    [$found_word_list_formatted, $found_word_list_length] = [implode(', ', $found_word_list), count($found_word_list)];
     $progress_bar = progress_bar();
     [$amount_approved_words, $end_amount] = [GAME_STATUS->amount_approved_words, GAME_STATUS->end_amount];
     return <<<END
