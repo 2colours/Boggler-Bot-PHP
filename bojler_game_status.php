@@ -36,10 +36,10 @@ class LetterList
 {
     public const SIZE = 16;
 
-    public readonly mixed $list;
+    public readonly array $list;
     public readonly array $lower_cntdict;
 
-    public function __construct($data, $preshuffle = false, $just_regenerate = false)
+    public function __construct(array $data, bool $preshuffle = false, bool $just_regenerate = false)
     {
         $this->list = $data;
         $this->lower_cntdict = array_count_values(array_map(mb_strtolower(...), array_filter($data, fn ($letter) => isset($letter))));
@@ -58,7 +58,7 @@ class LetterList
         $this->drawImageMatrix(...DISPLAY_SMALL);
     }
 
-    private function drawImageMatrix($space_top, $space_left, $distance_vertical, $distance_horizontal, $font_size, $image_filename, $img_h, $img_w)
+    private function drawImageMatrix(int $space_top, int $space_left, int $distance_vertical, int $distance_horizontal, int $font_size, string $image_filename, int $img_h, int $img_w)
     {
         $manager = new ImageManager(Driver::class);
         $image = $manager->create($img_w, $img_h);
@@ -110,7 +110,7 @@ class GameStatus
     public $available_hints;
     public $amount_approved_words;
 
-    public function __construct($file, $archive_file)
+    public function __construct(string $file, string $archive_file)
     {
         $this->player_handler = PlayerHandler::getInstance(); # TODO better injection?
         $this->archive_file = $archive_file;
@@ -247,14 +247,14 @@ class GameStatus
     }
 
     # for a given language gives back which languages you can translate it to
-    public function availableDictionariesFrom($origin = null)
+    public function availableDictionariesFrom(string $origin = null)
     {
         $origin ??= $this->current_lang;
         return array_filter(AVAILABLE_LANGUAGES, fn ($item) => array_key_exists((new DictionaryType($origin, $item))->asDictstring(), DICTIONARIES));
     }
 
     # gets the refdict instead of creating it every time
-    public function wordValidFast($word, $refdict) # TODO why is there a $refdict passed and $this->letters->lower_cntdict also used??
+    public function wordValidFast(string $word, array $refdict) # TODO why is there a $refdict passed and $this->letters->lower_cntdict also used??
     {
         # Pre-processing word for validity check
         $word = mb_ereg_replace("/[.'-]/", '', $word);
@@ -279,7 +279,7 @@ class GameStatus
         return true;
     }
 
-    public function germanLetters($word)
+    public function germanLetters(string $word)
     {
         $german_letters = [
             "ä" => "ae",
@@ -356,13 +356,13 @@ class GameStatus
         file_put_contents($this->file, $this->currentEntry());
     }
 
-    private function findWordlistSolutions($refdict)
+    private function findWordlistSolutions(array $refdict)
     {
         $content = file(WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES);
         $this->wordlist_solutions = new Set(array_filter($content, fn ($line) => $this->wordValidFast($line, $refdict)));
     }
 
-    private function tryLoadOldGame($number)
+    private function tryLoadOldGame(int $number)
     {
         $this->saveOld();
         if (1 <= $number && $number <= $this->max_saved_game + 1) {
@@ -412,7 +412,7 @@ class GameStatus
         return false;
     }
 
-    public function approvalStatus($word, $refdict)
+    public function approvalStatus(string $word)
     {
         $approval_dict = [];
         $approval_dict["word"] = $word;
@@ -440,7 +440,7 @@ class GameStatus
         $this->community_list = file(COMMUNITY_WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES);
     }
 
-    private function findCustomEmojis($refdict)
+    private function findCustomEmojis(array $refdict)
     {
         $this->custom_emoji_solution = array_filter(array_keys(CUSTOM_EMOJIS[$this->current_lang]), fn ($word) => $this->wordValidFast($word, $refdict));
     }
@@ -503,7 +503,7 @@ class GameStatus
         $this->saveGame();
     }
 
-    public function addWord($word)
+    public function addWord(string $word)
     {
         $starter_amount = $this->amount_approved_words;
         $this->found_words->add($word);
@@ -515,7 +515,7 @@ class GameStatus
         return $starter_amount < $this->end_amount && $this->amount_approved_words === $this->end_amount;
     }
 
-    public function tryAddCommunity($word, $refdict)
+    public function tryAddCommunity(string $word, array $refdict)
     {
         if (in_array($word, $this->community_list)) {
             return false;
@@ -534,7 +534,7 @@ class GameStatus
         return true;
     }
 
-    public function removeWord($word)
+    public function removeWord(string $word)
     {
         $this->found_words->remove($word);
         # removed words have always to be saved (changes_to_save)
@@ -551,9 +551,9 @@ class GameStatus
         $this->saveGame();
     }
 
-    public function setLang($word)
+    public function setLang(string $lang)
     {
-        $this->planned_lang = $word;
+        $this->planned_lang = $lang;
         $this->saveGame();
     }
 
@@ -616,5 +616,6 @@ class GameStatus
                 }
             }
         }
+        return $awards;
     }
 }
