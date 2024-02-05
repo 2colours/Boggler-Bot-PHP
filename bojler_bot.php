@@ -424,24 +424,26 @@ function current_emoji_version()
 # TODO homogenize the interface: either change all entries to arrays in the config or implement a grapheme split
 function progress_bar(string|array $emoji_scale = null)
 {
-    if (!isset($emoji_scale)) {
-        $emoji_scale = current_emoji_version()[1];
+    $emoji_scale ??= current_emoji_version()[1];
+    if (is_string($emoji_scale)) {
+        # This should give the same (same) behavior as Python - split on Unicode characters which aren't necessarily graphemes
+        $emoji_scale = mb_str_split($emoji_scale);
     }
     if (count($emoji_scale) < 2) {
-        echo "Error in config. Not enough symbols for progress bar.";
+        echo 'Error in config. Not enough symbols for progress bar.';
         return '';
     }
-    $progress_bar_length = ceil(GAME_STATUS->end_amount / 10);
+    $progress_bar_length = (int) ceil(GAME_STATUS->end_amount / 10);
     if (GAME_STATUS->amount_approved_words >= GAME_STATUS->end_amount) {
-        return $progress_bar_length * $emoji_scale[array_key_last($emoji_scale)];
+        return str_repeat($emoji_scale[array_key_last($emoji_scale)], $progress_bar_length);
     }
-    $full_emoji_number = floor(GAME_STATUS->amount_approved_words / 10);
-    $progress_bar = $full_emoji_number * $emoji_scale[array_key_last($emoji_scale)];
+    $full_emoji_number = intdiv(GAME_STATUS->amount_approved_words, 10);
+    $progress_bar = str_repeat($emoji_scale[array_key_last($emoji_scale)], $full_emoji_number);
     $rest = GAME_STATUS->end_amount - $full_emoji_number * 10;
-    $current_step_size = $rest < 10 ? $rest : 10;
-    $progress_in_current_step = floor((GAME_STATUS->amount_approved_word % 10) / $current_step_size);
+    $current_step_size = min($rest, 10);
+    $progress_in_current_step = intdiv((GAME_STATUS->amount_approved_words % 10), $current_step_size);
     $empty_emoji_number = $progress_bar_length - $full_emoji_number - 1;
-    $progress_bar .= $emoji_scale[floor($progress_in_current_step * (count($emoji_scale) - 1))];
+    $progress_bar .= $emoji_scale[$progress_in_current_step * (count($emoji_scale) - 1)];
     $progress_bar .= $empty_emoji_number * $emoji_scale[0];
     return $progress_bar;
 }
