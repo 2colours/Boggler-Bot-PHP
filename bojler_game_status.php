@@ -257,8 +257,8 @@ class GameStatus
     public function wordValidFast(string $word, array $refdict) # TODO why is there a $refdict passed and $this->letters->lower_cntdict also used??
     {
         # Pre-processing word for validity check
-        $word = mb_ereg_replace("/[.'-]/", '', $word);
-        if ($this->current_lang === "German") {
+        $word = mb_ereg_replace('/[.\'-]/', '', $word);
+        if ($this->current_lang === 'German') {
             $word = $this->germanLetters($word);
         }
         $word = mb_strtolower($word);
@@ -282,13 +282,13 @@ class GameStatus
     public function germanLetters(string $word)
     {
         $german_letters = [
-            "ä" => "ae",
-            "ö" => "oe",
-            "ü" => "ue",
-            "Ä" => "AE",
-            "Ö" => "OE",
-            "Ü" => "UE",
-            "ß" => "ss"
+            'ä' => 'ae',
+            'ö' => 'oe',
+            'ü' => 'ue',
+            'Ä' => 'AE',
+            'Ö' => 'OE',
+            'Ü' => 'UE',
+            'ß' => 'ss'
         ];
         return str_replace(array_keys($german_letters), array_values($german_letters), $word);
     }
@@ -374,7 +374,7 @@ class GameStatus
         list($languages, $letters, $words) = array_slice($lines, $offset, 3);
         $this->letters = new LetterList(explode(' ', $letters), true);
         if ($this->letters->isAbnormal()) {
-            echo "Game might be damaged.";
+            echo 'Game might be damaged.';
         }
         $this->found_words = new Set(count($words) !== 0 ? explode(' ', $words) : []);
         # set language and game number
@@ -415,12 +415,12 @@ class GameStatus
     public function approvalStatus(string $word)
     {
         $approval_dict = [];
-        $approval_dict["word"] = $word;
-        $approval_dict["valid"] = $this->wordValidFast($word, $refdict);
-        $approval_dict["any"] = false;
-        $approval_dict["wordlist"] = $this->wordlist_solutions->contains($word);
-        $approval_dict["community"] = in_array($word, $this->community_list);
-        $approval_dict["custom_reactions"] = CUSTOM_EMOJIS[$this->current_lang]->contains($word);
+        $approval_dict['word'] = $word;
+        $approval_dict['valid'] = $this->wordValidFast($word, $this->letters->lower_cntdict);
+        $approval_dict['any'] = false;
+        $approval_dict['wordlist'] = $this->wordlist_solutions->contains($word);
+        $approval_dict['community'] = in_array($word, $this->community_list);
+        $approval_dict['custom_reactions'] = CUSTOM_EMOJIS[$this->current_lang]->contains($word);
         foreach (AVAILABLE_LANGUAGES as $language) {
             $approval_dict[$language] = false;
         }
@@ -429,8 +429,8 @@ class GameStatus
                 $approval_dict[$language] = $word;
             }
         }
-        foreach (array_merge(["wordlist", "community", "custom_reactions"], AVAILABLE_LANGUAGES) as $key) {
-            $approval_dict["any"] = array_key_exists($key, $approval_dict) ?? $approval_dict["any"];
+        foreach (array_merge(['wordlist', 'community', 'custom_reactions'], AVAILABLE_LANGUAGES) as $key) {
+            $approval_dict['any'] = array_key_exists($key, $approval_dict) ?? $approval_dict['any'];
         }
         return $approval_dict;
     }
@@ -573,15 +573,15 @@ class GameStatus
     {
         $highscore = [];
         $awards = [
-            "First place" => [],
-            "Second place" => [],
-            "Third place" => [],
-            "Newcomer" => [],
-            "Best Beginner" => [],
-            "Most solved hints" => []
+            'First place' => [],
+            'Second place' => [],
+            'Third place' => [],
+            'Newcomer' => [],
+            'Best Beginner' => [],
+            'Most solved hints' => []
         ];
         foreach ($this->player_handler->player_dict as $key => $value) {
-            $found_words = count($value["found_words"]);
+            $found_words = count($value['found_words']);
             if (key_exists($found_words, $highscore)) {
                 array_push($highscore[$found_words], $key);
             } elseif ($found_words > 0) { # don't save people who didn't participate
@@ -591,7 +591,7 @@ class GameStatus
         $highscore_list = array_keys($highscore);
         arsort($highscore_list);
         # Places 1,2,3
-        $places = ["First place", "Second place", "Third place"];
+        $places = ['First place', 'Second place', 'Third place'];
         for ($i = 0; $i < min(count($highscore_list), 3); $i++) {
             $awards[$places[$i]] = $highscore[$highscore_list[$i]];
         }
@@ -599,16 +599,16 @@ class GameStatus
             foreach ($highscore[$highscore_list[$i]] as $player) {
                 $info = $this->player_handler->player_dict[$player];
                 # Best Beginner
-                if ($info["role"] === "Beginner") {
-                    array_push($awards["Best Beginner"], $player);
+                if ($info['role'] === 'Beginner') {
+                    array_push($awards['Best Beginner'], $player);
                 }
                 # Newcomer
-                if (count($info["found_words"]) === $info["all_time_found"]) {
-                    array_push($awards["Newcomer"], $player);
+                if (count($info['found_words']) === $info['all_time_found']) {
+                    array_push($awards['Newcomer'], $player);
                 }
-                $amount = max(1, count(new Set(array_merge($info["found_words"], $info["used_hints"]))));
-                if (count(new Set(array_intersect($info["found_words"], $info["used_hints"]))) === $amount) {
-                    array_push($awards["Most solved hints"], $player);
+                $amount = max(1, count(new Set(array_merge($info['found_words'], $info['used_hints']))));
+                if (count(new Set(array_intersect($info['found_words'], $info['used_hints']))) === $amount) {
+                    array_push($awards['Most solved hints'], $player);
                 }
             }
         }
