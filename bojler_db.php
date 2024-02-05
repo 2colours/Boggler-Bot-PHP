@@ -10,7 +10,7 @@ require_once __DIR__ . '/bojler_util.php'; # TODO fetch_all with PSR-4 autoloade
 
 class DictionaryType
 {
-    public static function fromDictstring($dictstring)
+    public static function fromDictstring(string $dictstring)
     {
         return new self(...explode('-', $dictstring));
     }
@@ -18,7 +18,7 @@ class DictionaryType
     public readonly string $src_lang;
     public readonly string $target_lang;
 
-    public function __construct($src_lang, $target_lang)
+    public function __construct(string $src_lang, string $target_lang)
     {
         $this->src_lang = $src_lang;
         $this->target_lang = $target_lang;
@@ -46,7 +46,7 @@ class DictionaryEntry
     public readonly string $description;
     public readonly string $langcode;
 
-    public function __construct($line)
+    public function __construct(string $line)
     {
         $line_pieces = explode("\t", $line);
         /*debug purposes
@@ -106,7 +106,7 @@ class DatabaseHandler
         }
     }
 
-    private function importData($table_name, string $table_file)
+    private function importData(string $table_name, string $table_file)
     {
         $current_table_class = self::TABLES[$table_name];
         foreach (file($table_file, FILE_IGNORE_NEW_LINES) as $line) {
@@ -131,7 +131,7 @@ class DatabaseHandler
         return isset(array_values($dummy_request)[0]);
     }
 
-    public function translate($word, DictionaryType $dtype)
+    public function translate(string $word, DictionaryType $dtype)
     {
         $dictcode = $dtype->asDictcode();
         $operators = ['=', 'LIKE'];
