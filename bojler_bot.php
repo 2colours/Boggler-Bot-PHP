@@ -467,15 +467,12 @@ function acknowledgement_reaction(string $word)
 {
     $word = remove_special_char($word);
     $word_length = grapheme_strlen($word);
-    if ($word_length >= 10) {
-        return "💯";
-    } elseif ($word_length === 9) {
-        return "🤯";
-    } elseif ($word_length > 5) {
-        return "🎉";
-    } else {
-        return "👍";
-    }
+    return match (true) {
+        $word_length >= 10 => '💯',
+        $word_length === 9 => '🤯',
+        $word_length > 5 => '🎉',
+        default => '👍'
+    };
 }
 
 /*import math
