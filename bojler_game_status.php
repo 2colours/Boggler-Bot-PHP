@@ -318,17 +318,17 @@ class GameStatus
         $space_separated_letters = implode(' ', $this->letters->list);
         $space_separated_found_words = implode(' ', $this->found_words->toArray());
         return <<<END
-        #Current Game
-        $space_separated_letters
-        $space_separated_found_words
-        Game Number\t{$this->game_number}
-        Game Language\t{$this->current_lang}
+            #Current Game
+            $space_separated_letters
+            $space_separated_found_words
+            Game Number\t{$this->game_number}
+            Game Language\t{$this->current_lang}
 
-        # General Settings
-        Base Language\t{$this->base_lang}
-        Planned Language\t{$this->planned_lang}
-        Saved Games\t{$this->max_saved_game}
-        END;
+            # General Settings
+            Base Language\t{$this->base_lang}
+            Planned Language\t{$this->planned_lang}
+            Saved Games\t{$this->max_saved_game}
+            END;
     }
 
     public function archiveEntry()
@@ -338,10 +338,10 @@ class GameStatus
         $space_separated_letters_alphabetic = implode(' ', $letters_sorted);
         $space_separated_found_words_alphabetic = implode(' ', $this->foundWordsSorted());
         return <<<END
-        {$this->game_number}. ({$this->current_lang})
-        $space_separated_letters_alphabetic
-        $space_separated_found_words_alphabetic
-        END;
+            {$this->game_number}. ({$this->current_lang})
+            $space_separated_letters_alphabetic
+            $space_separated_found_words_alphabetic
+            END;
     }
 
     public function foundWordsSorted()

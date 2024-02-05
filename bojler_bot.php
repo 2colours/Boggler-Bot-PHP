@@ -45,19 +45,19 @@ define('AVAILABLE_LANGUAGES', array_keys(DICE_DICT));
 # next is not necessary, used for testing purposes still
 define('PROGRESS_BAR_VERSION_LIST',  PROGRESS_BAR_VERSION_DICT["default"]);
 const INSTRUCTION_TEMPLATE = <<<END
-__***Szórakodtató bot***__
-***Rules:***
-_ - Build {0} words with the letters displayed._
-_ - You can use the letters in any order, but just in the displayed amount._
-_**b!s {1}** to add a found word "{1}"._
-_**b!remove {1}** to remove a solution "{1}"._
-_**b!new** to start a new game._
-_**b!help** for further commands._
-✅ _means the word is Scrabble dictionary approved_
-☑️ _means there is a translation available_
-✔ _means the word is community-approved_
-❔ _means the word is not in the dictionary (might still be right)_
-END;
+    __***Szórakodtató bot***__
+    ***Rules:***
+    _ - Build {0} words with the letters displayed._
+    _ - You can use the letters in any order, but just in the displayed amount._
+    _**b!s {1}** to add a found word "{1}"._
+    _**b!remove {1}** to remove a solution "{1}"._
+    _**b!new** to start a new game._
+    _**b!help** for further commands._
+    ✅ _means the word is Scrabble dictionary approved_
+    ☑️ _means there is a translation available_
+    ✔ _means the word is community-approved_
+    ❔ _means the word is not in the dictionary (might still be right)_
+    END;
 
 # TODO maybe this would deserve a proper util function at least
 # lame emulation of Python str.format as PHP only has sprintf
@@ -255,12 +255,12 @@ $bot->registerCommand('stats', function (Message $ctx) {
     }
     $found_words = implode(', ', $infos['found_words']);
     $ctx->channel->sendMessage(<<<END
-    **Player stats for $infos[server_name]:**
-    *Total found words:* $infos[all_time_found]
-    *Approved words in previous games:* $infos[all_time_approved]
-    *Personal emoji:* $infos[personal_emoji]
-    *Words found in current game:* $found_words
-    END);
+        **Player stats for $infos[server_name]:**
+        *Total found words:* $infos[all_time_found]
+        *Approved words in previous games:* $infos[all_time_approved]
+        *Personal emoji:* $infos[personal_emoji]
+        *Words found in current game:* $found_words
+        END);
 }, ['description' => 'send user stats']);
 
 $bot->registerCommand(
@@ -284,9 +284,9 @@ function next_language(Message $ctx, $args)
     if (is_null($lang) || !in_array($lang, AVAILABLE_LANGUAGES)) {
         $languages = implode(', ', AVAILABLE_LANGUAGES);
         $ctx->reply(<<<END
-        Please provide an argument <language>.
-        <language> should be one of the values [$languages].
-        END);
+            Please provide an argument <language>.
+            <language> should be one of the values [$languages].
+            END);
         return;
     }
     GAME_STATUS->setLang($lang);
@@ -453,7 +453,10 @@ function found_words_output()
     [$found_word_list_formatted, $found_word_list_length] = [implode(", ", $found_word_list), count($found_word_list)];
     $progress_bar = progress_bar();
     [$amount_approved_words, $end_amount] = [GAME_STATUS->amount_approved_words, GAME_STATUS->end_amount];
-    return "_$found_word_list_formatted ($found_word_list_length)_\n$progress_bar ($amount_approved_words/$end_amount)";
+    return <<<END
+        _$found_word_list_formatted ($found_word_list_length)_
+        $progress_bar ($amount_approved_words/$end_amount)
+        END;
 }
 
 function acknowledgement_reaction($word)
