@@ -214,7 +214,7 @@ class GameStatus
         $solutions = $this->solutions->toArray();
         $solutions_with_length = array_map(fn ($item) => [$item, grapheme_strlen(remove_special_char($item))], $solutions);
         $longest_solution_length = max(array_map(fn ($item) => $item[1], $solutions_with_length));
-        $this->longest_solutions = array_filter($solutions, fn ($item) => $item[0] === $longest_solution_length);
+        $this->longest_solutions = new Set(array_filter($solutions, fn ($item) => $item[0] === $longest_solution_length));
         echo "Longest solution: $longest_solution_length letters";
         var_dump($this->longest_solutions);
     }
@@ -234,7 +234,7 @@ class GameStatus
         # custom emojis
         $this->findCustomEmojis($refdict);
         $this->solutions->add($this->custom_emoji_solution);
-        echo "Custom reactions: " + count($this->custom_emoji_solution);
+        echo 'Custom reactions: ' . count($this->custom_emoji_solution);
     }
 
     private function findHints()
@@ -472,9 +472,7 @@ class GameStatus
         }
 
         # New game is appended (if game_number > max_saved_game)
-        $file = fopen($this->archive_file, 'a');
-        fwrite($file, $this->archiveEntry());
-        fclose($file);
+        file_put_contents($this->archive_file, $this->archiveEntry(), FILE_APPEND);
         $this->max_saved_game++;
         $this->saveGame();
     }
@@ -520,9 +518,7 @@ class GameStatus
         if (in_array($word, $this->community_list)) {
             return false;
         }
-        $file = fopen(COMMUNITY_WORDLIST_PATHS[$this->current_lang], 'a');
-        fwrite($file, $word + "\n");
-        fclose($file);
+        file_put_contents(COMMUNITY_WORDLIST_PATHS[$this->current_lang], "$word\n", FILE_APPEND);
         array_push($this->community_list, $word);
         if ($this->wordValidFast($word, $refdict)) {
             array_push($this->communitylist_solutions, $word);
@@ -539,7 +535,7 @@ class GameStatus
         $this->found_words->remove($word);
         # removed words have always to be saved (changes_to_save)
         $this->changes_to_save = true;
-        if (in_array($this->solutions, $word)) {
+        if ($this->solutions->contains($word)) {
             $this->amount_approved_words--;
         }
         $this->saveGame();
