@@ -61,7 +61,7 @@ const INSTRUCTION_TEMPLATE = <<<END
 
 # TODO maybe this would deserve a proper util function at least
 # lame emulation of Python str.format as PHP only has sprintf
-function instructions($lang)
+function instructions(string $lang)
 {
     return str_replace(["{0}", "{1}"], [$lang, EXAMPLES[$lang]], INSTRUCTION_TEMPLATE);
 }
@@ -93,7 +93,7 @@ class Counter
     }
 }
 
-function get_translation($text, DictionaryType $dictionary)
+function get_translation(string $text, DictionaryType $dictionary)
 {
     $db = DatabaseHandler::getInstance(); # TODO better injection?
     foreach ($db->translate($text, $dictionary) as $translation) {
@@ -104,7 +104,7 @@ function get_translation($text, DictionaryType $dictionary)
     return null;
 }
 
-function translator_command($src_lang = null, $target_lang = null)
+function translator_command(string $src_lang = null, string $target_lang = null)
 {
     return function (Message $ctx, $args) use ($src_lang, $target_lang) {
         $word = $args[0];
@@ -121,16 +121,16 @@ function translator_command($src_lang = null, $target_lang = null)
 # internal context-dependent functions that aren't really related to command handling
 
 #Determines which emoji reaction a certain word deserves - it doesn't remove special characters
-function achievements(Message $ctx, $word, $type)
+function achievements(Message $ctx, string $word, string $command_type)
 {
     $reactions = [];
-    if ($type === 's' && (GAME_STATUS->longest_solutions->contains($word))) {
+    if ($command_type === 's' && (GAME_STATUS->longest_solutions->contains($word))) {
         $reactions = ["🇳", "🇮", "🇨", "🇪"];
     }
     return $reactions;
 }
 
-function s_reactions(Message $ctx, $word)
+function s_reactions(Message $ctx, string $word)
 {
     $reaction_list = [acknowledgement_reaction($word), approval_reaction($word)];
     return array_merge($reaction_list, achievements($ctx, $word, "s"));
@@ -171,7 +171,7 @@ function enough_found()
 
 # "handler-ish" functions (not higher order, takes context, DC side effects)
 
-function try_send_msg(Message $ctx, $content)
+function try_send_msg(Message $ctx, string $content)
 {
     $can_be_sent = grapheme_strlen($content) <= 2000; # TODO this magic constant should be moved from here and other places as well
     if ($can_be_sent) {
@@ -193,7 +193,7 @@ function simple_board(Message $ctx)
 
 # "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
 # TODO does one have to manually lift await or is it auto-detected in called functions?
-function needs_counting($handler)
+function needs_counting(callable $handler)
 {
     return function ($ctx, ...$args) use ($handler) {
         $handler($ctx, ...$args);
@@ -204,7 +204,7 @@ function needs_counting($handler)
 }
 
 # $refusalMessageProducer is a function that can take $ctx
-function ensure_predicate($predicate, $refusalMessageProducer = null)
+function ensure_predicate(callable $predicate, callable $refusalMessageProducer = null)
 {
     return fn ($handler) => function (Message $ctx, ...$args) use ($handler, $predicate, $refusalMessageProducer) {
         if ($predicate($ctx)) {
@@ -216,7 +216,7 @@ function ensure_predicate($predicate, $refusalMessageProducer = null)
 }
 
 # [d1, d2, d3, ..., dn], h -> d1 ∘ d2 ∘ d3 ∘ ... ∘ dn ∘ h
-function decorate_handler(array $decorators, $handler)
+function decorate_handler(array $decorators, callable $handler)
 {
     return array_reduce(array_reverse($decorators), fn ($aggregate, $current) => $current($aggregate), $handler);
 }
@@ -296,7 +296,7 @@ function next_language(Message $ctx, $args)
 # Blocks the code - has to be at the bottom
 $bot->run();
 
-function highscore_names($ids)
+function highscore_names(array $ids)
 {
     if (count($ids) === 0) {
         return " - ";
@@ -343,7 +343,7 @@ function game_highscore()
     return $message;
 }
 
-function on_podium($people)
+function on_podium(array $people)
 {
     switch (count($people)) {
         case 0:
@@ -376,7 +376,7 @@ function on_podium($people)
     }
 }
 
-function approval_reaction($word)
+function approval_reaction(string $word)
 {
     if (array_key_exists($word, CUSTOM_EMOJIS[GAME_STATUS->current_lang])) {
         $custom_reaction_list = CUSTOM_EMOJIS[GAME_STATUS->current_lang][$word];
@@ -420,7 +420,8 @@ function current_emoji_version()
     return $current_list[gmp_intval(gmp_mod(gmp_init($hash, 16), count($current_list)))];
 }
 
-function progress_bar($emoji_scale = null)
+# TODO homogenize the interface: either change all entries to arrays in the config or implement a grapheme split
+function progress_bar(string|array $emoji_scale = null)
 {
     if (!isset($emoji_scale)) {
         $emoji_scale = current_emoji_version()[1];
@@ -459,7 +460,7 @@ function found_words_output()
         END;
 }
 
-function acknowledgement_reaction($word)
+function acknowledgement_reaction(string $word)
 {
     $word = remove_special_char($word);
     $word_length = grapheme_strlen($word);
