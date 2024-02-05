@@ -317,27 +317,28 @@ function game_highscore()
 {
     $awards = GAME_STATUS->gameAwards();
     [$on_podium_first, $on_podium_second, $on_podium_third] = [
-        on_podium($awards["First place"]),
-        on_podium($awards["Second place"]),
-        on_podium($awards["Third place"]),
+        on_podium($awards['First place']),
+        on_podium($awards['Second place']),
+        on_podium($awards['Third place']),
     ];
     [$highscore_names_first, $highscore_names_second, $highscore_names_third] = [
-        highscore_names($awards["First place"]),
-        highscore_names($awards["Second place"]),
-        highscore_names($awards["Third place"]),
+        highscore_names($awards['First place']),
+        highscore_names($awards['Second place']),
+        highscore_names($awards['Third place']),
     ];
-    $most_solved_hints = highscore_names($awards["Most solved hints"]);
-    $best_beginner = highscore_names($awards["Best Beginner"]);
-    $message = '';
-    $message .= "⬛⬛⬛{$on_podium_first}⬛⬛⬛⬛***HIGHSCORE***\n";
-    $message .= "{$on_podium_second}🟨🟨🟨⬛⬛⬛⬛**1.** $highscore_names_first\n";
-    $message .= "🟨🟨🟨🟨🟨🟨{$on_podium_third}⬛**2.** $highscore_names_second\n";
-    $message .= "🟨🟨🟨🟨🟨🟨🟨🟨🟨⬛**3.** $highscore_names_third\n";
-    $message .= "\n";
-    $message .= "*Most Solved Hints:* \t$most_solved_hints\n";
-    $message .= "*Hard-Working Beginner:* \t$best_beginner\n";
-    if (array_key_exists("Newcomer", $awards) && count($awards["Newcomer"]) !== 0) {
-        $newcomer_highscore_names = highscore_names($awards["Newcomer"]);
+    $most_solved_hints = highscore_names($awards['Most solved hints']);
+    $best_beginner = highscore_names($awards['Best Beginner']);
+    $message = <<<END
+        ⬛⬛⬛{$on_podium_first}⬛⬛⬛⬛***HIGHSCORE***
+        {$on_podium_second}🟨🟨🟨⬛⬛⬛⬛**1.** $highscore_names_first
+        🟨🟨🟨🟨🟨🟨{$on_podium_third}⬛**2.** $highscore_names_second
+        🟨🟨🟨🟨🟨🟨🟨🟨🟨⬛**3.** $highscore_names_third
+
+        *Most Solved Hints:* \t$most_solved_hints
+        *Hard-Working Beginner:* \t$best_beginner
+        END;
+    if (array_key_exists('Newcomer', $awards) && count($awards['Newcomer']) !== 0) {
+        $newcomer_highscore_names = highscore_names($awards['Newcomer']);
         $message .= "*Newcomer of the day:* $newcomer_highscore_names";
     }
     return $message;
