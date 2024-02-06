@@ -325,16 +325,21 @@ function new_game(Message $ctx)
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(SAVES_FILEPATH))); # TODO binary safe?
 }
 
-/*
-@bot.command(brief='show current game')
-@commands.check(channel_valid)
-async def see(ctx):
-message = "**Game #" + str(game_status.game_number) + ": Already found words:** " + found_words_output()
-for item in output_split_cursive(message):
-await ctx.send(item)
-with open(image_filepath_small, 'rb') as f:
-await ctx.send(file=discord.File(f))
-counter.reset()*/
+$bot->registerCommand(
+    'see',
+    decorate_handler([ensure_predicate(channel_valid(...))], see(...)),
+    ['description' => 'show current game']
+);
+
+function see(Message $ctx)
+{
+    $message = '**Game #' . GAME_STATUS->game_number . ': Already found words:** ' . found_words_output();
+    foreach (output_split_cursive($message) as $part) {
+        await($ctx->channel->sendMessage($part));
+    }
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL)));
+    COUNTER->reset();
+}
 
 # Blocks the code - has to be at the bottom
 $bot->run();
