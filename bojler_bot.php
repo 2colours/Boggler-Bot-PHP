@@ -186,9 +186,9 @@ function simple_board(Message $ctx)
     $found_words_display = found_words_output();
     $message = "**Already found words:** $found_words_display";
     if (!(try_send_msg($ctx, $message))) {
-        $ctx->channel->sendMessage('_Too many found words. Please use b!see._');
+        await($ctx->channel->sendMessage('_Too many found words. Please use b!see._'));
     }
-    $ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL)); # TODO is this really binary-safe?
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL))); # TODO is this really binary-safe?
 }
 
 # "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
@@ -210,7 +210,7 @@ function ensure_predicate(callable $predicate, callable $refusalMessageProducer 
         if ($predicate($ctx)) {
             $handler($ctx, ...$args);
         } elseif (isset($refusalMessageProducer)) {
-            $ctx->reply($refusalMessageProducer($ctx));
+            await($ctx->reply($refusalMessageProducer($ctx)));
         }
     };
 }
@@ -250,17 +250,17 @@ $bot->registerCommand('t', function (Message $ctx, $args) {
 $bot->registerCommand('stats', function (Message $ctx) {
     $infos = PlayerHandler::getInstance()->player_dict[$ctx->author->id]; # TODO better injection
     if (is_null($infos)) {
-        $ctx->reply('You don\'t have any statistics registered.');
+        await($ctx->reply('You don\'t have any statistics registered.'));
         return;
     }
     $found_words = implode(', ', $infos['found_words']);
-    $ctx->channel->sendMessage(<<<END
+    await($ctx->channel->sendMessage(<<<END
         **Player stats for $infos[server_name]:**
         *Total found words:* $infos[all_time_found]
         *Approved words in previous games:* $infos[all_time_approved]
         *Personal emoji:* $infos[personal_emoji]
         *Words found in current game:* $found_words
-        END);
+        END));
 }, ['description' => 'send user stats']);
 
 $bot->registerCommand(
@@ -270,7 +270,7 @@ $bot->registerCommand(
 );
 function trigger(Message $ctx, $args)
 {
-    $ctx->reply('Congrats, Master.');
+    await($ctx->reply('Congrats, Master.'));
 }
 
 $bot->registerCommand(
@@ -283,14 +283,14 @@ function next_language(Message $ctx, $args)
     $lang = $args[0];
     if (is_null($lang) || !in_array($lang, AVAILABLE_LANGUAGES)) {
         $languages = implode(', ', AVAILABLE_LANGUAGES);
-        $ctx->reply(<<<END
+        await($ctx->reply(<<<END
             Please provide an argument <language>.
             <language> should be one of the values [$languages].
-            END);
+            END));
         return;
     }
     GAME_STATUS->setLang($lang);
-    $ctx->channel->sendMessage("Changed language to $lang for the next games.");
+    await($ctx->channel->sendMessage("Changed language to $lang for the next games."));
 }
 
 # Blocks the code - has to be at the bottom
