@@ -5,13 +5,13 @@ declare(strict_types=1);
 mb_internal_encoding('UTF-8');
 mb_regex_encoding('UTF-8');
 
-function remove_special_char($word)
+function remove_special_char(string $word)
 {
     return str_replace(['.', '-'], '', $word);
 }
 
 # Might be a way of splitting a too long output string
-function output_split($arg)
+function output_split(string $arg)
 {
     if (grapheme_strlen($arg) <= 2000) {
         return [$arg];
@@ -21,7 +21,7 @@ function output_split($arg)
     return [grapheme_substr($arg, 0, $index), ...output_split(grapheme_substr($arg, $index + 1))];
 }
 
-function output_split_cursive($arg)
+function output_split_cursive(string $arg)
 {
     $open_cursive = false;
     $output_array = output_split($arg);
