@@ -36,8 +36,8 @@ class LetterList
 {
     public const SIZE = 16;
 
-    public readonly array $list;
-    public readonly array $lower_cntdict;
+    public array $list;
+    public array $lower_cntdict;
 
     public function __construct(array $data, bool $preshuffle = false, bool $just_regenerate = false)
     {
@@ -97,7 +97,7 @@ class GameStatus
     public $base_lang;
     public $planned_lang;
     public $max_saved_game;
-    private $changes_to_save;
+    public $changes_to_save;
     private $thrown_the_dice;
     private $end_amount;
     private $custom_emoji_solution;
@@ -227,13 +227,15 @@ class GameStatus
         $this->solutions = $this->wordlist_solutions;
         # dictionaries (hints)
         $this->findHints();
-        $this->solutions->add($this->available_hints);
+        foreach ($this->available_hints as $hints_for_language) {
+            $this->solutions->add(...$hints_for_language);
+        }
         # communitylist
         $this->loadCommunityList();
-        $this->solutions->add(array_filter($this->community_list, fn ($word) => $this->wordValidFast($word, $refdict)));
+        $this->solutions->add(...array_filter($this->community_list, fn ($word) => $this->wordValidFast($word, $refdict)));
         # custom emojis
         $this->findCustomEmojis($refdict);
-        $this->solutions->add($this->custom_emoji_solution);
+        $this->solutions->add(...$this->custom_emoji_solution);
         echo 'Custom reactions: ' . count($this->custom_emoji_solution);
     }
 
@@ -437,7 +439,7 @@ class GameStatus
 
     private function loadCommunityList()
     {
-        $this->community_list = file(COMMUNITY_WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES);
+        $this->community_list = file(COMMUNITY_WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES) ?: [];
     }
 
     private function findCustomEmojis(array $refdict)
@@ -561,10 +563,10 @@ class GameStatus
 
     public function throwDice()
     {
-        $used_permutation = range(0, 16);
+        $used_permutation = range(0, 15);
         shuffle($used_permutation);
         $current_dice = DICE_DICT[$this->current_lang];
-        $this->letters = new LetterList(array_map(fn ($dice_index) => $current_dice[$dice_index][rand(0, 6)], $used_permutation), false, true);
+        $this->letters = new LetterList(array_map(fn ($dice_index) => $current_dice[$dice_index][rand(0, 5)], $used_permutation), just_regenerate: true);
         $this->saveGame();
     }
 
