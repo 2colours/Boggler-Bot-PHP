@@ -99,7 +99,7 @@ class GameStatus
     public $max_saved_game;
     public $changes_to_save;
     private $thrown_the_dice;
-    private $end_amount;
+    public $end_amount;
     private $custom_emoji_solution;
     public Set $longest_solutions;
     public Set $solutions;
@@ -310,7 +310,7 @@ class GameStatus
         $this->amount_approved_words = $this->solutions->count() - $amount;
     }
 
-    private function collator()
+    public function collator()
     {
         return new Collator(CONFIG->get('locale')[$this->current_lang]);
     }

@@ -492,7 +492,7 @@ function progress_bar(string|array $emoji_scale = null)
     $progress_in_current_step = intdiv((GAME_STATUS->amount_approved_words % 10), $current_step_size);
     $empty_emoji_number = $progress_bar_length - $full_emoji_number - 1;
     $progress_bar .= $emoji_scale[$progress_in_current_step * (count($emoji_scale) - 1)];
-    $progress_bar .= $empty_emoji_number * $emoji_scale[0];
+    $progress_bar .= str_repeat($emoji_scale[0], $empty_emoji_number);
     return $progress_bar;
 }
 
