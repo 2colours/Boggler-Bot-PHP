@@ -293,6 +293,49 @@ function next_language(Message $ctx, $args)
     await($ctx->channel->sendMessage("Changed language to $lang for the next games."));
 }
 
+$bot->registerCommand(
+    'new',
+    decorate_handler([ensure_predicate(channel_valid(...))], new_game(...)),
+    ['description' => 'start new game']
+);
+function new_game(Message $ctx)
+{
+    # this isn't perfect, but at least it won't display this "found words" always when just having looked at an old game for a second. That would be annoying.
+    if (GAME_STATUS->changes_to_save) {
+        await($ctx->channel->sendMessage(game_highscore()));
+        $message = 'All words found in the last game: ' . found_words_output() . "\n\n" . instructions(GAME_STATUS->planned_lang) . "\n\n";
+        foreach (output_split_cursive($message) as $item) {
+            await($ctx->channel->sendMessage($item));
+        }
+    } else {
+        await($ctx->channel->sendMessage(instructions(GAME_STATUS->planned_lang) . "\n\n"));
+    }
+
+    $ctx->channel->broadcastTyping(); # TODO better synchronization maybe?
+    GAME_STATUS->newGame();
+    COUNTER->reset();
+
+    $game_number = GAME_STATUS->game_number;
+    $solutions_count = GAME_STATUS->solutions->count();
+    $emoji_version_description = current_emoji_version()[0];
+    await($ctx->channel->sendMessage(<<<END
+        Game #**$game_number** _($emoji_version_description)_:
+        **($solutions_count)** possible approved words)
+        END));
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(SAVES_FILEPATH))); # TODO binary safe?
+}
+
+/*
+@bot.command(brief='show current game')
+@commands.check(channel_valid)
+async def see(ctx):
+message = "**Game #" + str(game_status.game_number) + ": Already found words:** " + found_words_output()
+for item in output_split_cursive(message):
+await ctx.send(item)
+with open(image_filepath_small, 'rb') as f:
+await ctx.send(file=discord.File(f))
+counter.reset()*/
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -581,46 +624,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         if counter.trigger():
         await simple_board(ctx)
         await ctx.send("Removed _" + arg + "_.")
-
-        @bot.command(brief='show current game')
-        @commands.check(channel_valid)
-        async def see(ctx):
-        message = "**Game #" + str(game_status.game_number) + ": Already found words:** " + found_words_output()
-        for item in output_split_cursive(message):
-        await ctx.send(item)
-        with open(image_filepath_small, 'rb') as f:
-        await ctx.send(file=discord.File(f))
-        counter.reset()
-
-        @bot.command(brief='start new game')
-        @commands.check(channel_valid)
-        async def new(ctx):
-        # this isn't perfect, but at least it won't display this "found words" always when just having looked at an old game for a second. That would be annoying.
-        if game_status.changes_to_save:
-        await ctx.send(game_highscore())
-        #message = "All words found in the last game: " + found_words_output() + "\n\n" + instructions(game_status.planned_lang) + "\n\n"
-        #for item in output_split_cursive(message):
-        # await ctx.send(item)
-        else:
-        await ctx.send(instructions(game_status.planned_lang) + "\n\n")
-        # important: first save, then new (obviously)
-        async with ctx.channel.typing():
-        game_status.new_game()
-        counter.reset()
-
-        await ctx.send("Game #**" + str(game_status.game_number) + "** _(" + current_emoji_version()[0] + ")_:" + "\n**(" + str(len(game_status.solutions)) + "** possible approved words)")
-
-        #with open(saves_filepath, 'a') as f:
-        # f.write(str(game_status.game_number) + '. ' + "(" + current_lang + ")\n" + ' '.join(game_status.letters))
-        # f.write("\n")
-
-        with open(image_filepath_normal, 'rb') as f:
-        await ctx.send(file=discord.File(f))
-        counter.reset()
-        # print all saves, should be removed sometime
-        #with open(saves_filepath, 'r') as file:
-        # for line in file:
-        # print(line)
 
         @bot.command(brief='send saved games')
         async def oldgames(ctx):
