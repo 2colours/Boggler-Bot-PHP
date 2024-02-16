@@ -165,7 +165,6 @@ function savefile_valid()
 function enough_found()
 {
     return GAME_STATUS->found_words->count() >= GAME_STATUS->end_amount;
-    #or: 'You have to find ' . GAME_STATUS->end_amount . ' words first.')
 }
 
 # "handler-ish" functions (not higher order, takes context, DC side effects)
@@ -367,6 +366,23 @@ function status(Message $ctx)
     }
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL)));
     COUNTER->reset();
+}
+
+$bot->registerCommand(
+    'unfound',
+    decorate_handler(
+        [ensure_predicate(enough_found(...), fn () => 'You have to find ' . GAME_STATUS->end_amount . ' words first.'), needs_counting(...)],
+        unfound(...)
+    ),
+    ['description' => 'send unfound Scrabble solutions']
+);
+
+function unfound(Message $ctx)
+{
+    $unfound_file = 'live_data/unfound_solutions.txt';
+    #$found_words_caps = array_map(mb_strtoupper(...), GAME_STATUS->found_words->toArray());
+    file_put_contents($unfound_file, implode("\n", GAME_STATUS->solutions->diff(GAME_STATUS->found_words)->toArray()));
+    $ctx->channel->sendMessage(MessageBuilder::new()->addFile($unfound_file));
 }
 
 # Blocks the code - has to be at the bottom
@@ -649,19 +665,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         @bot.command(brief='send saved games')
         async def oldgames(ctx):
         with open(saves_filepath, 'r') as f:
-        await ctx.send(file=discord.File(f))
-
-        @bot.command(brief='send unfound Scrabble solutions')
-        @commands.check(enough_found)
-        @needs_counting
-        async def unfound(ctx):
-        unfound_file = 'live_data/unfound_solutions.txt'
-        #found_words_caps = list(map(str.upper, game_status.found_words_set))
-        with open(unfound_file, 'w') as f:
-        for item in game_status.solutions:
-        if not item in game_status.found_words_set:
-        f.write(item + "\n")
-        with open(unfound_file, "r") as f:
         await ctx.send(file=discord.File(f))
 
         @bot.command(brief='amount of unfound Scrabble solutions')
