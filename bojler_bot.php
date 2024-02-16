@@ -152,7 +152,6 @@ function channel_valid(Message $ctx)
 function needs_thrown_dice()
 {
     return GAME_STATUS->thrown_the_dice; # TODO really not nice dependency, especially if we want to move the function
-    #or: '_Please load game using_ **b!load** _or start a new game using_ **b!new**'
 }
 
 #Checks if current_game savefile is correctly formatted
@@ -343,7 +342,7 @@ function see(Message $ctx)
 
 $bot->registerCommand(
     'status',
-    decorate_handler([ensure_predicate(needs_thrown_dice(...))], status(...)),
+    decorate_handler([ensure_predicate(needs_thrown_dice(...), fn () => '_Please load game using_ **b!load** _or start a new game using_ **b!new**')], status(...)),
     ['description' => 'show current status of the game']
 );
 

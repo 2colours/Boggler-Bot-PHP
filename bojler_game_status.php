@@ -98,7 +98,7 @@ class GameStatus
     public $planned_lang;
     public $max_saved_game;
     public $changes_to_save;
-    private $thrown_the_dice;
+    public $thrown_the_dice;
     public $end_amount;
     private $custom_emoji_solution;
     public Set $longest_solutions;
