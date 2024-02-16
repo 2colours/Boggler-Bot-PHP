@@ -188,7 +188,7 @@ function simple_board(Message $ctx)
     if (!(try_send_msg($ctx, $message))) {
         await($ctx->channel->sendMessage('_Too many found words. Please use b!see._'));
     }
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL))); # TODO is this really binary-safe?
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL)));
 }
 
 # "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
@@ -322,7 +322,7 @@ function new_game(Message $ctx)
         Game #**$game_number** _($emoji_version_description)_:
         **($solutions_count)** possible approved words)
         END));
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(SAVES_FILEPATH))); # TODO binary safe?
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_NORMAL)));
 }
 
 $bot->registerCommand(
@@ -335,6 +335,35 @@ function see(Message $ctx)
 {
     $message = '**Game #' . GAME_STATUS->game_number . ': Already found words:** ' . found_words_output();
     foreach (output_split_cursive($message) as $part) {
+        await($ctx->channel->sendMessage($part));
+    }
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL)));
+    COUNTER->reset();
+}
+
+$bot->registerCommand(
+    'status',
+    decorate_handler([ensure_predicate(needs_thrown_dice(...))], status(...)),
+    ['description' => 'show current status of the game']
+);
+
+function status(Message $ctx)
+{
+    $game_status = GAME_STATUS;
+    $space_separated_letters = implode(' ', $game_status->letters->list);
+    $found_words_output = found_words_output();
+    $emoji_version_description = current_emoji_version()[0];
+    $solutions_count = $game_status->solutions->count();
+    $status_text = <<<END
+        **Game #{$game_status->game_number}** (saved {$game_status->max_saved_game}) $space_separated_letters _($emoji_version_description)_
+        $found_words_output
+        **$solutions_count** words in the Scrabble dictionary (end amount: **{$game_status->end_amount}**)
+        Current language: {$game_status->current_lang}
+        END;
+    if ($game_status->current_lang !== $game_status->planned_lang) {
+        $status_text .= ", next game: {$game_status->planned_lang}";
+    }
+    foreach (output_split_cursive($status_text) as $part) {
         await($ctx->channel->sendMessage($part));
     }
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_SMALL)));
@@ -593,18 +622,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         pass
         with open(file_to_send, "r") as f:
         await ctx.send(file=discord.File(f))
-
-        @bot.command(brief='show current status of the game')
-        @commands.check(thrown_dice)
-        async def status(ctx):
-        status_text = "**Game #" + str(game_status.game_number) + '** (saved ' + str(game_status.max_saved_game) + ') ' + ' '.join(game_status.letters.list) + " _(" + current_emoji_version()[0] + ")_\n" + found_words_output() + "\n**" + str(len(game_status.solutions)) + "** words in the Scrabble dictionary (end amount: **" + str(int(game_status.end_amount)) + "**)" + "\nCurrent language: " + game_status.current_lang
-        if game_status.current_lang != game_status.planned_lang:
-        status_text = status_text + ", next game: " + game_status.planned_lang
-        for item in output_split_cursive(status_text):
-        await ctx.send(item)
-        with open(image_filepath_small, "rb") as f:
-        await ctx.send(file=discord.File(f))
-        counter.reset()
 
         @bot.command(hidden=True,brief='load saved game')
         @commands.is_owner()
