@@ -417,6 +417,22 @@ function left(Message $ctx)
     await($ctx->channel->sendMessage("**$amount** approved words left (of $solution_count) - $hint_count_by_language hints left."));
 }
 
+$bot->registerCommand(
+    'shuffle',
+    decorate_handler(
+        [ensure_predicate(channel_valid(...))],
+        shuffle2(...)
+    ),
+    ['description' => 'shuffle the position of dice']
+);
+
+function shuffle2(Message $ctx)
+{
+    GAME_STATUS->shuffleLetters();
+    await($ctx->channel->sendMessage('**Letters shuffled.**'));
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_NORMAL)));
+}
+
 
 # Blocks the code - has to be at the bottom
 $bot->run();
@@ -806,14 +822,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         with open(image_filepath_normal, 'rb') as f:
         await ctx.send(file=discord.File(f))
         counter.reset()
-
-        @bot.command(brief='shuffle the position of dice')
-        @commands.check(channel_valid)
-        async def shuffle(ctx):
-        game_status.shuffle_letters()
-        await ctx.send('**Letters shuffled.**')
-        with open(image_filepath_normal, 'rb') as f:
-        await ctx.send(file=discord.File(f))
 
         @bot.command(brief='change your personal emoji')
         async def emoji(ctx, arg):
