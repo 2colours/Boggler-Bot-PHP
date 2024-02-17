@@ -53,10 +53,12 @@ class PlayerHandler
 
 
     public const PLAYER_SAVES_PATH = 'live_data/player_saves.json';
+    private readonly mixed $default_player;
     public $player_dict;
 
     private function __construct()
     {
+        $this->default_player = ConfigHandler::getInstance()->get('default_player'); # TODO not sure if I like this "dependency injection"
         $read_content = file_get_contents(self::PLAYER_SAVES_PATH);
         if ($read_content === false) {
             $read_content = '{}';
@@ -64,7 +66,7 @@ class PlayerHandler
         }
         $this->player_dict = json_decode($read_content, true);
         foreach ($this->player_dict as &$player_data) {
-            $player_data = array_merge($this->player_dict['default_user'], $player_data);
+            $player_data = array_merge($this->default_player, $player_data);
         }
         $this->saveFile();
     }
@@ -116,7 +118,7 @@ class PlayerHandler
         } else {
             echo $this->player_dict[$player->user->id]; # TODO why?
             $this->player_dict[$player->user->id] = array_merge(
-                $this->player_dict['default_user'],
+                $this->default_player,
                 $this->player_dict[$player->user->id],
                 [
                     'role' => hungarian_role($player),
