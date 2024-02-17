@@ -216,7 +216,6 @@ class GameStatus
         $longest_solution_length = max(array_map(fn ($item) => $item[1], $solutions_with_length));
         $this->longest_solutions = new Set(array_filter($solutions, fn ($item) => $item[0] === $longest_solution_length));
         echo "Longest solution: $longest_solution_length letters";
-        var_dump($this->longest_solutions);
     }
 
     private function findSolutions()
