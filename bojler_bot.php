@@ -382,8 +382,41 @@ function unfound(Message $ctx)
     $unfound_file = 'live_data/unfound_solutions.txt';
     #$found_words_caps = array_map(mb_strtoupper(...), GAME_STATUS->found_words->toArray());
     file_put_contents($unfound_file, implode("\n", GAME_STATUS->solutions->diff(GAME_STATUS->found_words)->toArray()));
-    $ctx->channel->sendMessage(MessageBuilder::new()->addFile($unfound_file));
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($unfound_file)));
 }
+
+$bot->registerCommand(
+    'left',
+    decorate_handler(
+        [needs_counting(...)],
+        left(...)
+    ),
+    ['description' => 'amount of unfound Scrabble solutions']
+);
+
+function left(Message $ctx)
+{
+    $amount = GAME_STATUS->solutions->diff(GAME_STATUS->found_words)->count();
+    #$hints_caps = array_map(mb_strtoupper(...), GAME_STATUS->available_hints);
+    $unfound_hints_without_empty = array_filter(
+        array_map(
+            fn ($hints_for_language) => array_filter($hints_for_language, fn ($hint) => !GAME_STATUS->found_words->contains($hint)),
+            GAME_STATUS->available_hints
+        ),
+        fn ($hints_for_language) => count($hints_for_language) > 0
+    );
+    $hint_count_by_language = implode(
+        ', ',
+        array_map(
+            fn ($language, $hints_for_language) => count($hints_for_language) . " $language",
+            array_keys($unfound_hints_without_empty),
+            array_values($unfound_hints_without_empty)
+        )
+    ) ?: '0';
+    $solution_count = GAME_STATUS->solutions->count();
+    await($ctx->channel->sendMessage("**$amount** approved words left (of $solution_count) - $hint_count_by_language hints left."));
+}
+
 
 # Blocks the code - has to be at the bottom
 $bot->run();
@@ -666,25 +699,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         async def oldgames(ctx):
         with open(saves_filepath, 'r') as f:
         await ctx.send(file=discord.File(f))
-
-        @bot.command(brief='amount of unfound Scrabble solutions')
-        @needs_counting
-        async def left(ctx):
-        amount = 0
-        for item in game_status.solutions:
-        if not item in game_status.found_words_set:
-        amount += 1
-        #hints_caps = list(map(str.upper, game_status.available_hints))
-        unfound_hints = dict()
-        for item in game_status.available_hints:
-        unfound_hints[item] = list(filter(lambda x: x not in game_status.found_words_set, game_status.available_hints[item]))
-        language_hints = ''
-        for item in unfound_hints:
-        if unfound_hints[item]:
-        language_hints += (str(len(unfound_hints[item])) + " " + item + ", ")
-        if not language_hints:
-        language_hints = "0.."
-        await ctx.send("**" + str(amount) + "** approved words left (of " + str(len(game_status.solutions)) + ") - " + language_hints[:-2] + " hints left.")
 
 
         @bot.command(brief = 'give a hint')
