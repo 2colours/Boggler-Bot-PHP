@@ -414,20 +414,19 @@ class GameStatus
         $approval_dict = [];
         $approval_dict['word'] = $word;
         $approval_dict['valid'] = $this->wordValidFast($word, $this->letters->lower_cntdict);
-        $approval_dict['any'] = false;
         $approval_dict['wordlist'] = $this->wordlist_solutions->contains($word);
         $approval_dict['community'] = in_array($word, $this->community_list);
-        $approval_dict['custom_reactions'] = CUSTOM_EMOJIS[$this->current_lang]->contains($word);
-        foreach (AVAILABLE_LANGUAGES as $language) {
-            $approval_dict[$language] = false;
+        $approval_dict['custom_reactions'] = array_key_exists($word, CUSTOM_EMOJIS[$this->current_lang]);
+        $approval_dict['any'] = false;
+        foreach (['wordlist', 'community', 'custom_reactions'] as $key) {
+            $approval_dict['any'] = $approval_dict['any'] || $approval_dict[$key];
         }
+        $approval_dict += array_map(fn () => false, array_flip(AVAILABLE_LANGUAGES));
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
             if (in_array($word, $this->available_hints[$language])) {
                 $approval_dict[$language] = $word;
+                $approval_dict['any'] = true;
             }
-        }
-        foreach (array_merge(['wordlist', 'community', 'custom_reactions'], AVAILABLE_LANGUAGES) as $key) {
-            $approval_dict['any'] = array_key_exists($key, $approval_dict) ?? $approval_dict['any'];
         }
         return $approval_dict;
     }
