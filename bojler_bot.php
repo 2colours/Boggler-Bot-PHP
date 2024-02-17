@@ -339,9 +339,11 @@ function see(Message $ctx)
     COUNTER->reset();
 }
 
+define('ENSURE_THROWN_DICE', ensure_predicate(needs_thrown_dice(...), fn () => '_Please load game using_ **b!load** _or start a new game using_ **b!new**'));
+
 $bot->registerCommand(
     'status',
-    decorate_handler([ensure_predicate(needs_thrown_dice(...), fn () => '_Please load game using_ **b!load** _or start a new game using_ **b!new**')], status(...)),
+    decorate_handler([ENSURE_THROWN_DICE], status(...)),
     ['description' => 'show current status of the game']
 );
 
@@ -434,6 +436,45 @@ function shuffle2(Message $ctx)
 }
 
 
+$bot->registerCommand(
+    's',
+    decorate_handler(
+        [ensure_predicate(channel_valid(...)), ENSURE_THROWN_DICE],
+        'add_solution'
+    ),
+    ['description' => 'add solution'] # TODO aliases S and empty string?
+);
+
+function add_solution(Message $ctx, $args)
+{
+    $word = $args[0];
+    $word_info = GAME_STATUS->approvalStatus($word);
+    #await(easter_egg_trigger($ctx, $word, '_Rev'));
+    if (array_key_exists('valid', $word_info)) {
+        if (GAME_STATUS->found_words->contains($word)) {
+            await($ctx->channel->sendMessage("$word was already found."));
+        } else {
+            #await(easter_egg_trigger($ctx, $word));
+            $end_signal = GAME_STATUS->addWord($word);
+            foreach (s_reactions($ctx, $word) as $reaction) {
+                await($ctx->react($reaction));
+            }
+            PlayerHandler::getInstance()->playerAddWord($ctx, $word_info);
+            if ($end_signal) {
+                await($ctx->channel->sendMessage('**Congratulations! You won this game! You found ' . GAME_STATUS->end_amount . ' words!**'));
+                await($ctx->channel->sendMessage(game_highscore()));
+                return;
+            }
+        }
+    } else {
+        await($ctx->channel->sendMessage("$word doesn't fit the given letters."));
+    }
+    if (COUNTER->trigger()) {
+        simple_board($ctx);
+    }
+}
+
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -518,31 +559,30 @@ function on_podium(array $people)
     }
 }
 
-function approval_reaction(string $word)
+function approval_reaction(string $word): string
 {
     if (array_key_exists($word, CUSTOM_EMOJIS[GAME_STATUS->current_lang])) {
         $custom_reaction_list = CUSTOM_EMOJIS[GAME_STATUS->current_lang][$word];
         return $custom_reaction_list[array_rand($custom_reaction_list)];
     }
     $approval_status = GAME_STATUS->approvalStatus($word);
-    if (array_key_exists('any', $approval_status) && count($approval_status['any']) !== 0) {
-        if (array_key_exists(GAME_STATUS->base_lang, $approval_status) && $approval_status[GAME_STATUS->base_lang]) {
-            return '☑️';
-        }
-        if (array_key_exists('word_list', $approval_status) && $approval_status['word_list']) {
+    if (!$approval_status['any']) {
+        return '❔';
+    }
+    if (array_key_exists(GAME_STATUS->base_lang, $approval_status) && $approval_status[GAME_STATUS->base_lang]) {
+        return '☑️';
+    }
+    if ($approval_status['wordlist']) {
+        return '✅';
+    }
+    foreach (AVAILABLE_LANGUAGES as $language) {
+        if (array_key_exists($language, $approval_status) && $approval_status[$language]) {
             return '✅';
         }
-        foreach (AVAILABLE_LANGUAGES as $language) {
-            if (array_key_exists($language, $approval_status) && $approval_status[$language]) {
-                return '✅';
-            }
-        }
-        if (array_key_exists('community', $approval_status) && $approval_status['community']) {
-            return '✔';
-        }
     }
-
-    return '❔';
+    if (array_key_exists('community', $approval_status) && $approval_status['community']) {
+        return '✔';
+    }
 }
 
 # emojis are retrieved in a deterministic way: (current date, sorted letters, emoji list) determine the value
@@ -645,29 +685,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
     async def easter_egg_trigger(ctx, word, add='' ): # handle_easter_eggs decides which one to trigger, this here triggers it then type=easter_egg_handler.handle_easter_eggs(word, add) if not type: return print("Easter Egg") # to tell us when this might be responsible for anything if type=="nyan" : await quick_walk(ctx, "nyan" ) elif type=="bojler" : await bojler(ctx) elif type=="tongue" : message=await ctx.send("😝") await sleep(0.3) await message.delete() elif type=="varázsló" : await quick_walk(ctx, "varázsló" ) elif type=="huszár" : message=await ctx.send(easter_eggs["nagyhuszár"][0]) await sleep(2) await message.delete()
 
         # async def test(ctx, *, arg): for more than one word (whole message)
-        @bot.command(brief='add solution', aliases=['', 'S'])
-        @commands.check(channel_valid)
-        @commands.check(thrown_dice)
-        async def s(ctx, word):
-        word_info = game_status.approval_status(word)
-        await easter_egg_trigger(ctx, word, "_Rev")
-        if word_info["valid"]:
-        if word in game_status.found_words_set:
-        await ctx.send(word + " was already found.")
-        else:
-        await easter_egg_trigger(ctx, word)
-        end_signal = game_status.add_word(word)
-        for reaction in await s_reactions(ctx, word):
-        await ctx.message.add_reaction(reaction)
-        PlayerHandler.player_add_word(ctx, word_info)
-        if end_signal:
-        await ctx.send("**Congratulations! You won this game! You found " + str(int(game_status.end_amount)) + " words!** \n")
-        await ctx.send(game_highscore())
-        return
-        else:
-        await ctx.send(word + " doesn't fit the given letters.")
-        if counter.trigger():
-        await simple_board(ctx)
 
         @bot.command(brief='add to community wordlist')
         @needs_counting
