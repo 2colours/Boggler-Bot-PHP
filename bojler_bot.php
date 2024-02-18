@@ -595,8 +595,8 @@ function approval_reaction(string $word): string
     if ($approval_status['wordlist']) {
         return '✅';
     }
-    foreach (AVAILABLE_LANGUAGES as $language) {
-        if (array_key_exists($language, $approval_status) && $approval_status[$language]) {
+    foreach (array_intersect(AVAILABLE_LANGUAGES, array_keys($approval_status)) as $language) {
+        if ($approval_status[$language]) {
             return '✅';
         }
     }
