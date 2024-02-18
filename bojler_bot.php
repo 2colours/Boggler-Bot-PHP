@@ -474,6 +474,26 @@ function add_solution(Message $ctx, $args)
     }
 }
 
+$bot->registerCommand(
+    'remove',
+    decorate_handler(
+        [ensure_predicate(channel_valid(...)), needs_counting(...)],
+        'remove'
+    ),
+    ['description' => 'remove solution', 'aliases' => 'r']
+);
+
+function remove(Message $ctx, $args)
+{
+    $word = $args[0];
+    if (GAME_STATUS->found_words->contains($word)) {
+        GAME_STATUS->removeWord($word);
+        PlayerHandler::getInstance()->playerRemoveWord($ctx, GAME_STATUS->approvalStatus($word));
+        await($ctx->channel->sendMessage("Removed _{$word}_."));
+    } else {
+        await($ctx->channel->sendMessage("$word doesn't appear among the found solutions."));
+    }
+}
 
 # Blocks the code - has to be at the bottom
 $bot->run();
@@ -715,18 +735,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         await ctx.send("_Too many words found. Please use b!see._")
         with open(image_filepath_small, "rb") as f:
         await ctx.send(file=discord.File(f))
-
-
-        @bot.command(brief='remove solution', aliases=['r'])
-        @commands.check(channel_valid)
-        async def remove(ctx, arg):
-        word_info = game_status.approval_status(arg)
-        if arg in game_status.found_words_set:
-        game_status.remove_word(arg)
-        PlayerHandler.player_remove_word(ctx, word_info)
-        if counter.trigger():
-        await simple_board(ctx)
-        await ctx.send("Removed _" + arg + "_.")
 
         @bot.command(brief='send saved games')
         async def oldgames(ctx):
