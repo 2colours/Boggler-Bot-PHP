@@ -680,15 +680,9 @@ function acknowledgement_reaction(string $word)
 from numpy import random as rnd
 import random as rand
 from json import load, dump
-import discord
-from discord.ext import commands
 import os
-import sys
-import traceback
-from hashlib import md5
 from datetime import date
 from asyncio import sleep
-import inspect
 from bojler_db import DatabaseHandler, DictionaryType
 from bojler_config import ConfigHandler
 from bojler_game_status import GameStatus, EasterEggHandler
