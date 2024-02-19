@@ -520,11 +520,7 @@ function highscore_names(array $ids)
     $names = [];
     $handler = PlayerHandler::getInstance();
     foreach ($ids as $id) {
-        if (array_key_exists('server_name', $handler->player_dict[$id])) {
-            array_push($handler->player_dict[$id]['server_name'], $names);
-        } else {
-            array_push($handler->player_dict[$id]['name'], $names);
-        }
+        array_push($names, $handler->player_dict[$id]['server_name'] ?? $handler->player_dict[$id]['name']);
     }
     return implode(', ', $names);
 }
