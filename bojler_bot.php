@@ -318,7 +318,7 @@ function new_game(Message $ctx)
     $emoji_version_description = current_emoji_version()[0];
     await($ctx->channel->sendMessage(<<<END
         Game #**$game_number** _($emoji_version_description)_:
-        **($solutions_count)** possible approved words)
+        **($solutions_count)** possible approved words
         END));
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_NORMAL)));
 }
@@ -541,7 +541,7 @@ function game_highscore()
         END;
     if (array_key_exists('Newcomer', $awards) && count($awards['Newcomer']) !== 0) {
         $newcomer_highscore_names = highscore_names($awards['Newcomer']);
-        $message .= "*Newcomer of the day:* $newcomer_highscore_names";
+        $message .= "\n*Newcomer of the day:* $newcomer_highscore_names";
     }
     return $message;
 }
