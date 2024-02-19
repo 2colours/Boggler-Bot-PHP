@@ -103,7 +103,7 @@ class PlayerHandler
 
     public function newGame()
     {
-        foreach ($this->player_dict as $player_data) {
+        foreach ($this->player_dict as &$player_data) {
             $player_data['found_words'] = [];
             $player_data['used_hints'] = [];
         }
