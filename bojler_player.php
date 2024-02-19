@@ -84,7 +84,7 @@ class PlayerHandler
 
     public function saveFile()
     {
-        file_put_contents(self::PLAYER_SAVES_PATH, json_encode($this->player_dict, JSON_FORCE_OBJECT));
+        file_put_contents(self::PLAYER_SAVES_PATH, json_encode((object)$this->player_dict, JSON_UNESCAPED_UNICODE));
     }
 
     public function newPlayer(Member $member)
