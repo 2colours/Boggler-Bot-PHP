@@ -58,7 +58,7 @@
       "Hungarian": "ló",
       "English": "and"
     },
-  "default_end_amount": 150,
+  "default_end_amount": 15,
   "default_translation" : ["Hungarian", "English"],
   "default_player": {
     "name": "",
