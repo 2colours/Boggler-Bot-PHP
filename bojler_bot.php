@@ -495,6 +495,20 @@ function remove(Message $ctx, $args)
     }
 }
 
+$bot->registerCommand(
+    'highscore',
+    decorate_handler(
+        [],
+        highscore(...)
+    ),
+    ['description' => 'send highscore']
+);
+
+function highscore(Message $ctx)
+{
+    await($ctx->channel->sendMessage(game_highscore()));
+}
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -849,10 +863,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         await ctx.send("Changed emoji to " + arg)
         else:
         await ctx.send("You have to find 100 words first! (currently " + str(PlayerHandler.get_player_field(ctx.author.id, "all_time_found")) + ")")
-
-        @bot.command(brief = 'send highscore')
-        async def highscore(ctx):
-        await ctx.send(game_highscore())
 
         #debug/testing stuff
         @bot.command(hidden=True,brief='delete long time saves (current game is deleted with \'new\')')
