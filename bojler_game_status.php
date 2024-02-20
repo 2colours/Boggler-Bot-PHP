@@ -223,7 +223,7 @@ class GameStatus
         $refdict = $this->letters->lower_cntdict;
         # wordlist
         $this->findWordlistSolutions($refdict);
-        $this->solutions = $this->wordlist_solutions;
+        $this->solutions = clone $this->wordlist_solutions;
         # dictionaries (hints)
         $this->findHints();
         foreach ($this->available_hints as $hints_for_language) {
