@@ -528,6 +528,24 @@ function add(Message $ctx, $args)
     }
 }
 
+$bot->registerCommand(
+    'communitylist',
+    decorate_handler(
+        [],
+        community_list(...)
+    ),
+    ['description' => 'send current community list']
+);
+
+function community_list(Message $ctx)
+{
+    $file_to_send = 'live_data/' . COMMUNITY_WORDLISTS[GAME_STATUS->current_lang];
+    if (!is_file($file_to_send)) {
+        touch($file_to_send);
+    }
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($file_to_send)));
+}
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -709,7 +727,6 @@ function acknowledgement_reaction(string $word)
 from numpy import random as rnd
 import random as rand
 from json import load, dump
-import os
 from datetime import date
 from asyncio import sleep
 from bojler_db import DatabaseHandler, DictionaryType
@@ -728,15 +745,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
     async def easter_egg_trigger(ctx, word, add='' ): # handle_easter_eggs decides which one to trigger, this here triggers it then type=easter_egg_handler.handle_easter_eggs(word, add) if not type: return print("Easter Egg") # to tell us when this might be responsible for anything if type=="nyan" : await quick_walk(ctx, "nyan" ) elif type=="bojler" : await bojler(ctx) elif type=="tongue" : message=await ctx.send("😝") await sleep(0.3) await message.delete() elif type=="varázsló" : await quick_walk(ctx, "varázsló" ) elif type=="huszár" : message=await ctx.send(easter_eggs["nagyhuszár"][0]) await sleep(2) await message.delete()
 
         # async def test(ctx, *, arg): for more than one word (whole message)
-
-        @bot.command(brief='send current community list')
-        async def communitylist(ctx):
-        file_to_send = f'live_data/{community_wordlists[game_status.current_lang]}'
-        if not os.path.isfile(file_to_send):
-        with open(file_to_send, 'w'):
-        pass
-        with open(file_to_send, "r") as f:
-        await ctx.send(file=discord.File(f))
 
         @bot.command(hidden=True,brief='load saved game')
         @commands.is_owner()
