@@ -509,6 +509,25 @@ function highscore(Message $ctx)
     await($ctx->channel->sendMessage(game_highscore()));
 }
 
+$bot->registerCommand(
+    'add',
+    decorate_handler(
+        [needs_counting(...)],
+        'add'
+    ),
+    ['description' => 'add to community wordlist']
+);
+
+function add(Message $ctx, $args)
+{
+    $word = $args[0];
+    if (GAME_STATUS->tryAddCommunity($word)) {
+        await($ctx->react('📝'));
+    } else {
+        await($ctx->channel->sendMessage('Word already in the community list'));
+    }
+}
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -709,15 +728,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
     async def easter_egg_trigger(ctx, word, add='' ): # handle_easter_eggs decides which one to trigger, this here triggers it then type=easter_egg_handler.handle_easter_eggs(word, add) if not type: return print("Easter Egg") # to tell us when this might be responsible for anything if type=="nyan" : await quick_walk(ctx, "nyan" ) elif type=="bojler" : await bojler(ctx) elif type=="tongue" : message=await ctx.send("😝") await sleep(0.3) await message.delete() elif type=="varázsló" : await quick_walk(ctx, "varázsló" ) elif type=="huszár" : message=await ctx.send(easter_eggs["nagyhuszár"][0]) await sleep(2) await message.delete()
 
         # async def test(ctx, *, arg): for more than one word (whole message)
-
-        @bot.command(brief='add to community wordlist')
-        @needs_counting
-        async def add(ctx, word):
-        await achievements(ctx, word, "add")
-        if game_status.try_add_community(word):
-        await ctx.message.add_reaction("📝")
-        else:
-        await ctx.send("Word already in the community list")
 
         @bot.command(brief='send current community list')
         async def communitylist(ctx):
