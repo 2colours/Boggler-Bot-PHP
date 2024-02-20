@@ -509,14 +509,14 @@ class GameStatus
         return $starter_amount < $this->end_amount && $this->amount_approved_words === $this->end_amount;
     }
 
-    public function tryAddCommunity(string $word, array $refdict)
+    public function tryAddCommunity(string $word)
     {
         if (in_array($word, $this->community_list)) {
             return false;
         }
         file_put_contents(COMMUNITY_WORDLIST_PATHS[$this->current_lang], "$word\n", FILE_APPEND);
         array_push($this->community_list, $word);
-        if ($this->wordValidFast($word, $refdict)) {
+        if ($this->wordValidFast($word, $this->letters->lower_cntdict)) {
             array_push($this->communitylist_solutions, $word);
             $this->solutions->add($word);
             if ($this->found_words->contains($word)) {
