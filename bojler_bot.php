@@ -748,7 +748,6 @@ function acknowledgement_reaction(string $word)
 from numpy import random as rnd
 import random as rand
 from json import load, dump
-from datetime import date
 from asyncio import sleep
 from bojler_db import DatabaseHandler, DictionaryType
 from bojler_config import ConfigHandler
