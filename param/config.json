@@ -70,6 +70,9 @@
     "role": "",
     "server_name": ""
   },
+  "rewards" : {
+    "words_for_emoji": 20
+  },
   "progress_bar_version_dict" : {"default" : [["Rice edition","🥣🍚"], ["Friendly moon edition","🌚🌝"], ["Umbrella edition",["🌂","☂️"]], ["Glasses edition","🕶️👓"],
                           ["Water edition","💧🌊"], ["Winter edition","❄️☃️"], ["Newspaper edition",["🗞️", "📰"]], ["Lock edition","🔒🔓"], ["Moon edition","🌑🌒🌓🌔🌕"],
                           ["Paper edition","📄📝"], ["Weather edition",["☁️", "🌥️", "⛅", "🌤️", "☀️"]], ["Sunflower edition","🌱🌻"], ["Resurrecting flower edition","🥀🌹"],

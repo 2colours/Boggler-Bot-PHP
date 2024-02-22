@@ -167,6 +167,11 @@ function enough_found()
     return GAME_STATUS->found_words->count() >= GAME_STATUS->end_amount;
 }
 
+function emoji_awarded(Message $ctx)
+{
+    return PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->get('rewards')['words_for_emoji'];
+}
+
 # "handler-ish" functions (not higher order, takes context, DC side effects)
 
 function try_send_msg(Message $ctx, string $content)
@@ -546,6 +551,22 @@ function community_list(Message $ctx)
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($file_to_send)));
 }
 
+$bot->registerCommand(
+    'emoji',
+    decorate_handler(
+        [ensure_predicate(emoji_awarded(...), fn (Message $ctx) => 'You have to find ' . CONFIG->get('rewards')['words_for_emoji'] . ' words first! (currently ' . PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
+        'emoji'
+    ),
+    ['description' => 'change your personal emoji']
+);
+
+function emoji(Message $ctx, $args)
+{
+    $emoji_str = $args[0];
+    PlayerHandler::getInstance()->setEmoji($ctx->author->id, $emoji_str);
+    await($ctx->channel->sendMessage("Changed emoji to $emoji_str."));
+}
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -869,14 +890,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         with open(image_filepath_normal, 'rb') as f:
         await ctx.send(file=discord.File(f))
         counter.reset()
-
-        @bot.command(brief='change your personal emoji')
-        async def emoji(ctx, arg):
-        if PlayerHandler.get_player_field(ctx.author.id, "all_time_found")>= 100:
-        PlayerHandler.set_emoji(ctx.author.id, arg)
-        await ctx.send("Changed emoji to " + arg)
-        else:
-        await ctx.send("You have to find 100 words first! (currently " + str(PlayerHandler.get_player_field(ctx.author.id, "all_time_found")) + ")")
 
         #debug/testing stuff
         @bot.command(hidden=True,brief='delete long time saves (current game is deleted with \'new\')')
