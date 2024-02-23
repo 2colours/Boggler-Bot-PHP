@@ -243,7 +243,7 @@ class GameStatus
         $db = DatabaseHandler::getInstance();
         $refdict = $this->letters->lower_cntdict;
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
-            $this->available_hints[$language] = array_filter($db->getWords(new DictionaryType($this->current_lang, $language)), fn ($item) => $this->wordValidFast($item, $refdict));
+            $this->available_hints[$language] = array_values(array_filter($db->getWords(new DictionaryType($this->current_lang, $language)), fn ($item) => $this->wordValidFast($item, $refdict)));
         }
     }
 
