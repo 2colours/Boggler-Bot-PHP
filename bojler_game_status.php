@@ -359,7 +359,7 @@ class GameStatus
         $this->wordlist_solutions = new Set(array_filter($content, fn ($line) => $this->wordValidFast($line, $refdict)));
     }
 
-    private function tryLoadOldGame(int $number)
+    public function tryLoadOldGame(int $number)
     {
         $this->saveOld();
         if (1 <= $number && $number <= $this->max_saved_game + 1) {
@@ -468,7 +468,7 @@ class GameStatus
         }
 
         # New game is appended (if game_number > max_saved_game)
-        file_put_contents($this->archive_file, $this->archiveEntry(), FILE_APPEND);
+        file_put_contents($this->archive_file, $this->archiveEntry() . "\n", FILE_APPEND);
         $this->max_saved_game++;
         $this->saveGame();
     }

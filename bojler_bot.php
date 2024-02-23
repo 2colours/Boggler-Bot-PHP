@@ -624,6 +624,48 @@ function old_games(Message $ctx)
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(SAVES_FILEPATH)));
 }
 
+$bot->registerCommand(
+    'loadgame',
+    decorate_handler(
+        [ensure_predicate(channel_valid(...))],
+        'load_game'
+    ),
+    ['description' => 'load older games (see: oldgames), example: b!loadgame 5']
+);
+
+function load_game(Message $ctx, $args)
+{
+    $game_number = (int) $args[0];
+    # Checks for changes before showing "found words" every time when just skipping through old games. That would be annoying.
+    if (GAME_STATUS->changes_to_save) {
+        $message = 'All words found in the last game: ' . found_words_output();
+        if (!try_send_msg($ctx, $message)) {
+            $found_words_count = GAME_STATUS->found_words->count();
+            await($ctx->channel->sendMessage("**$found_words_count** words found in this game. **"));
+        }
+    }
+    $ctx->channel->broadcastTyping(); # TODO better synchronization maybe?
+    if (!GAME_STATUS->tryLoadOldGame($game_number)) {
+        await($ctx->channel->sendMessage('The requested game doesn\'t exist.'));
+        return;
+    }
+    # here current_lang, because this is loaded from saves.txt
+    $game_number = GAME_STATUS->game_number;
+    $current_lang = GAME_STATUS->current_lang;
+    $found_words_output = found_words_output();
+    $message = <<<END
+
+
+    **Game #$game_number** ($current_lang)
+    **Already found words:** $found_words_output
+    END;
+    foreach (output_split_cursive($message) as $part) {
+        await($ctx->channel->sendMessage($part));
+    }
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_NORMAL)));
+    COUNTER->reset();
+}
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -856,27 +898,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         else:
         message += "◍"
         await ctx.send("Hint: _" + message + "_")
-
-        @bot.command(brief='load older games (see: oldgames), example: b!loadgame 5')
-        @commands.check(channel_valid)
-        async def loadgame(ctx, arg):
-        # Checks for changes before showing "found words" every time when just skipping through old games. That would be annoying.
-        if game_status.changes_to_save:
-        message = "All words found in the last game: " + found_words_output()
-        if not (await ctx.try_send(message)):
-        await ctx.send("Congratulations! You won this game! 🎉 You found **" + str(len(game_status.found_words_set)) + "** words.\n")
-        async with ctx.channel.typing():
-        if game_status.try_load_oldgame(int(arg)):
-        # here current_lang, because this is loaded from saves.txt
-        message = "\n\n**Game #" + str(game_status.game_number) + "** (" + game_status.current_lang + ")\n" + "**Already found words:** " + found_words_output()
-        for item in output_split_cursive(message):
-        await ctx.send(item)
-
-        with open(image_filepath_normal, 'rb') as f:
-        await ctx.send(file=discord.File(f))
-        counter.reset()
-        else:
-        await ctx.send("The requested game doesn't exist.")
 
         @bot.command(brief='load random old game')
         @commands.check(channel_valid)
