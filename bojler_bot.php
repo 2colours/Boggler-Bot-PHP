@@ -567,6 +567,49 @@ function emoji(Message $ctx, $args)
     await($ctx->channel->sendMessage("Changed emoji to $emoji_str."));
 }
 
+$bot->registerCommand(
+    'hint',
+    decorate_handler(
+        [ensure_predicate(channel_valid(...)), needs_counting(...)],
+        hint_command('English')
+    ),
+    ['description' => 'give a hint in English']
+);
+
+$bot->registerCommand(
+    'hinweis',
+    decorate_handler(
+        [ensure_predicate(channel_valid(...)), needs_counting(...)],
+        hint_command('German')
+    ),
+    ['description' => 'give a hint in German']
+);
+
+$bot->registerCommand(
+    'súgás',
+    decorate_handler(
+        [ensure_predicate(channel_valid(...)), needs_counting(...)],
+        hint_command('Hungarian')
+    ),
+    ['description' => 'give a hint in Hungarian']
+);
+
+function hint_command(string $from_language)
+{
+    return function (Message $ctx) use ($from_language) {
+        $unfound_hint_list = array_values(array_filter(GAME_STATUS->available_hints[$from_language], fn ($hint) => !GAME_STATUS->found_words->contains($hint)));
+        if (count($unfound_hint_list) === 0) {
+            await($ctx->channel->sendMessage('No hints left.'));
+            return;
+        }
+        var_dump($unfound_hint_list);
+        $chosen_idx = random_int(0, array_key_last($unfound_hint_list));
+        $hint_content = get_translation($unfound_hint_list[$chosen_idx], new DictionaryType(GAME_STATUS->current_lang, $from_language));
+        await($ctx->channel->sendMessage("hint: _{$hint_content}_"));
+        PlayerHandler::getInstance()->playerUsedHint($ctx, $unfound_hint_list[$chosen_idx]);
+    };
+}
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -782,51 +825,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         async def oldgames(ctx):
         with open(saves_filepath, 'r') as f:
         await ctx.send(file=discord.File(f))
-
-
-        @bot.command(brief = 'give a hint')
-        @commands.check(channel_valid)
-        @needs_counting
-        async def hint(ctx):
-        #found_words_caps = list(map(str.upper, game_status.found_words_set))
-        #hints_caps = list(map(str.upper, game_status.available_hints))
-        unfound_hint_list = list(filter(lambda x: x not in game_status.found_words_set, game_status.available_hints["English"]))
-        if len(unfound_hint_list) == 0:
-        await ctx.send("No hints left.")
-        else:
-        number = rnd.randint(0, len(unfound_hint_list))
-        entry = game_status.get_translation(unfound_hint_list[number], DictionaryType(game_status.current_lang, "English"))
-        await ctx.send('hint: _' + entry + '_')
-        PlayerHandler.player_used_hint(ctx, unfound_hint_list[number])
-
-        @bot.command(brief = 'give a hint in German', aliases=['Hinweis'])
-        @commands.check(channel_valid)
-        @needs_counting
-        async def hinweis(ctx):
-        #found_words_caps = list(map(str.upper, game_status.found_words_set))
-        #hints_caps = list(map(str.upper, game_status.available_hints["German"]))
-        unfound_hint_list = list(filter(lambda x: x not in game_status.found_words_set, game_status.available_hints["German"]))
-        if len(unfound_hint_list) == 0:
-        await ctx.send("No hints left.")
-        else:
-        number = rnd.randint(0, len(unfound_hint_list))
-        entry = game_status.get_translation(unfound_hint_list[number], DictionaryType(game_status.current_lang, "German"))
-        await ctx.send('Hinweis: _' + entry + '_')
-        PlayerHandler.player_used_hint(ctx, unfound_hint_list[number])
-
-
-        @bot.command(brief = 'give a hint in Hungarian')
-        @commands.check(channel_valid)
-        @needs_counting
-        async def súgás(ctx):
-        unfound_hint_list = list(filter(lambda x: x not in game_status.found_words_set, game_status.available_hints["Hungarian"]))
-        if len(unfound_hint_list) == 0:
-        await ctx.send("No hints left.")
-        else:
-        number = rnd.randint(0, len(unfound_hint_list))
-        entry = game_status.get_translation(unfound_hint_list[number], DictionaryType(game_status.current_lang, "Hungarian"))
-        await ctx.send('Súgás: _' + entry + '_')
-        PlayerHandler.player_used_hint(ctx, unfound_hint_list[number])
 
         @bot.command(brief = 'reveal letters of a previously requested hint')
         @commands.check(channel_valid)
