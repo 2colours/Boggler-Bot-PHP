@@ -610,6 +610,20 @@ function hint_command(string $from_language)
     };
 }
 
+$bot->registerCommand(
+    'oldgames',
+    decorate_handler(
+        [],
+        old_games(...)
+    ),
+    ['description' => 'send saved games']
+);
+
+function old_games(Message $ctx)
+{
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(SAVES_FILEPATH)));
+}
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -819,11 +833,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         if not (await ctx.try_send(message)):
         await ctx.send("_Too many words found. Please use b!see._")
         with open(image_filepath_small, "rb") as f:
-        await ctx.send(file=discord.File(f))
-
-        @bot.command(brief='send saved games')
-        async def oldgames(ctx):
-        with open(saves_filepath, 'r') as f:
         await ctx.send(file=discord.File(f))
 
         @bot.command(brief = 'reveal letters of a previously requested hint')
