@@ -666,6 +666,37 @@ function load_game(Message $ctx, $args)
     COUNTER->reset();
 }
 
+$bot->registerCommand(
+    'random',
+    decorate_handler(
+        [ensure_predicate(channel_valid(...))],
+        random(...)
+    ),
+    ['description' => 'load random old game']
+);
+
+function random(Message $ctx)
+{
+    # random game between 1 and max_saved_game - after one calling, newest game is saved, too. Newest game can appear as second random call
+    $number = random_int(1, GAME_STATUS->max_saved_game + 1);
+    if (GAME_STATUS->thrown_the_dice) {
+        await($ctx->channel->sendMessage('All words found in the last game: ' . found_words_output()));
+    }
+    GAME_STATUS->tryLoadOldGame($number);
+    # here current_lang, because this is loaded from saves.txt
+    $game_number = GAME_STATUS->game_number;
+    $current_lang = GAME_STATUS->current_lang;
+    $found_words_output = found_words_output();
+    $message = <<<END
+
+
+    **Game #$game_number** ($current_lang)
+    **Already found words:** $found_words_output
+    END;
+    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(IMAGE_FILEPATH_NORMAL)));
+    COUNTER->reset();
+}
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -898,25 +929,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         else:
         message += "◍"
         await ctx.send("Hint: _" + message + "_")
-
-        @bot.command(brief='load random old game')
-        @commands.check(channel_valid)
-        async def random(ctx):
-        # random game between 1 and max_saved_game - after one calling, newest game is saved, too. Newest game can appear as second random call
-        number = rnd.randint(1, game_status.max_saved_game+1)
-
-        if game_status.thrown_the_dice:
-        await ctx.send("All words found in the last game: " + found_words_output())
-
-
-        game_status.try_load_oldgame(number)
-
-        # here current_lang, because this is loaded from saves.txt
-        await ctx.send("\n\n**Game #" + str(game_status.game_number) + "** (" + game_status.current_lang + ")\n" + "**Already found words:** " + found_words_output())
-
-        with open(image_filepath_normal, 'rb') as f:
-        await ctx.send(file=discord.File(f))
-        counter.reset()
 
         #debug/testing stuff
         @bot.command(hidden=True,brief='delete long time saves (current game is deleted with \'new\')')
