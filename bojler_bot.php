@@ -12,6 +12,7 @@ use Symfony\Component\Dotenv\Dotenv;
 use Discord\DiscordCommandClient;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Intents;
+use Random\Randomizer;
 use function React\Async\await;
 
 require_once __DIR__ . '/bojler_game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
@@ -228,6 +229,7 @@ function decorate_handler(array $decorators, callable $handler)
 define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
 # define('easter_egg_handler', new EasterEggHandler(GAME_STATUS->found_words_set));
 define('COUNTER', new Counter(10));
+const RNG = new Randomizer();
 
 $bot = new DiscordCommandClient([
     'prefix' => 'b!',
@@ -697,6 +699,30 @@ function random(Message $ctx)
     COUNTER->reset();
 }
 
+$bot->registerCommand(
+    'reveal',
+    decorate_handler(
+        [ensure_predicate(channel_valid(...)), needs_counting(...)],
+        reveal(...)
+    ),
+    ['description' => 'reveal letters of a previously requested hint']
+);
+
+function reveal(Message $ctx)
+{
+    $player_hints = PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'used_hints');
+    $left_hints = array_diff($player_hints, GAME_STATUS->found_words->toArray());
+    if (count($left_hints) === 0) {
+        await($ctx->channel->sendMessage('You have no unsolved hints left.'));
+        return;
+    }
+    $chosen_word = $left_hints[array_rand($left_hints)];
+    $word_length = grapheme_strlen($chosen_word);
+    $revealed_indices = RNG->pickArrayKeys(range(0, $word_length - 1), intdiv($word_length, 3));
+    $masked_word = masked_word($chosen_word, $revealed_indices);
+    await($ctx->channel->sendMessage("Hint: _{$masked_word}_"));
+}
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
@@ -875,8 +901,6 @@ function acknowledgement_reaction(string $word)
 }
 
 /*import math
-from numpy import random as rnd
-import random as rand
 from json import load, dump
 from asyncio import sleep
 from bojler_db import DatabaseHandler, DictionaryType
@@ -907,28 +931,6 @@ adventure=Adventure(game_status.letters.list, set(custom_emojis[game_status.curr
         await ctx.send("_Too many words found. Please use b!see._")
         with open(image_filepath_small, "rb") as f:
         await ctx.send(file=discord.File(f))
-
-        @bot.command(brief = 'reveal letters of a previously requested hint')
-        @commands.check(channel_valid)
-        @needs_counting
-        async def reveal(ctx):
-        players_hints = PlayerHandler.get_player_field(ctx.author.id, "used_hints")
-        left_hints = []
-        for word in players_hints:
-        if not word in game_status.found_words_set:
-        left_hints.append(word)
-        if not left_hints:
-        await ctx.send("You have no unsolved hints left.")
-        else:
-        word = left_hints[rnd.randint(0, len(left_hints))]
-        poslist = rand.sample(range(len(word)), int(len(word)/3))
-        message = ""
-        for i in range(len(word)):
-        if i in poslist:
-        message += word[i]
-        else:
-        message += "◍"
-        await ctx.send("Hint: _" + message + "_")
 
         #debug/testing stuff
         @bot.command(hidden=True,brief='delete long time saves (current game is deleted with \'new\')')

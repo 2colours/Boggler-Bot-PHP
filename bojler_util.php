@@ -54,3 +54,18 @@ function fetch_all(SQLite3Result $db_result)
         yield $current_entry;
     }
 }
+
+
+function masked_word(string $original_word, array $transparent_positions)
+{
+    var_dump($transparent_positions);
+    $result = '';
+    $bytes_count = strlen($original_word);
+    $next = 0;
+    $current_position = 0;
+    while (($current_grapheme = grapheme_extract($original_word, 1, GRAPHEME_EXTR_COUNT, $start = $next, $next)) !== false && $start < $bytes_count) {
+        $result .= in_array($current_position, $transparent_positions) ? $current_grapheme : '◍';
+        $current_position++;
+    }
+    return $result;
+}
