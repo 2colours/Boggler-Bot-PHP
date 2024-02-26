@@ -605,10 +605,10 @@ function hint_command(string $from_language)
             return;
         }
         var_dump($unfound_hint_list);
-        $chosen_idx = random_int(0, array_key_last($unfound_hint_list));
-        $hint_content = get_translation($unfound_hint_list[$chosen_idx], new DictionaryType(GAME_STATUS->current_lang, $from_language));
+        $chosen_hint = $unfound_hint_list[array_rand($unfound_hint_list)];
+        $hint_content = get_translation($chosen_hint, new DictionaryType(GAME_STATUS->current_lang, $from_language));
         await($ctx->channel->sendMessage("hint: _{$hint_content}_"));
-        PlayerHandler::getInstance()->playerUsedHint($ctx, $unfound_hint_list[$chosen_idx]);
+        PlayerHandler::getInstance()->playerUsedHint($ctx, $chosen_hint);
     };
 }
 

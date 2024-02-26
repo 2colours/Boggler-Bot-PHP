@@ -560,7 +560,8 @@ class GameStatus
         $used_permutation = range(0, 15);
         shuffle($used_permutation);
         $current_dice = DICE_DICT[$this->current_lang];
-        $this->letters = new LetterList(array_map(fn ($dice_index) => $current_dice[$dice_index][rand(0, 5)], $used_permutation), just_regenerate: true);
+        $dice_permutated = array_map(fn ($dice_index) => $current_dice[$dice_index], $used_permutation);
+        $this->letters = new LetterList(array_map(fn ($current_die) => $current_die[array_rand($current_die)], $dice_permutated), just_regenerate: true);
         $this->saveGame();
     }
 
