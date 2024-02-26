@@ -228,7 +228,7 @@ function decorate_handler(array $decorators, callable $handler)
 # TODO it's dubious whether these are actually constants; gotta think about it
 define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
 # define('easter_egg_handler', new EasterEggHandler(GAME_STATUS->found_words_set));
-define('COUNTER', new Counter(10));
+const COUNTER = new Counter(10);
 const RNG = new Randomizer();
 
 $bot = new DiscordCommandClient([
