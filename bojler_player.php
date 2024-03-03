@@ -134,7 +134,7 @@ class PlayerHandler
         $this->playerUpdate($ctx->member);
         $this->player_dict[$ctx->author->id]['found_words'][] = $word_info['word'];
         $this->player_dict[$ctx->author->id]['all_time_found']++;
-        if (array_key_exists('any', $word_info)) {
+        if ($word_info['any']) {
             $this->player_dict[$ctx->author->id]['all_time_approved']++;
         }
         $this->saveFile();

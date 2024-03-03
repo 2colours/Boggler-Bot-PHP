@@ -457,7 +457,7 @@ function add_solution(Message $ctx, $args)
     $word = $args[0];
     $word_info = GAME_STATUS->approvalStatus($word);
     #await(easter_egg_trigger($ctx, $word, '_Rev'));
-    if (array_key_exists('valid', $word_info)) {
+    if ($word_info['valid']) {
         if (GAME_STATUS->found_words->contains($word)) {
             await($ctx->channel->sendMessage("$word was already found."));
         } else {
@@ -824,7 +824,7 @@ function approval_reaction(string $word): string
             return '✅';
         }
     }
-    if (array_key_exists('community', $approval_status) && $approval_status['community']) {
+    if ($approval_status['community']) {
         return '✔';
     }
 }
