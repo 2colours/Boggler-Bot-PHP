@@ -114,9 +114,7 @@ class PlayerHandler
     {
         if (!array_key_exists($player->user->id, $this->player_dict)) {
             $this->newPlayer($player);
-            var_dump($this->player_dict[$player->user->id]); # TODO why?
         } else {
-            var_dump($this->player_dict[$player->user->id]); # TODO why?
             $this->player_dict[$player->user->id] = array_merge(
                 $this->default_player,
                 $this->player_dict[$player->user->id],
