@@ -585,30 +585,23 @@ class GameStatus
                 $highscore[$found_words] = [$key];
             }
         }
-        $highscore_list = array_keys($highscore);
-        arsort($highscore_list);
+        krsort($highscore);
         # Places 1,2,3
         $places = ['First place', 'Second place', 'Third place'];
-        for ($i = 0; $i < min(count($highscore_list), 3); $i++) {
-            $awards[$places[$i]] = $highscore[$highscore_list[$i]];
-        }
-        for ($i = 0; $i < count($highscore_list); $i++) {
-            foreach ($highscore[$highscore_list[$i]] as $player) {
-                $info = $this->player_handler->player_dict[$player];
-                # Best Beginner
-                if ($info['role'] === 'Beginner') {
-                    array_push($awards['Best Beginner'], $player);
-                }
-                # Newcomer
-                if (count($info['found_words']) === $info['all_time_found']) {
-                    array_push($awards['Newcomer'], $player);
-                }
-                $amount = max(1, count(new Set(array_merge($info['found_words'], $info['used_hints']))));
-                if (count(new Set(array_intersect($info['found_words'], $info['used_hints']))) === $amount) {
-                    array_push($awards['Most solved hints'], $player);
-                }
+        $awarded_places = min(count($places), count($highscore));
+        $awards = array_combine(array_slice($places, 0, $awarded_places), array_slice($highscore, 0, $awarded_places));
+        foreach (array_values($highscore) as $players) {
+            if (count($awards['Best Beginner']) > 0) {
+                break;
             }
+            $awards['Best Beginner'] = array_filter($players, fn ($player) => $this->player_handler->getPlayerField($player, 'role') === 'Beginner');
         }
+        $relevant_players = array_merge($highscore);
+        $is_newcomer = fn ($player_data) => count($player_data['found_words']) === $player_data['all_time_found'];
+        $solved_hints = fn ($player_data) => count(array_intersect($player_data['found_words'], $player_data['used_hints']));
+        $awards['Newcomer'] = array_filter($relevant_players, fn ($player) => $is_newcomer($this->player_handler->player_dict[$player]));
+        $most_solved_hints_amount = max(array_map(fn ($player) => $solved_hints($this->player_handler->player_dict[$player]), $relevant_players));
+        $awards['Most solved hints'] = array_filter($relevant_players, fn ($player) => $solved_hints($this->player_handler->player_dict[$player]) === $most_solved_hints_amount);
         return $awards;
     }
 }
