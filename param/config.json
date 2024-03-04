@@ -31,7 +31,7 @@
   "home_channel": 1201185389617086535,
   "display": {
     "normal": {
-      "space_top": 50,
+      "space_top": 100,
       "space_left": 50,
       "distance_horizontal": 120,
       "distance_vertical": 100,
@@ -41,7 +41,7 @@
       "image_filename": "Boggle_Bild.png"
     },
     "small": {
-      "space_top": 20,
+      "space_top": 50,
       "space_left": 20,
       "distance_horizontal": 48,
       "distance_vertical": 40,
