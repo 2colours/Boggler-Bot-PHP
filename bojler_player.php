@@ -64,18 +64,15 @@ class PlayerHandler
             $read_content = '{}';
             file_put_contents(self::PLAYER_SAVES_PATH, $read_content);
         }
-        $broken_dict = json_decode($read_content, true); # This one has numeric keys because there is no way to turn that off
-        $this->player_dict = array_combine(
-            array_map(fn ($id) => strval($id), array_keys($broken_dict)),
-            array_values(array_map(
-                fn ($player_data) => array_merge($this->default_player, $player_data),
-                $broken_dict
-            ))
+        $read_dict = json_decode($read_content, true);
+        $this->player_dict = array_map(
+            fn ($player_data) => array_merge($this->default_player, $player_data),
+            $read_dict
         );
         $this->saveFile();
     }
 
-    public function getPlayerField(string $id, $field_name)
+    public function getPlayerField(string|int $id, $field_name)
     {
         return $this->player_dict[$id][$field_name];
     }
