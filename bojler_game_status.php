@@ -589,7 +589,7 @@ class GameStatus
         # Places 1,2,3
         $places = ['First place', 'Second place', 'Third place'];
         $awarded_places = min(count($places), count($highscore));
-        $awards = array_combine(array_slice($places, 0, $awarded_places), array_slice($highscore, 0, $awarded_places));
+        $awards = array_merge($awards, array_combine(array_slice($places, 0, $awarded_places), array_slice($highscore, 0, $awarded_places)));
         foreach (array_values($highscore) as $players) {
             if (count($awards['Best Beginner']) > 0) {
                 break;
