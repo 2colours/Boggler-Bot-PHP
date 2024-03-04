@@ -64,7 +64,7 @@ class PlayerHandler
             $read_content = '{}';
             file_put_contents(self::PLAYER_SAVES_PATH, $read_content);
         }
-        $this->player_dict = json_decode($read_content, true);
+        $this->player_dict = json_decode($read_content, true, flags: JSON_BIGINT_AS_STRING);
         foreach ($this->player_dict as &$player_data) {
             $player_data = array_merge($this->default_player, $player_data);
         }
