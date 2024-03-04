@@ -596,7 +596,7 @@ class GameStatus
             }
             $awards['Best Beginner'] = array_filter($players, fn ($player) => $this->player_handler->getPlayerField($player, 'role') === 'Beginner');
         }
-        $relevant_players = array_merge($highscore);
+        $relevant_players = array_merge(...$highscore);
         $is_newcomer = fn ($player_data) => count($player_data['found_words']) === $player_data['all_time_found'];
         $solved_hints = fn ($player_data) => count(array_intersect($player_data['found_words'], $player_data['used_hints']));
         $awards['Newcomer'] = array_filter($relevant_players, fn ($player) => $is_newcomer($this->player_handler->player_dict[$player]));
