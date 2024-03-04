@@ -1,3 +1,4 @@
 .env
 /vendor/
 /.vscode/
+live_data/
