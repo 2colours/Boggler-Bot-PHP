@@ -27,10 +27,10 @@ function hungarian_role(Member $member)
 function name_shortened($name)
 {
     if (grapheme_strlen($name) >= 15) {
-        $name = grapheme_substr($name, 0, grapheme_strpos($name, '|'));
+        $name = grapheme_substr($name, 0, grapheme_strpos($name, '|') ?: null);
     }
     if (grapheme_strlen($name) >= 15) {
-        $name = grapheme_substr($name, 0, grapheme_strpos($name, ' '));
+        $name = grapheme_substr($name, 0, grapheme_strpos($name, ' ') ?: null);
     }
     if (grapheme_strlen($name) >= 15) {
         $name = grapheme_substr($name, 0, 15);
