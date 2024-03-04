@@ -186,7 +186,7 @@ class GameStatus
         }
         # Current Game
         $this->letters = new LetterList(explode(' ', $content[1]));
-        $this->found_words = new Set(explode(' ', $content[2]));
+        $this->found_words = new Set($content[2] === '' ? [] : explode(' ', $content[2]));
         $this->game_number = (int) explode("\t", $content[3])[1];
         $this->current_lang = explode("\t", $content[4])[1];
         # General Settings
