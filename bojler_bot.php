@@ -14,6 +14,7 @@ use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Intents;
 use Random\Randomizer;
 use function React\Async\await;
+use function React\Async\async;
 
 require_once __DIR__ . '/bojler_game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
 require_once __DIR__ . '/bojler_player.php'; # TODO PlayerHandler with PSR-4 autoloader
@@ -270,7 +271,7 @@ $bot->registerCommand('stats', function (Message $ctx) {
 
 $bot->registerCommand(
     'trigger',
-    decorate_handler([ensure_predicate(from_creator(...), fn () => 'This would be very silly now, wouldn\'t it.')], 'trigger'),
+    decorate_handler([async(...), ensure_predicate(from_creator(...), fn () => 'This would be very silly now, wouldn\'t it.')], 'trigger'),
     ['description' => 'testing purposes only']
 );
 function trigger(Message $ctx, $args)
@@ -280,7 +281,7 @@ function trigger(Message $ctx, $args)
 
 $bot->registerCommand(
     'nextlang',
-    decorate_handler([ensure_predicate(channel_valid(...))], 'next_language'),
+    decorate_handler([async(...), ensure_predicate(channel_valid(...))], 'next_language'),
     ['description' => 'change language']
 );
 function next_language(Message $ctx, $args)
@@ -300,7 +301,7 @@ function next_language(Message $ctx, $args)
 
 $bot->registerCommand(
     'new',
-    decorate_handler([ensure_predicate(channel_valid(...))], new_game(...)),
+    decorate_handler([async(...), ensure_predicate(channel_valid(...))], new_game(...)),
     ['description' => 'start new game']
 );
 function new_game(Message $ctx)
@@ -332,7 +333,7 @@ function new_game(Message $ctx)
 
 $bot->registerCommand(
     'see',
-    decorate_handler([ensure_predicate(channel_valid(...))], see(...)),
+    decorate_handler([async(...), ensure_predicate(channel_valid(...))], see(...)),
     ['description' => 'show current game']
 );
 
@@ -350,7 +351,7 @@ define('ENSURE_THROWN_DICE', ensure_predicate(needs_thrown_dice(...), fn () => '
 
 $bot->registerCommand(
     'status',
-    decorate_handler([ENSURE_THROWN_DICE], status(...)),
+    decorate_handler([async(...), ENSURE_THROWN_DICE], status(...)),
     ['description' => 'show current status of the game']
 );
 
@@ -380,7 +381,7 @@ function status(Message $ctx)
 $bot->registerCommand(
     'unfound',
     decorate_handler(
-        [ensure_predicate(enough_found(...), fn () => 'You have to find ' . GAME_STATUS->end_amount . ' words first.'), needs_counting(...)],
+        [async(...), ensure_predicate(enough_found(...), fn () => 'You have to find ' . GAME_STATUS->end_amount . ' words first.'), needs_counting(...)],
         unfound(...)
     ),
     ['description' => 'send unfound Scrabble solutions']
@@ -397,7 +398,7 @@ function unfound(Message $ctx)
 $bot->registerCommand(
     'left',
     decorate_handler(
-        [needs_counting(...)],
+        [async(...), needs_counting(...)],
         left(...)
     ),
     ['description' => 'amount of unfound Scrabble solutions']
@@ -429,7 +430,7 @@ function left(Message $ctx)
 $bot->registerCommand(
     'shuffle',
     decorate_handler(
-        [ensure_predicate(channel_valid(...))],
+        [async(...), ensure_predicate(channel_valid(...))],
         shuffle2(...)
     ),
     ['description' => 'shuffle the position of dice']
@@ -446,7 +447,7 @@ function shuffle2(Message $ctx)
 $bot->registerCommand(
     's',
     decorate_handler(
-        [ensure_predicate(channel_valid(...)), ENSURE_THROWN_DICE],
+        [async(...), ensure_predicate(channel_valid(...)), ENSURE_THROWN_DICE],
         'add_solution'
     ),
     ['description' => 'add solution'] # TODO aliases S and empty string?
@@ -484,7 +485,7 @@ function add_solution(Message $ctx, $args)
 $bot->registerCommand(
     'remove',
     decorate_handler(
-        [ensure_predicate(channel_valid(...)), needs_counting(...)],
+        [async(...), ensure_predicate(channel_valid(...)), needs_counting(...)],
         'remove'
     ),
     ['description' => 'remove solution', 'aliases' => 'r']
@@ -505,7 +506,7 @@ function remove(Message $ctx, $args)
 $bot->registerCommand(
     'highscore',
     decorate_handler(
-        [],
+        [async(...)],
         highscore(...)
     ),
     ['description' => 'send highscore']
@@ -519,7 +520,7 @@ function highscore(Message $ctx)
 $bot->registerCommand(
     'add',
     decorate_handler(
-        [needs_counting(...)],
+        [async(...), needs_counting(...)],
         'add'
     ),
     ['description' => 'add to community wordlist']
@@ -538,7 +539,7 @@ function add(Message $ctx, $args)
 $bot->registerCommand(
     'communitylist',
     decorate_handler(
-        [],
+        [async(...)],
         community_list(...)
     ),
     ['description' => 'send current community list']
@@ -556,7 +557,7 @@ function community_list(Message $ctx)
 $bot->registerCommand(
     'emoji',
     decorate_handler(
-        [ensure_predicate(emoji_awarded(...), fn (Message $ctx) => 'You have to find ' . CONFIG->get('rewards')['words_for_emoji'] . ' words first! (currently ' . PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
+        [async(...), ensure_predicate(emoji_awarded(...), fn (Message $ctx) => 'You have to find ' . CONFIG->get('rewards')['words_for_emoji'] . ' words first! (currently ' . PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
         'emoji'
     ),
     ['description' => 'change your personal emoji']
@@ -572,7 +573,7 @@ function emoji(Message $ctx, $args)
 $bot->registerCommand(
     'hint',
     decorate_handler(
-        [ensure_predicate(channel_valid(...)), needs_counting(...)],
+        [async(...), ensure_predicate(channel_valid(...)), needs_counting(...)],
         hint_command('English')
     ),
     ['description' => 'give a hint in English']
@@ -581,7 +582,7 @@ $bot->registerCommand(
 $bot->registerCommand(
     'hinweis',
     decorate_handler(
-        [ensure_predicate(channel_valid(...)), needs_counting(...)],
+        [async(...), ensure_predicate(channel_valid(...)), needs_counting(...)],
         hint_command('German')
     ),
     ['description' => 'give a hint in German']
@@ -590,7 +591,7 @@ $bot->registerCommand(
 $bot->registerCommand(
     'súgás',
     decorate_handler(
-        [ensure_predicate(channel_valid(...)), needs_counting(...)],
+        [async(...), ensure_predicate(channel_valid(...)), needs_counting(...)],
         hint_command('Hungarian')
     ),
     ['description' => 'give a hint in Hungarian']
@@ -615,7 +616,7 @@ function hint_command(string $from_language)
 $bot->registerCommand(
     'oldgames',
     decorate_handler(
-        [],
+        [async(...)],
         old_games(...)
     ),
     ['description' => 'send saved games']
@@ -629,7 +630,7 @@ function old_games(Message $ctx)
 $bot->registerCommand(
     'loadgame',
     decorate_handler(
-        [ensure_predicate(channel_valid(...))],
+        [async(...), ensure_predicate(channel_valid(...))],
         'load_game'
     ),
     ['description' => 'load older games (see: oldgames), example: b!loadgame 5']
@@ -671,7 +672,7 @@ function load_game(Message $ctx, $args)
 $bot->registerCommand(
     'random',
     decorate_handler(
-        [ensure_predicate(channel_valid(...))],
+        [async(...), ensure_predicate(channel_valid(...))],
         random(...)
     ),
     ['description' => 'load random old game']
@@ -702,7 +703,7 @@ function random(Message $ctx)
 $bot->registerCommand(
     'reveal',
     decorate_handler(
-        [ensure_predicate(channel_valid(...)), needs_counting(...)],
+        [async(...), ensure_predicate(channel_valid(...)), needs_counting(...)],
         reveal(...)
     ),
     ['description' => 'reveal letters of a previously requested hint']
