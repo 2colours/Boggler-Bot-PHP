@@ -38,6 +38,15 @@ function name_shortened($name)
     return $name;
 }
 
+function discord_specific_fields(Member $member)
+{
+    return [
+        'name' => $member->username,
+        'role' => hungarian_role($member),
+        'server_name' => name_shortened($member->nick ?? $member->username)
+    ];
+}
+
 class PlayerHandler
 {
     private static $instance;
@@ -90,16 +99,16 @@ class PlayerHandler
 
     public function newPlayer(Member $member)
     {
-        $this->player_dict[$member->user->id] = [
-            'name' => $member->username,
-            'found_words' => [],
-            'used_hints' => [],
-            'all_time_found' => 0,
-            'all_time_approved' => 0,
-            'personal_emoji' => '👤',
-            'role' => hungarian_role($member),
-            'server_name' => name_shortened($member->displayname)
-        ];
+        $this->player_dict[$member->user->id] = array_merge(
+            [
+                'found_words' => [],
+                'used_hints' => [],
+                'all_time_found' => 0,
+                'all_time_approved' => 0,
+                'personal_emoji' => '👤'
+            ],
+            discord_specific_fields($member)
+        );
     }
 
     public function newGame()
@@ -115,17 +124,14 @@ class PlayerHandler
     {
         if (!array_key_exists($player->user->id, $this->player_dict)) {
             $this->newPlayer($player);
-        } else {
-            $this->player_dict[$player->user->id] = array_merge(
-                $this->default_player,
-                $this->player_dict[$player->user->id],
-                [
-                    'role' => hungarian_role($player),
-                    'name' => $player->username,
-                    'server_name' => name_shortened($player->displayname),
-                ]
-            );
+            return;
         }
+
+        $this->player_dict[$player->user->id] = array_merge(
+            $this->default_player,
+            $this->player_dict[$player->user->id],
+            discord_specific_fields($player)
+        );
     }
 
     public function playerAddWord(Message $ctx, $word_info)
