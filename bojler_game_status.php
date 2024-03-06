@@ -61,7 +61,7 @@ class LetterList
     private function drawImageMatrix(int $space_top, int $space_left, int $distance_vertical, int $distance_horizontal, int $font_size, string $image_filename, int $img_h, int $img_w)
     {
         $manager = new ImageManager(Driver::class);
-        $image = $manager->create($img_w, $img_h);
+        $image = $manager->create($img_w, $img_h)->fill('white');
         $font = new Font('param/arial.ttf');
         $font->setSize($font_size);
         $font->setColor('rgb(0, 178, 238)');
