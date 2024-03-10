@@ -258,7 +258,7 @@ class GameStatus
     public function wordValidFast(string $word, array $refdict) # TODO why is there a $refdict passed and $this->letters->lower_cntdict also used??
     {
         # Pre-processing word for validity check
-        $word = mb_ereg_replace('/[.\'-]/', '', $word);
+        $word = mb_ereg_replace('[.\'-]', '', $word);
         if ($this->current_lang === 'German') {
             $word = $this->germanLetters($word);
         }
