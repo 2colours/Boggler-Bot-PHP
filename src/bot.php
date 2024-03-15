@@ -20,8 +20,8 @@ use Monolog\{
 use function React\Async\await;
 use function React\Async\async;
 
-require_once __DIR__ . '/bojler_game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
-require_once __DIR__ . '/bojler_player.php'; # TODO PlayerHandler with PSR-4 autoloader
+require_once __DIR__ . '/Bojler/game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
+require_once __DIR__ . '/Bojler/player.php'; # TODO PlayerHandler with PSR-4 autoloader
 
 $dotenv = new Dotenv();
 $dotenv->load('./.env');

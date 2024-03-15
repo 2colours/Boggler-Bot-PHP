@@ -5,17 +5,17 @@ declare(strict_types=1);
 mb_internal_encoding('UTF-8');
 mb_regex_encoding('UTF-8');
 
-include __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Typography\Font;
 use Ds\Set;
 
-require_once __DIR__ . '/bojler_config.php'; # TODO ConfigHandler with PSR-4 autoloader
-require_once __DIR__ . '/bojler_db.php'; # TODO DatabaseHandler, DictionaryType with PSR-4 autoloader
-require_once __DIR__ . '/bojler_util.php'; # TODO remove_special_char with PSR-4 autoloader
-require_once __DIR__ . '/bojler_player.php'; # TODO PlayerHandler with PSR-4 autoloader
+require_once __DIR__ . '/config.php'; # TODO ConfigHandler with PSR-4 autoloader
+require_once __DIR__ . '/db.php'; # TODO DatabaseHandler, DictionaryType with PSR-4 autoloader
+require_once __DIR__ . '/util.php'; # TODO remove_special_char with PSR-4 autoloader
+require_once __DIR__ . '/player.php'; # TODO PlayerHandler with PSR-4 autoloader
 
 # TODO better dependency injection surely...
 define('CONFIG', ConfigHandler::getInstance());
