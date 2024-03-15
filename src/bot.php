@@ -15,8 +15,10 @@ use Discord\WebSockets\Intents;
 use Random\Randomizer;
 use Monolog\{
     Logger,
-    Handler\NullHandler,
+    Handler\StreamHandler,
+    Level,
 };
+
 use function React\Async\await;
 use function React\Async\async;
 
@@ -241,7 +243,7 @@ $bot = new DiscordCommandClient([
     'token' => $_ENV['DC_TOKEN'],
     'description' => 'Szórakodtató bot',
     'discordOptions' => [
-        'logger' => (new Logger('devnull'))->pushHandler(new NullHandler()),
+        'logger' => (new Logger('bojlerLogger'))->pushHandler(new StreamHandler('php://stdout', Level::Warning)),
         'intents' => Intents::getDefaultIntents()
         //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
     ]
