@@ -769,7 +769,7 @@ function game_highscore()
         *Most Solved Hints:* \t$most_solved_hints
         *Hard-Working Beginner:* \t$best_beginner
         END;
-    if (array_key_exists('Newcomer', $awards) && count($awards['Newcomer']) !== 0) {
+    if (count($awards['Newcomer']) !== 0) {
         $newcomer_highscore_names = highscore_names($awards['Newcomer']);
         $message .= "\n*Newcomer of the day:* $newcomer_highscore_names";
     }
