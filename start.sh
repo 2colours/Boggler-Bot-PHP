@@ -1,2 +1,2 @@
 #!/bin/sh
-php -c . bojler_bot.php
+php -c . src/bot.php
