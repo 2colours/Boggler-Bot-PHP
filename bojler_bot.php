@@ -240,8 +240,8 @@ $bot = new DiscordCommandClient([
     'prefix' => 'b!',
     'token' => $_ENV['DC_TOKEN'],
     'description' => 'Szórakodtató bot',
-    'logger' => (new Logger('devnull'))->pushHandler(new NullHandler()),
     'discordOptions' => [
+        'logger' => (new Logger('devnull'))->pushHandler(new NullHandler()),
         'intents' => Intents::getDefaultIntents()
         //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
     ]
