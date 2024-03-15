@@ -354,7 +354,7 @@ function see(Message $ctx)
     COUNTER->reset();
 }
 
-define('ENSURE_THROWN_DICE', ensure_predicate(needs_thrown_dice(...), fn () => '_Please load game using_ **b!load** _or start a new game using_ **b!new**'));
+define('ENSURE_THROWN_DICE', ensure_predicate(needs_thrown_dice(...), fn () => '_Please load game using_ **b!loadgame** _or start a new game using_ **b!new**'));
 
 $bot->registerCommand(
     'status',
