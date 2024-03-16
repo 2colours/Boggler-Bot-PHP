@@ -281,7 +281,7 @@ $bot->registerCommand('stats', function (Message $ctx) {
     await($ctx->channel->sendMessage(<<<END
         **Player stats for $infos[server_name]:**
         *Total found words:* $infos[all_time_found]
-        *Approved words in previous games:* $infos[all_time_approved]
+        *Approved words in all games:* $infos[all_time_approved]
         *Personal emoji:* $infos[personal_emoji]
         *Words found in current game:* $found_words
         END));
