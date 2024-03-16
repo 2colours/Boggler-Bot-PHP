@@ -596,7 +596,7 @@ class GameStatus
         $is_newcomer = fn ($player_data) => count($player_data['found_words']) === $player_data['all_time_found'];
         $solved_hints = fn ($player_data) => count(array_intersect($player_data['found_words'], $player_data['used_hints']));
         $awards['Newcomer'] = array_filter($relevant_players, fn ($player) => $is_newcomer($this->player_handler->player_dict[$player]));
-        $most_solved_hints_amount = max(array_map(fn ($player) => $solved_hints($this->player_handler->player_dict[$player]), $relevant_players));
+        $most_solved_hints_amount = count($relevant_players) === 0 ? 0 : max(array_map(fn ($player) => $solved_hints($this->player_handler->player_dict[$player]), $relevant_players));
         if ($most_solved_hints_amount > 0) {
             $awards['Most solved hints'] = array_filter($relevant_players, fn ($player) => $solved_hints($this->player_handler->player_dict[$player]) === $most_solved_hints_amount);
         }
