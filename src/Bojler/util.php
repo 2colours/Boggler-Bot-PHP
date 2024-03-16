@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
+namespace Bojler;
 
-mb_internal_encoding('UTF-8');
-mb_regex_encoding('UTF-8');
+use SQLite3Result;
 
 function remove_special_char(string $word)
 {

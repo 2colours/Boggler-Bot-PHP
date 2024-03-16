@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types=1);
+namespace Bojler;
 
-mb_internal_encoding('UTF-8');
-mb_regex_encoding('UTF-8');
-
+use Exception;
+use Collator;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Typography\Font;
 use Ds\Set;
+
 
 require_once __DIR__ . '/config.php'; # TODO ConfigHandler with PSR-4 autoloader
 require_once __DIR__ . '/db.php'; # TODO DatabaseHandler, DictionaryType with PSR-4 autoloader

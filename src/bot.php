@@ -6,7 +6,16 @@ mb_internal_encoding('UTF-8');
 mb_regex_encoding('UTF-8');
 
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/Bojler/game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
+require_once __DIR__ . '/Bojler/player.php'; # TODO PlayerHandler with PSR-4 autoloader
 
+use Bojler\{
+    ConfigHandler,
+    DatabaseHandler,
+    DictionaryType,
+    GameStatus,
+    PlayerHandler,
+};
 use Discord\Builders\MessageBuilder;
 use Symfony\Component\Dotenv\Dotenv;
 use Discord\DiscordCommandClient;
@@ -19,11 +28,11 @@ use Monolog\{
     Level,
 };
 
+use function Bojler\masked_word;
+use function Bojler\output_split_cursive;
+use function Bojler\remove_special_char;
 use function React\Async\await;
 use function React\Async\async;
-
-require_once __DIR__ . '/Bojler/game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
-require_once __DIR__ . '/Bojler/player.php'; # TODO PlayerHandler with PSR-4 autoloader
 
 $dotenv = new Dotenv();
 $dotenv->load('./.env');

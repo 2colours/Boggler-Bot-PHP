@@ -1,12 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
-mb_internal_encoding('UTF-8');
-mb_regex_encoding('UTF-8');
+namespace Bojler;
 
 require_once __DIR__ . '/config.php'; # TODO ConfigHandler with PSR-4 autoloader
 require_once __DIR__ . '/util.php'; # TODO fetch_all with PSR-4 autoloader
+
+use SQLite3;
 
 class DictionaryType
 {
