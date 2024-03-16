@@ -144,16 +144,6 @@ class PlayerHandler
 
     public function playerRemoveWord(Message $ctx, $word_info)
     {
-        # TODO revise the necessity of this code and preferably delete it
-        /*
-        $this->playerUpdate($ctx->member);
-        if (array_key_exists($word_info['word'], $this->player_dict[$ctx->author->id]['found_words'])) {
-            $current_found_words = &$this->player_dict[$ctx->author->id]['found_words'];
-            $current_found_words = array_diff($current_found_words, [$word_info["word"]]);
-            $this->player_dict[$ctx->author->id]['all_time_found']--;
-            if (array_key_exists('any', $word_info))
-              $this->player_dict[$ctx->author->id]['all_time_approved']++;
-        }*/
         foreach ($this->player_dict as &$player_data) {
             $word_index = array_search($word_info['word'], $player_data['found_words']);
             if ($word_index !== false) {
