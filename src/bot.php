@@ -246,13 +246,15 @@ define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
 # define('easter_egg_handler', new EasterEggHandler(GAME_STATUS->found_words_set));
 const COUNTER = new Counter(10);
 const RNG = new Randomizer();
+const BOT_LOGGER = new Logger('bojlerLogger');
+BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Warning));
 
 $bot = new DiscordCommandClient([
     'prefix' => 'b!',
     'token' => $_ENV['DC_TOKEN'],
     'description' => 'Szórakodtató bot',
     'discordOptions' => [
-        'logger' => (new Logger('bojlerLogger'))->pushHandler(new StreamHandler('php://stdout', Level::Warning)),
+        'logger' => BOT_LOGGER,
         'intents' => Intents::getDefaultIntents()
         //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
     ]
