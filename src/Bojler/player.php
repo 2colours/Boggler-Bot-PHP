@@ -159,7 +159,7 @@ class PlayerHandler
             if ($word_index !== false) {
                 array_splice($player_data['found_words'], $word_index, 1);
                 $player_data['all_time_found']--;
-                if (!$word_info['any']) {
+                if ($word_info['any']) {
                     $this->player_dict[$ctx->author->id]['all_time_approved']--;
                 }
             }
