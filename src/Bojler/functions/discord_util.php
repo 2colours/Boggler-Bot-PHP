@@ -2,7 +2,19 @@
 
 namespace Bojler;
 
+use Discord\Parts\Channel\Message;
 use Discord\Parts\User\Member;
+
+use function React\Async\await;
+
+function try_send_msg(Message $ctx, string $content)
+{
+    $can_be_sent = grapheme_strlen($content) <= 2000; # TODO this magic constant should be moved from here and other places as well
+    if ($can_be_sent) {
+        await($ctx->channel->sendMessage($content));
+    }
+    return $can_be_sent;
+}
 
 function hungarian_role(Member $member)
 {

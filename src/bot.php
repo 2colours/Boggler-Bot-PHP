@@ -26,9 +26,12 @@ use Monolog\{
     Level,
 };
 
-use function Bojler\masked_word;
-use function Bojler\output_split_cursive;
-use function Bojler\remove_special_char;
+use function Bojler\{
+    masked_word,
+    output_split_cursive,
+    remove_special_char,
+    try_send_msg
+};
 use function React\Async\await;
 use function React\Async\async;
 
@@ -180,15 +183,6 @@ function emoji_awarded(Message $ctx)
 }
 
 # "handler-ish" functions (not higher order, takes context, DC side effects)
-
-function try_send_msg(Message $ctx, string $content)
-{
-    $can_be_sent = grapheme_strlen($content) <= 2000; # TODO this magic constant should be moved from here and other places as well
-    if ($can_be_sent) {
-        await($ctx->channel->sendMessage($content));
-    }
-    return $can_be_sent;
-}
 
 # sends the small game board with the found words if they fit into one message
 function simple_board(Message $ctx)
