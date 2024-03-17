@@ -8,18 +8,14 @@ use Ds\Set;
 
 # TODO better dependency injection surely...
 define('CONFIG', ConfigHandler::getInstance());
-define('DISPLAY', CONFIG->get('display'));
-define('DISPLAY_NORMAL', DISPLAY['normal']);
-define('DISPLAY_SMALL', DISPLAY['small']);
-define('DEFAULT_TRANSLATION', CONFIG->get('default_translation'));
-define('DICE_DICT', CONFIG->get('dice'));
-define('AVAILABLE_LANGUAGES', array_keys(DICE_DICT));
-define('DEFAULT_END_AMOUNT', CONFIG->get('default_end_amount'));
-define('WORDLIST_PATHS', array_map(fn ($value) => "param/$value", CONFIG->get('wordlists')));
-define('DICTIONARIES', CONFIG->get('dictionaries'));
-define('COMMUNITY_WORDLIST_PATHS', array_map(fn ($value) => "live_data/$value", CONFIG->get('community_wordlists')));
-define('CUSTOM_EMOJIS', CONFIG->get('custom_emojis'));
-define('EASTER_EGGS', CONFIG->get('easter_eggs'));
+define('DEFAULT_TRANSLATION', CONFIG->getDefaultTranslation());
+define('DICE_DICT', CONFIG->getDice());
+define('AVAILABLE_LANGUAGES', CONFIG->getAvailableLanguages());
+define('DEFAULT_END_AMOUNT', CONFIG->getDefaultEndAmount());
+define('WORDLIST_PATHS', array_map(fn ($value) => "param/$value", CONFIG->getWordlists()));
+define('DICTIONARIES', CONFIG->getDictionaries());
+define('COMMUNITY_WORDLIST_PATHS', array_map(fn ($value) => "live_data/$value", CONFIG->getCommunityWordlists()));
+define('CUSTOM_EMOJIS', CONFIG->getCustomEmojis());
 
 class GameStatus
 {
@@ -242,7 +238,7 @@ class GameStatus
 
     public function collator()
     {
-        return new Collator(CONFIG->get('locale')[$this->current_lang]);
+        return new Collator(CONFIG->getLocale($this->current_lang));
     }
 
     public function currentEntry()

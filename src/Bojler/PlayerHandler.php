@@ -27,7 +27,7 @@ class PlayerHandler
 
     private function __construct()
     {
-        $this->default_player = ConfigHandler::getInstance()->get('default_player'); # TODO not sure if I like this "dependency injection"
+        $this->default_player = ConfigHandler::getInstance()->getPlayerDefaults(); # TODO not sure if I like this "dependency injection"
         $read_content = file_get_contents(self::PLAYER_SAVES_PATH);
         if ($read_content === false) {
             $read_content = '{}';

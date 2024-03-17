@@ -38,27 +38,19 @@ $dotenv->load('./.env');
 const CREATORS = ['297037173541175296', '217319536485990400'];
 # TODO better dependency injection surely...
 define('CONFIG', ConfigHandler::getInstance());
-define('DISPLAY', CONFIG->get('display'));
-define('DISPLAY_NORMAL', DISPLAY['normal']);
-define('DISPLAY_SMALL', DISPLAY['small']);
-define('IMAGE_FILEPATH_NORMAL', 'live_data/' . DISPLAY_NORMAL['image_filename']);
-define('IMAGE_FILEPATH_SMALL', 'live_data/' . DISPLAY_SMALL['image_filename']);
-define('SAVES_FILEPATH', 'live_data/' . CONFIG->get('saves_filename'));
-define('CURRENT_GAME', 'live_data/' . CONFIG->get('current_game'));
-define('EXAMPLES', CONFIG->get('examples'));
-define('DICE_DICT', CONFIG->get('dice'));
-define('WORDLISTS', CONFIG->get('wordlists'));
-define('COMMUNITY_WORDLISTS', CONFIG->get('community_wordlists'));
-define('DICTIONARIES', CONFIG->get('dictionaries'));
-define('HOME_SERVER', (string) $_ENV['HOME_SERVER']);
-define('HOME_CHANNEL', (string) $_ENV['HOME_CHANNEL']);
-define('PROGRESS_BAR_VERSION_DICT', CONFIG->get('progress_bar_version_dict'));
-define('CUSTOM_EMOJIS', CONFIG->get('custom_emojis'));
-define('EASTER_EGGS', CONFIG->get('easter_eggs'));
-#useful stuff
-define('AVAILABLE_LANGUAGES', array_keys(DICE_DICT));
-# next is not necessary, used for testing purposes still
-define('PROGRESS_BAR_VERSION_LIST',  PROGRESS_BAR_VERSION_DICT['default']);
+define('IMAGE_FILEPATH_NORMAL', 'live_data/' . CONFIG->getDisplayNormalFileName());
+define('IMAGE_FILEPATH_SMALL', 'live_data/' . CONFIG->getDisplaySmallFileName());
+define('SAVES_FILEPATH', 'live_data/' . CONFIG->getSavesFileName());
+define('CURRENT_GAME', 'live_data/' . CONFIG->getCurrentGameFileName());
+define('EXAMPLES', CONFIG->getExamples());
+define('COMMUNITY_WORDLISTS', CONFIG->getCommunityWordlists());
+define('DICTIONARIES', CONFIG->getDictionaries());
+define('HOME_SERVER', $_ENV['HOME_SERVER']);
+define('HOME_CHANNEL', $_ENV['HOME_CHANNEL']);
+define('PROGRESS_BAR_VERSION', CONFIG->getProgressBarVersion());
+define('CUSTOM_EMOJIS', CONFIG->getCustomEmojis());
+define('AVAILABLE_LANGUAGES', CONFIG->getAvailableLanguages());
+
 const INSTRUCTION_TEMPLATE = <<<END
     __***Szórakodtató bot***__
     ***Rules:***
@@ -184,7 +176,7 @@ function enough_found()
 
 function emoji_awarded(Message $ctx)
 {
-    return PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->get('rewards')['words_for_emoji'];
+    return PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->getWordCountForEmoji();
 }
 
 # "handler-ish" functions (not higher order, takes context, DC side effects)
@@ -573,7 +565,7 @@ function community_list(Message $ctx)
 $bot->registerCommand(
     'emoji',
     decorate_handler(
-        [async(...), ensure_predicate(emoji_awarded(...), fn (Message $ctx) => 'You have to find ' . CONFIG->get('rewards')['words_for_emoji'] . ' words first! (currently ' . PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
+        [async(...), ensure_predicate(emoji_awarded(...), fn (Message $ctx) => 'You have to find ' . CONFIG->getWordCountForEmoji() . ' words first! (currently ' . PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
         'emoji'
     ),
     ['description' => 'change your personal emoji']
@@ -854,10 +846,10 @@ function current_emoji_version()
     GAME_STATUS->collator()->sort($letter_list);
     $hash = md5(implode(' ', $letter_list));
     $date = date('md');
-    if (array_key_exists($date, PROGRESS_BAR_VERSION_DICT)) {
-        $current_list = PROGRESS_BAR_VERSION_DICT[$date];
+    if (array_key_exists($date, PROGRESS_BAR_VERSION)) {
+        $current_list = PROGRESS_BAR_VERSION[$date];
     } else {
-        $current_list = PROGRESS_BAR_VERSION_DICT['default'];
+        $current_list = PROGRESS_BAR_VERSION['default'];
     }
     return $current_list[gmp_intval(gmp_mod(gmp_init($hash, 16), count($current_list)))];
 }

@@ -19,6 +19,7 @@ class DatabaseHandler
     }
 
     public const TABLES = ['dictionary' => DictionaryEntry::class];
+    private const DB_PATH = 'param/dictionary.db';
 
     public readonly SQLite3 $db;
     public readonly mixed $dictionaries;
@@ -92,8 +93,8 @@ class DatabaseHandler
 
     private function __construct()
     {
-        $this->db = new SQLite3('param/dictionary.db');
-        $this->dictionaries = ConfigHandler::getInstance()->get('dictionaries'); # TODO better injection
+        $this->db = new SQLite3(self::DB_PATH);
+        $this->dictionaries = ConfigHandler::getInstance()->getDictionaries(); # TODO better injection
         $this->tableSetup();
         foreach ($this->dictionaries as $dictstring => $dictcode) {
             $dtype = DictionaryType::fromDictstring($dictstring);

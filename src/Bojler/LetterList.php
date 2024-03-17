@@ -6,6 +6,9 @@ use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Typography\Font;
 
+define('DISPLAY_NORMAL', CONFIG->getDisplayNormalRecord());
+define('DISPLAY_SMALL', CONFIG->getDisplaySmallRecord());
+
 class LetterList
 {
     public const SIZE = 16;
