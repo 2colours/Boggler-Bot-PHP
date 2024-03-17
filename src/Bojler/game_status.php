@@ -10,7 +10,6 @@ use Intervention\Image\Typography\Font;
 use Ds\Set;
 
 
-require_once __DIR__ . '/config.php'; # TODO ConfigHandler with PSR-4 autoloader
 require_once __DIR__ . '/db.php'; # TODO DatabaseHandler, DictionaryType with PSR-4 autoloader
 require_once __DIR__ . '/util.php'; # TODO remove_special_char with PSR-4 autoloader
 require_once __DIR__ . '/player.php'; # TODO PlayerHandler with PSR-4 autoloader

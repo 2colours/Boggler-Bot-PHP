@@ -1,4 +1,9 @@
 {
+    "autoload": {
+        "psr-4": {
+            "Bojler\\": "src/Bojler"
+        }
+    },
     "require": {
         "team-reflex/discord-php": "^7.3",
         "intervention/image": "^3.3",
