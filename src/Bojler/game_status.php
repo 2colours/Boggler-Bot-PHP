@@ -9,9 +9,6 @@ use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Typography\Font;
 use Ds\Set;
 
-
-require_once __DIR__ . '/db.php'; # TODO DatabaseHandler, DictionaryType with PSR-4 autoloader
-
 # TODO better dependency injection surely...
 define('CONFIG', ConfigHandler::getInstance());
 define('DISPLAY', CONFIG->get('display'));
