@@ -496,7 +496,6 @@ class GameStatus
         $this->saveGame();
     }
 
-    # TODO a lot of it is broken atm, most notably the "most solved hints" and somewhat the "best beginner"
     public function gameAwards()
     {
         $highscore = [];
