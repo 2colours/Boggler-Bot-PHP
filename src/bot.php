@@ -6,7 +6,6 @@ mb_internal_encoding('UTF-8');
 mb_regex_encoding('UTF-8');
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/Bojler/game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
 
 use Bojler\{
     ConfigHandler,
