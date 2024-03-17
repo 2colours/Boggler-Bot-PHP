@@ -1,7 +1,8 @@
 <?php
 
+namespace Bojler;
+
 use Discord\Parts\User\Member;
-use function Bojler\name_shortened;
 
 function hungarian_role(Member $member)
 {
