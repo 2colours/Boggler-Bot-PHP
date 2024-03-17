@@ -9,6 +9,21 @@ function remove_special_char(string $word)
     return str_replace(['.', '-'], '', $word);
 }
 
+
+function name_shortened(string $name)
+{
+    if (grapheme_strlen($name) >= 15) {
+        $name = grapheme_substr($name, 0, grapheme_strpos($name, '|') ?: null);
+    }
+    if (grapheme_strlen($name) >= 15) {
+        $name = grapheme_substr($name, 0, grapheme_strpos($name, ' ') ?: null);
+    }
+    if (grapheme_strlen($name) >= 15) {
+        $name = grapheme_substr($name, 0, 15);
+    }
+    return $name;
+}
+
 # Might be a way of splitting a too long output string
 function output_split(string $arg)
 {

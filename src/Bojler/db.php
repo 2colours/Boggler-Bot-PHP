@@ -2,8 +2,6 @@
 
 namespace Bojler;
 
-require_once __DIR__ . '/util.php'; # TODO fetch_all with PSR-4 autoloader
-
 use SQLite3;
 
 class DictionaryType

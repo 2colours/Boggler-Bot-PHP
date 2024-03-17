@@ -1,5 +1,9 @@
 {
     "autoload": {
+        "files": [
+            "src/Bojler/functions/util.php",
+            "src/Bojler/functions/discord_util.php"
+        ],
         "psr-4": {
             "Bojler\\": "src/Bojler"
         }
