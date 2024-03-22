@@ -1,73 +1,8 @@
 <?php
 
-declare(strict_types=1);
+namespace Bojler;
 
-mb_internal_encoding('UTF-8');
-mb_regex_encoding('UTF-8');
-
-require_once __DIR__ . '/bojler_config.php'; # TODO ConfigHandler with PSR-4 autoloader
-require_once __DIR__ . '/bojler_util.php'; # TODO fetch_all with PSR-4 autoloader
-
-class DictionaryType
-{
-    public static function fromDictstring(string $dictstring)
-    {
-        return new self(...explode('-', $dictstring));
-    }
-
-    public readonly string $src_lang;
-    public readonly string $target_lang;
-
-    public function __construct(string $src_lang, string $target_lang)
-    {
-        $this->src_lang = $src_lang;
-        $this->target_lang = $target_lang;
-    }
-
-    public function asDictstring()
-    {
-        return "{$this->src_lang}-{$this->target_lang}";
-    }
-
-    public function asDictcode()
-    {
-        return ConfigHandler::getInstance()->get('dictionaries')[$this->asDictstring()]; # TODO better injection of singleton
-    }
-}
-
-#A dictionary entry that represents one record - needs to be changed when applying a migration
-class DictionaryEntry
-{
-    public const TABLE_TYPES = ['TEXT', 'TEXT', 'INTEGER'];
-    public const TABLE_COLUMNS = ['word', 'description', 'dictionarycode'];
-    public const INDEXES = ['dictindex' => ['word', 'dictionarycode']];
-
-    public readonly string $word;
-    public readonly string $description;
-    public readonly string $langcode;
-
-    public function __construct(string $line)
-    {
-        $line_pieces = explode("\t", $line);
-        /*debug purposes
-        if (count($line_pieces) != 3) {
-            var_dump($line_pieces);
-        }
-        */
-        list($this->word, $this->description, $this->langcode) = $line_pieces;
-    }
-
-    public function __toString()
-    {
-        return "{$this->word}\t{$this->description}\t{$this->langcode}";
-    }
-
-    # Has to be in accordance with TABLE_TYPES and TABLE_COLUMNS!
-    public function asRow()
-    {
-        return [$this->word, $this->description, $this->langcode];
-    }
-}
+use SQLite3;
 
 
 class DatabaseHandler
@@ -84,6 +19,7 @@ class DatabaseHandler
     }
 
     public const TABLES = ['dictionary' => DictionaryEntry::class];
+    private const DB_PATH = 'param/dictionary.db';
 
     public readonly SQLite3 $db;
     public readonly mixed $dictionaries;
@@ -157,8 +93,8 @@ class DatabaseHandler
 
     private function __construct()
     {
-        $this->db = new SQLite3('param/dictionary.db');
-        $this->dictionaries = ConfigHandler::getInstance()->get('dictionaries'); # TODO better injection
+        $this->db = new SQLite3(self::DB_PATH);
+        $this->dictionaries = ConfigHandler::getInstance()->getDictionaries(); # TODO better injection
         $this->tableSetup();
         foreach ($this->dictionaries as $dictstring => $dictcode) {
             $dtype = DictionaryType::fromDictstring($dictstring);

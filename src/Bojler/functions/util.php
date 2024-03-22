@@ -1,13 +1,27 @@
 <?php
 
-declare(strict_types=1);
+namespace Bojler;
 
-mb_internal_encoding('UTF-8');
-mb_regex_encoding('UTF-8');
+use SQLite3Result;
 
 function remove_special_char(string $word)
 {
     return str_replace(['.', '-'], '', $word);
+}
+
+
+function name_shortened(string $name)
+{
+    if (grapheme_strlen($name) >= 15) {
+        $name = grapheme_substr($name, 0, grapheme_strpos($name, '|') ?: null);
+    }
+    if (grapheme_strlen($name) >= 15) {
+        $name = grapheme_substr($name, 0, grapheme_strpos($name, ' ') ?: null);
+    }
+    if (grapheme_strlen($name) >= 15) {
+        $name = grapheme_substr($name, 0, 15);
+    }
+    return $name;
 }
 
 # Might be a way of splitting a too long output string

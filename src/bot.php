@@ -5,8 +5,15 @@ declare(strict_types=1);
 mb_internal_encoding('UTF-8');
 mb_regex_encoding('UTF-8');
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
+use Bojler\{
+    ConfigHandler,
+    DatabaseHandler,
+    DictionaryType,
+    GameStatus,
+    PlayerHandler,
+};
 use Discord\Builders\MessageBuilder;
 use Symfony\Component\Dotenv\Dotenv;
 use Discord\DiscordCommandClient;
@@ -15,13 +22,18 @@ use Discord\WebSockets\Intents;
 use Random\Randomizer;
 use Monolog\{
     Logger,
-    Handler\NullHandler,
+    Handler\StreamHandler,
+    Level,
+};
+
+use function Bojler\{
+    masked_word,
+    output_split_cursive,
+    remove_special_char,
+    try_send_msg
 };
 use function React\Async\await;
 use function React\Async\async;
-
-require_once __DIR__ . '/bojler_game_status.php'; # TODO GameStatus, EasterEggHandler with PSR-4 autoloader
-require_once __DIR__ . '/bojler_player.php'; # TODO PlayerHandler with PSR-4 autoloader
 
 $dotenv = new Dotenv();
 $dotenv->load('./.env');
@@ -29,27 +41,19 @@ $dotenv->load('./.env');
 const CREATORS = ['297037173541175296', '217319536485990400'];
 # TODO better dependency injection surely...
 define('CONFIG', ConfigHandler::getInstance());
-define('DISPLAY', CONFIG->get('display'));
-define('DISPLAY_NORMAL', DISPLAY['normal']);
-define('DISPLAY_SMALL', DISPLAY['small']);
-define('IMAGE_FILEPATH_NORMAL', 'live_data/' . DISPLAY_NORMAL['image_filename']);
-define('IMAGE_FILEPATH_SMALL', 'live_data/' . DISPLAY_SMALL['image_filename']);
-define('SAVES_FILEPATH', 'live_data/' . CONFIG->get('saves_filename'));
-define('CURRENT_GAME', 'live_data/' . CONFIG->get('current_game'));
-define('EXAMPLES', CONFIG->get('examples'));
-define('DICE_DICT', CONFIG->get('dice'));
-define('WORDLISTS', CONFIG->get('wordlists'));
-define('COMMUNITY_WORDLISTS', CONFIG->get('community_wordlists'));
-define('DICTIONARIES', CONFIG->get('dictionaries'));
-define('HOME_SERVER', (string) CONFIG->get('home_server'));
-define('HOME_CHANNEL', (string) CONFIG->get('home_channel'));
-define('PROGRESS_BAR_VERSION_DICT', CONFIG->get('progress_bar_version_dict'));
-define('CUSTOM_EMOJIS', CONFIG->get('custom_emojis'));
-define('EASTER_EGGS', CONFIG->get('easter_eggs'));
-#useful stuff
-define('AVAILABLE_LANGUAGES', array_keys(DICE_DICT));
-# next is not necessary, used for testing purposes still
-define('PROGRESS_BAR_VERSION_LIST',  PROGRESS_BAR_VERSION_DICT['default']);
+define('IMAGE_FILEPATH_NORMAL', 'live_data/' . CONFIG->getDisplayNormalFileName());
+define('IMAGE_FILEPATH_SMALL', 'live_data/' . CONFIG->getDisplaySmallFileName());
+define('SAVES_FILEPATH', 'live_data/' . CONFIG->getSavesFileName());
+define('CURRENT_GAME', 'live_data/' . CONFIG->getCurrentGameFileName());
+define('EXAMPLES', CONFIG->getExamples());
+define('COMMUNITY_WORDLISTS', CONFIG->getCommunityWordlists());
+define('DICTIONARIES', CONFIG->getDictionaries());
+define('HOME_SERVER', $_ENV['HOME_SERVER']);
+define('HOME_CHANNEL', $_ENV['HOME_CHANNEL']);
+define('PROGRESS_BAR_VERSION', CONFIG->getProgressBarVersion());
+define('CUSTOM_EMOJIS', CONFIG->getCustomEmojis());
+define('AVAILABLE_LANGUAGES', CONFIG->getAvailableLanguages());
+
 const INSTRUCTION_TEMPLATE = <<<END
     __***Szórakodtató bot***__
     ***Rules:***
@@ -175,19 +179,10 @@ function enough_found()
 
 function emoji_awarded(Message $ctx)
 {
-    return PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->get('rewards')['words_for_emoji'];
+    return PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->getWordCountForEmoji();
 }
 
 # "handler-ish" functions (not higher order, takes context, DC side effects)
-
-function try_send_msg(Message $ctx, string $content)
-{
-    $can_be_sent = grapheme_strlen($content) <= 2000; # TODO this magic constant should be moved from here and other places as well
-    if ($can_be_sent) {
-        await($ctx->channel->sendMessage($content));
-    }
-    return $can_be_sent;
-}
 
 # sends the small game board with the found words if they fit into one message
 function simple_board(Message $ctx)
@@ -235,13 +230,15 @@ define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
 # define('easter_egg_handler', new EasterEggHandler(GAME_STATUS->found_words_set));
 const COUNTER = new Counter(10);
 const RNG = new Randomizer();
+const BOT_LOGGER = new Logger('bojlerLogger');
+BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Warning));
 
 $bot = new DiscordCommandClient([
     'prefix' => 'b!',
     'token' => $_ENV['DC_TOKEN'],
     'description' => 'Szórakodtató bot',
     'discordOptions' => [
-        'logger' => (new Logger('devnull'))->pushHandler(new NullHandler()),
+        'logger' => BOT_LOGGER,
         'intents' => Intents::getDefaultIntents()
         //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
     ]
@@ -268,7 +265,7 @@ $bot->registerCommand('stats', function (Message $ctx) {
     await($ctx->channel->sendMessage(<<<END
         **Player stats for $infos[server_name]:**
         *Total found words:* $infos[all_time_found]
-        *Approved words in previous games:* $infos[all_time_approved]
+        *Approved words in all games:* $infos[all_time_approved]
         *Personal emoji:* $infos[personal_emoji]
         *Words found in current game:* $found_words
         END));
@@ -352,7 +349,7 @@ function see(Message $ctx)
     COUNTER->reset();
 }
 
-define('ENSURE_THROWN_DICE', ensure_predicate(needs_thrown_dice(...), fn () => '_Please load game using_ **b!load** _or start a new game using_ **b!new**'));
+define('ENSURE_THROWN_DICE', ensure_predicate(needs_thrown_dice(...), fn () => '_Please load game using_ **b!loadgame** _or start a new game using_ **b!new**'));
 
 $bot->registerCommand(
     'status',
@@ -562,7 +559,7 @@ function community_list(Message $ctx)
 $bot->registerCommand(
     'emoji',
     decorate_handler(
-        [async(...), ensure_predicate(emoji_awarded(...), fn (Message $ctx) => 'You have to find ' . CONFIG->get('rewards')['words_for_emoji'] . ' words first! (currently ' . PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
+        [async(...), ensure_predicate(emoji_awarded(...), fn (Message $ctx) => 'You have to find ' . CONFIG->getWordCountForEmoji() . ' words first! (currently ' . PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
         'emoji'
     ),
     ['description' => 'change your personal emoji']
@@ -610,7 +607,6 @@ function hint_command(string $from_language)
             await($ctx->channel->sendMessage('No hints left.'));
             return;
         }
-        var_dump($unfound_hint_list);
         $chosen_hint = $unfound_hint_list[array_rand($unfound_hint_list)];
         $hint_content = get_translation($chosen_hint, new DictionaryType(GAME_STATUS->current_lang, $from_language));
         await($ctx->channel->sendMessage("hint: _{$hint_content}_"));
@@ -844,10 +840,10 @@ function current_emoji_version()
     GAME_STATUS->collator()->sort($letter_list);
     $hash = md5(implode(' ', $letter_list));
     $date = date('md');
-    if (array_key_exists($date, PROGRESS_BAR_VERSION_DICT)) {
-        $current_list = PROGRESS_BAR_VERSION_DICT[$date];
+    if (array_key_exists($date, PROGRESS_BAR_VERSION)) {
+        $current_list = PROGRESS_BAR_VERSION[$date];
     } else {
-        $current_list = PROGRESS_BAR_VERSION_DICT['default'];
+        $current_list = PROGRESS_BAR_VERSION['default'];
     }
     return $current_list[gmp_intval(gmp_mod(gmp_init($hash, 16), count($current_list)))];
 }

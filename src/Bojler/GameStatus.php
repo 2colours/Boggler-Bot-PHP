@@ -1,88 +1,21 @@
 <?php
 
-declare(strict_types=1);
+namespace Bojler;
 
-mb_internal_encoding('UTF-8');
-mb_regex_encoding('UTF-8');
-
-include __DIR__ . '/vendor/autoload.php';
-
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\Typography\Font;
+use Exception;
+use Collator;
 use Ds\Set;
-
-require_once __DIR__ . '/bojler_config.php'; # TODO ConfigHandler with PSR-4 autoloader
-require_once __DIR__ . '/bojler_db.php'; # TODO DatabaseHandler, DictionaryType with PSR-4 autoloader
-require_once __DIR__ . '/bojler_util.php'; # TODO remove_special_char with PSR-4 autoloader
-require_once __DIR__ . '/bojler_player.php'; # TODO PlayerHandler with PSR-4 autoloader
 
 # TODO better dependency injection surely...
 define('CONFIG', ConfigHandler::getInstance());
-define('DISPLAY', CONFIG->get('display'));
-define('DISPLAY_NORMAL', DISPLAY['normal']);
-define('DISPLAY_SMALL', DISPLAY['small']);
-define('DEFAULT_TRANSLATION', CONFIG->get('default_translation'));
-define('DICE_DICT', CONFIG->get('dice'));
-define('AVAILABLE_LANGUAGES', array_keys(DICE_DICT));
-define('DEFAULT_END_AMOUNT', CONFIG->get('default_end_amount'));
-define('WORDLIST_PATHS', array_map(fn ($value) => "param/$value", CONFIG->get('wordlists')));
-define('DICTIONARIES', CONFIG->get('dictionaries'));
-define('COMMUNITY_WORDLIST_PATHS', array_map(fn ($value) => "live_data/$value", CONFIG->get('community_wordlists')));
-define('CUSTOM_EMOJIS', CONFIG->get('custom_emojis'));
-define('EASTER_EGGS', CONFIG->get('easter_eggs'));
-
-class LetterList
-{
-    public const SIZE = 16;
-
-    public array $list;
-    public array $lower_cntdict;
-
-    public function __construct(array $data, bool $preshuffle = false, bool $just_regenerate = false)
-    {
-        $this->list = $data;
-        $this->lower_cntdict = array_count_values(array_map(mb_strtolower(...), array_filter($data, fn ($letter) => isset($letter))));
-        if ($preshuffle) {
-            $this->shuffle();
-        } elseif ($just_regenerate) {
-            $this->drawImageMatrix(...DISPLAY_NORMAL);
-            $this->drawImageMatrix(...DISPLAY_SMALL);
-        }
-    }
-
-    public function shuffle()
-    {
-        shuffle($this->list);
-        $this->drawImageMatrix(...DISPLAY_NORMAL);
-        $this->drawImageMatrix(...DISPLAY_SMALL);
-    }
-
-    private function drawImageMatrix(int $space_top, int $space_left, int $distance_vertical, int $distance_horizontal, int $font_size, string $image_filename, int $img_h, int $img_w)
-    {
-        $manager = new ImageManager(Driver::class);
-        $image = $manager->create($img_w, $img_h)->fill('white');
-        $font = new Font('param/arial.ttf');
-        $font->setSize($font_size);
-        $font->setColor('rgb(0, 178, 238)');
-
-        foreach ($this->list as $i => $item) {
-            $image->text(
-                $item,
-                $space_left + $distance_horizontal * ($i % 4),
-                $space_top + $distance_vertical * intdiv($i, 4),
-                $font
-            );
-        }
-
-        $image->save("live_data/$image_filename");
-    }
-
-    public function isAbnormal()
-    {
-        return count($this->list) != self::SIZE;
-    }
-}
+define('DEFAULT_TRANSLATION', CONFIG->getDefaultTranslation());
+define('DICE_DICT', CONFIG->getDice());
+define('AVAILABLE_LANGUAGES', CONFIG->getAvailableLanguages());
+define('DEFAULT_END_AMOUNT', CONFIG->getDefaultEndAmount());
+define('WORDLIST_PATHS', array_map(fn ($value) => "param/$value", CONFIG->getWordlists()));
+define('DICTIONARIES', CONFIG->getDictionaries());
+define('COMMUNITY_WORDLIST_PATHS', array_map(fn ($value) => "live_data/$value", CONFIG->getCommunityWordlists()));
+define('CUSTOM_EMOJIS', CONFIG->getCustomEmojis());
 
 class GameStatus
 {
@@ -215,7 +148,6 @@ class GameStatus
         $solutions_with_length = array_map(fn ($item) => [$item, grapheme_strlen(remove_special_char($item))], $solutions);
         $longest_solution_length = max(array_map(fn ($item) => $item[1], $solutions_with_length));
         $this->longest_solutions = new Set(array_filter($solutions, fn ($item) => $item[0] === $longest_solution_length));
-        echo "Longest solution: $longest_solution_length letters";
     }
 
     private function findSolutions()
@@ -235,7 +167,6 @@ class GameStatus
         # custom emojis
         $this->findCustomEmojis($refdict);
         $this->solutions->add(...$this->custom_emoji_solution);
-        echo 'Custom reactions: ' . count($this->custom_emoji_solution);
     }
 
     private function findHints()
@@ -307,7 +238,7 @@ class GameStatus
 
     public function collator()
     {
-        return new Collator(CONFIG->get('locale')[$this->current_lang]);
+        return new Collator(CONFIG->getLocale($this->current_lang));
     }
 
     public function currentEntry()
@@ -565,7 +496,6 @@ class GameStatus
         $this->saveGame();
     }
 
-    # TODO a lot of it is broken atm, most notably the "most solved hints" and somewhat the "best beginner"
     public function gameAwards()
     {
         $highscore = [];
@@ -600,7 +530,7 @@ class GameStatus
         $is_newcomer = fn ($player_data) => count($player_data['found_words']) === $player_data['all_time_found'];
         $solved_hints = fn ($player_data) => count(array_intersect($player_data['found_words'], $player_data['used_hints']));
         $awards['Newcomer'] = array_filter($relevant_players, fn ($player) => $is_newcomer($this->player_handler->player_dict[$player]));
-        $most_solved_hints_amount = max(array_map(fn ($player) => $solved_hints($this->player_handler->player_dict[$player]), $relevant_players));
+        $most_solved_hints_amount = count($relevant_players) === 0 ? 0 : max(array_map(fn ($player) => $solved_hints($this->player_handler->player_dict[$player]), $relevant_players));
         if ($most_solved_hints_amount > 0) {
             $awards['Most solved hints'] = array_filter($relevant_players, fn ($player) => $solved_hints($this->player_handler->player_dict[$player]) === $most_solved_hints_amount);
         }
