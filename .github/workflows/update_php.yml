@@ -1,0 +1,33 @@
+name: main
+
+on: workflow_dispatch
+
+env:
+  PHP_VERSION: 8.3
+  PHP_EXTENSIONS: curl,gd,gmp,intl,mbstring,openssl,zlib
+  PHP_LIBRARIES: freetype
+  SERVICE_USERNAME: bots
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: Contabo VPS relevant
+    steps:
+      - name: Retrieve latest spc binary
+        run:  curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+      - name: Allow execution of spc binary
+        run: sudo chmod a+x spc
+      - name: Download defined PHP setup
+        run: ./spc download --with-php=$PHP_VERSION --for-extensions "$PHP_EXTENSIONS"
+      - name: Ensure native dependencies are ready for the build
+        run: ./spc doctor
+      - name: Build defined PHP setup
+        run: ./spc build --build-cli "$PHP_EXTENSIONS" --with-libs="$PHP_LIBRARIES"
+      - name: Push built PHP binary to host
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVICE_HOST }}
+          username: ${{ env.SERVICE_USERNAME }}
+          key: ${{ secrets.HOST_PRIVATE_KEY }}
+          source: "./buildroot/bin/php"
+          target: /home/${{ env.SERVICE_USERNAME }}
