@@ -4,7 +4,7 @@ on: workflow_dispatch
 
 env:
   PHP_VERSION: 8.3
-  PHP_EXTENSIONS: curl,gd,gmp,intl,mbstring,openssl,phar,zlib
+  PHP_EXTENSIONS: curl,gd,gmp,intl,mbregex,mbstring,openssl,phar,sockets,uv,zlib
   PHP_LIBRARIES: freetype
   SERVICE_USERNAME: bots
 
