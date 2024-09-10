@@ -14,7 +14,7 @@ jobs:
     environment: Contabo VPS relevant
     steps:
       - name: Retrieve latest spc binary
-        run:  curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+        run:  curl -Lo spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
       - name: Allow execution of spc binary
         run: sudo chmod a+x spc
       - name: Download defined PHP setup
