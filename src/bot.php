@@ -466,16 +466,11 @@ function add_solution(Message $ctx, $args)
             await($ctx->channel->sendMessage("$word was already found."));
         } else {
             #await(easter_egg_trigger($ctx, $word));
-            $end_signal = GAME_STATUS->addWord($word);
+            GAME_STATUS->addWord($ctx, $word);
             foreach (s_reactions($ctx, $word) as $reaction) {
                 await($ctx->react($reaction));
             }
             PlayerHandler::getInstance()->playerAddWord($ctx, $word_info);
-            if ($end_signal) {
-                await($ctx->channel->sendMessage('**Congratulations! You won this game! You found ' . GAME_STATUS->end_amount . ' words!**'));
-                await($ctx->channel->sendMessage(game_highscore()));
-                return;
-            }
         }
     } else {
         await($ctx->channel->sendMessage("$word doesn't fit the given letters."));
@@ -532,7 +527,7 @@ $bot->registerCommand(
 function add(Message $ctx, $args)
 {
     $word = $args[0];
-    if (GAME_STATUS->tryAddCommunity($word)) {
+    if (GAME_STATUS->tryAddCommunity($ctx, $word)) {
         await($ctx->react('📝'));
     } else {
         await($ctx->channel->sendMessage('Word already in the community list'));
