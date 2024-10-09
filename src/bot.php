@@ -30,7 +30,8 @@ use function Bojler\{
     masked_word,
     output_split_cursive,
     remove_special_char,
-    try_send_msg
+    try_send_msg,
+    game_highscore
 };
 use function React\Async\await;
 use function React\Async\async;
@@ -310,7 +311,7 @@ function new_game(Message $ctx)
 {
     # this isn't perfect, but at least it won't display this "found words" always when just having looked at an old game for a second. That would be annoying.
     if (GAME_STATUS->changes_to_save) {
-        await($ctx->channel->sendMessage(game_highscore()));
+        await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, PlayerHandler::getInstance())));
         $message = 'All words found in the last game: ' . found_words_output() . "\n\n" . instructions(GAME_STATUS->planned_lang) . "\n\n";
         foreach (output_split_cursive($message) as $item) {
             await($ctx->channel->sendMessage($item));
@@ -516,7 +517,7 @@ $bot->registerCommand(
 
 function highscore(Message $ctx)
 {
-    await($ctx->channel->sendMessage(game_highscore()));
+    await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, PlayerHandler::getInstance())));
 }
 
 $bot->registerCommand(
@@ -727,83 +728,6 @@ function reveal(Message $ctx)
 
 # Blocks the code - has to be at the bottom
 $bot->run();
-
-function highscore_names(array $ids)
-{
-    if (count($ids) === 0) {
-        return ' - ';
-    }
-    $names = [];
-    $handler = PlayerHandler::getInstance();
-    foreach ($ids as $id) {
-        array_push($names, $handler->player_dict[$id]['server_name'] ?? $handler->player_dict[$id]['name']);
-    }
-    return implode(', ', $names);
-}
-
-function game_highscore()
-{
-    $awards = GAME_STATUS->gameAwards();
-    [$on_podium_first, $on_podium_second, $on_podium_third] = [
-        on_podium($awards['First place']),
-        on_podium($awards['Second place']),
-        on_podium($awards['Third place']),
-    ];
-    [$highscore_names_first, $highscore_names_second, $highscore_names_third] = [
-        highscore_names($awards['First place']),
-        highscore_names($awards['Second place']),
-        highscore_names($awards['Third place']),
-    ];
-    $most_solved_hints = highscore_names($awards['Most solved hints']);
-    $best_beginner = highscore_names($awards['Best Beginner']);
-    $message = <<<END
-        ⬛⬛⬛{$on_podium_first}⬛⬛⬛⬛***HIGHSCORE***
-        {$on_podium_second}🟨🟨🟨⬛⬛⬛⬛**1.** $highscore_names_first
-        🟨🟨🟨🟨🟨🟨{$on_podium_third}⬛**2.** $highscore_names_second
-        🟨🟨🟨🟨🟨🟨🟨🟨🟨⬛**3.** $highscore_names_third
-
-        *Most Solved Hints:* \t$most_solved_hints
-        *Hard-Working Beginner:* \t$best_beginner
-        END;
-    if (count($awards['Newcomer']) !== 0) {
-        $newcomer_highscore_names = highscore_names($awards['Newcomer']);
-        $message .= "\n*Newcomer of the day:* $newcomer_highscore_names";
-    }
-    return $message;
-}
-
-function on_podium(array $people)
-{
-    switch (count($people)) {
-        case 0:
-            return '⬛⬛⬛';
-        case 1:
-            $handler = PlayerHandler::getInstance();
-            $personal_emoji = $handler->player_dict[$people[0]]['personal_emoji'];
-            return "⬛{$personal_emoji}⬛";
-        case 2:
-            $handler = PlayerHandler::getInstance();
-            [$personal_emoji_first, $personal_emoji_second] = [
-                $handler->player_dict[$people[0]]['personal_emoji'],
-                $handler->player_dict[$people[1]]['personal_emoji'],
-            ];
-            return "{$personal_emoji_first}⬛{$personal_emoji_second}";
-        case 3:
-            $handler = PlayerHandler::getInstance();
-            [$personal_emoji_first, $personal_emoji_second, $personal_emoji_third] = [
-                $handler->player_dict[$people[0]]['personal_emoji'],
-                $handler->player_dict[$people[1]]['personal_emoji'],
-                $handler->player_dict[$people[2]]['personal_emoji'],
-            ];
-            return "$personal_emoji_first$personal_emoji_second$personal_emoji_third";
-        case 4:
-            return '🧍🧑‍🤝‍🧑🧍';
-        case 5:
-            return '🧑‍🤝‍🧑🧍🧑‍🤝‍🧑';
-        default:
-            return '🧑‍🤝‍🧑🧑‍🤝‍🧑🧑‍🤝‍🧑';
-    }
-}
 
 function approval_reaction(string $word): string
 {
