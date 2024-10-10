@@ -368,7 +368,7 @@ function status(Message $ctx)
     $status_text = <<<END
         **Game #{$game_status->game_number}** (saved {$game_status->max_saved_game}) $space_separated_letters _($emoji_version_description)_
         $found_words_output
-        **$solutions_count** words in the Scrabble dictionary (end amount: **{$game_status->end_amount}**)
+        **$solutions_count** approved words (end amount: **{$game_status->end_amount}**)
         Current language: {$game_status->current_lang}
         END;
     if ($game_status->current_lang !== $game_status->planned_lang) {
