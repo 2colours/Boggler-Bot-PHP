@@ -4,7 +4,10 @@ namespace Bojler;
 
 use Exception;
 use Collator;
+use Discord\Parts\Channel\Message;
 use Ds\Set;
+
+use function React\Async\await;
 
 # TODO better dependency injection surely...
 define('CONFIG', ConfigHandler::getInstance());
@@ -23,6 +26,7 @@ class GameStatus
     private readonly PlayerHandler $player_handler;
     private $file;
     private $archive_file;
+    private $game_over_acknowledged;
     public LetterList $letters;
     public Set $found_words;
     public $game_number;
@@ -63,6 +67,7 @@ class GameStatus
         $this->end_amount = DEFAULT_END_AMOUNT;
         #dependent data
         $this->amount_approved_words = 0;
+        $this->game_over_acknowledged = false;
         # changes_to_save determines if we have to save sth in saves.txt. Always true for a loaded current_game or new games (might not be saved yet). False when loading old games. Becomes true with every adding or removing word.
         $this->changes_to_save = false;
         $this->thrown_the_dice = false;
@@ -428,19 +433,35 @@ class GameStatus
         $this->saveGame();
     }
 
-    public function addWord(string $word)
+    private function ensureGameOver(Message $ctx)
     {
-        $starter_amount = $this->amount_approved_words;
+        if ($this->game_over_acknowledged) {
+            return;
+        }
+        $this->game_over_acknowledged = true;
+        await($ctx->channel->sendMessage('**Congratulations! You won this game! You found ' . $this->end_amount . ' words!**'));
+        await($ctx->channel->sendMessage(game_highscore($this, $this->player_handler)));
+    }
+
+    public function addWord(Message $ctx, string $word)
+    {
         $this->found_words->add($word);
         $this->changes_to_save = true;
         if ($this->solutions->contains($word)) {
-            $this->amount_approved_words++;
+            $this->addApprovedWord($ctx);
         }
         $this->saveGame();
-        return $starter_amount < $this->end_amount && $this->amount_approved_words === $this->end_amount;
     }
 
-    public function tryAddCommunity(string $word)
+    private function addApprovedWord(Message $ctx)
+    {
+        $this->amount_approved_words++;
+        if ($this->amount_approved_words === $this->end_amount) {
+            $this->ensureGameOver($ctx);
+        }
+    }
+
+    public function tryAddCommunity(Message $ctx, string $word)
     {
         if (in_array($word, $this->community_list)) {
             return false;
@@ -451,7 +472,7 @@ class GameStatus
             array_push($this->communitylist_solutions, $word);
             $this->solutions->add($word);
             if ($this->found_words->contains($word)) {
-                $this->amount_approved_words++;
+                $this->addApprovedWord($ctx);
             }
         }
         return true;
