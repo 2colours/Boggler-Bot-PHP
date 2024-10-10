@@ -31,7 +31,8 @@ use function Bojler\{
     output_split_cursive,
     remove_special_char,
     try_send_msg,
-    game_highscore
+    game_highscore,
+    hungarian_role
 };
 use function React\Async\await;
 use function React\Async\async;
@@ -148,6 +149,13 @@ function s_reactions(Message $ctx, string $word)
 }
 
 # "predicate-ish" functions (not higher order, takes context, performs a check)
+
+#Checks whether the author of the message is a "native speaker"
+function from_native_speaker(Message $ctx)
+{
+    return hungarian_role($ctx->member) === 'Native speaker'; # TODO preferably should be configurable, not hardcoded constant
+}
+
 function from_creator(Message $ctx)
 {
     return in_array($ctx->author->id, CREATORS, true);
@@ -518,7 +526,7 @@ function highscore(Message $ctx)
 $bot->registerCommand(
     'add',
     decorate_handler(
-        [async(...), needs_counting(...)],
+        [async(...), ensure_predicate(from_native_speaker(...), fn () => 'Only native speakers can use this command.'), needs_counting(...)],
         'add'
     ),
     ['description' => 'add to community wordlist']
