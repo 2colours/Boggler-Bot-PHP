@@ -232,7 +232,8 @@ class GameStatus
 
     private function setEndAmount()
     {
-        $this->end_amount = $this->solutions->isEmpty() ? 100 : min(DEFAULT_END_AMOUNT, intdiv($this->solutions->count() * 2, 3));
+        $expected_solution_count = $this->wordlist_solutions->count();
+        $this->end_amount = $this->solutions->isEmpty() ? 100 : min(DEFAULT_END_AMOUNT, intdiv($expected_solution_count, 2));
     }
 
     private function countApprovedWords()
