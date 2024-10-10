@@ -14,8 +14,5 @@
         "symfony/dotenv": "^7.0",
         "php-ds/php-ds": "^1.5",
         "react/async": "^4.2"
-    },
-    "require-dev": {
-        "codeception/codeception": "^5.0"
     }
 }
