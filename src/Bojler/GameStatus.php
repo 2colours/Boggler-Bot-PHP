@@ -140,6 +140,7 @@ class GameStatus
         $this->findSolutions();
         $this->setEndAmount();
         $this->countApprovedWords();
+        $this->game_over_acknowledged = $this->amount_approved_words >= $this->end_amount;
         $this->thrown_the_dice = True;
         # easter egg stuff
         #$this->_easter_egg_conditions();
