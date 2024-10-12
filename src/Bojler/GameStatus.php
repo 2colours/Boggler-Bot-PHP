@@ -153,7 +153,7 @@ class GameStatus
         $solutions = $this->solutions->toArray();
         $solutions_with_length = array_map(fn ($item) => [$item, grapheme_strlen(remove_special_char($item))], $solutions);
         $longest_solution_length = max(array_map(fn ($item) => $item[1], $solutions_with_length));
-        $this->longest_solutions = new Set(array_filter($solutions, fn ($item) => $item[0] === $longest_solution_length));
+        $this->longest_solutions = new Set(array_map(fn ($item) => $item[0], array_filter($solutions_with_length, fn ($item) => $item[1] === $longest_solution_length)));
     }
 
     private function findSolutions()
