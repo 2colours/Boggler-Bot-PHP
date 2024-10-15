@@ -1,3 +1,3 @@
 # Boggler Bot, DiscordPHP rewrite
 ## Setup
-The current work environment is [PHP 8.3.3](https://www.php.net/downloads.php#v8.3.3), configured the following way: `./configure --with-openssl --with-zlib --enable-mbstring --enable-gd --with-freetype --with-curl --enable-intl --with-gmp`
+Deployed with [static-php-cli](https://github.com/crazywhalecc/static-php-cli). Confer the [Actions workflow](https://github.com/2colours/Boggler-Bot-PHP/blob/bb9eab7358db565650385dfa94fb64fa2767e087/.github/workflows/update_php.yml#L6) for the most recent configuration.
