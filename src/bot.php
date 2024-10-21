@@ -205,7 +205,6 @@ function simple_board(Message $ctx)
 }
 
 # "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
-# TODO does one have to manually lift await or is it auto-detected in called functions?
 function needs_counting(callable $handler)
 {
     return function ($ctx, ...$args) use ($handler) {
