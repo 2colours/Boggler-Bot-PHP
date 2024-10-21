@@ -300,8 +300,8 @@ class GameStatus
     public function tryLoadOldGame(int $number)
     {
         $this->saveOld();
-        if (1 <= $number && $number <= $this->max_saved_game + 1) {
-            return True;
+        if ($number < 1 || $this->max_saved_game + 1 < $number) {
+            return false;
         }
         $this->player_handler->newGame();
         $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
