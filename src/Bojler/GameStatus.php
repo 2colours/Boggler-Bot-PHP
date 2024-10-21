@@ -356,6 +356,7 @@ class GameStatus
         $approval_dict['community'] = in_array($word, $this->community_list);
         $approval_dict['custom_reactions'] = array_key_exists($word, CUSTOM_EMOJIS[$this->current_lang]);
         $approval_dict['any'] = false;
+        $approval_dict['dictionary'] = false;
         foreach (['wordlist', 'community', 'custom_reactions'] as $key) {
             $approval_dict['any'] = $approval_dict['any'] || $approval_dict[$key];
         }
@@ -363,6 +364,7 @@ class GameStatus
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
             if (in_array($word, $this->available_hints[$language])) {
                 $approval_dict[$language] = $word;
+                $approval_dict['dictionary'] = true;
                 $approval_dict['any'] = true;
             }
         }
