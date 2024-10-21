@@ -457,7 +457,7 @@ function shuffle2(Message $ctx)
 $bot->registerCommand(
     's',
     decorate_handler(
-        [async(...), ensure_predicate(channel_valid(...)), ENSURE_THROWN_DICE],
+        [async(...), ensure_predicate(channel_valid(...)), ENSURE_THROWN_DICE, needs_counting(...)],
         'add_solution'
     ),
     ['description' => 'add solution'] # TODO aliases S and empty string?
@@ -481,9 +481,6 @@ function add_solution(Message $ctx, $args)
         }
     } else {
         await($ctx->channel->sendMessage("$word doesn't fit the given letters."));
-    }
-    if (COUNTER->trigger()) {
-        simple_board($ctx);
     }
 }
 
