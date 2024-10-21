@@ -276,6 +276,7 @@ class GameStatus
             {$this->game_number}. ({$this->current_lang})
             $space_separated_letters_alphabetic
             $space_separated_found_words_alphabetic
+
             END;
     }
 
@@ -300,24 +301,22 @@ class GameStatus
     public function tryLoadOldGame(int $number)
     {
         $this->saveOld();
-        if ($number < 1 || $this->max_saved_game + 1 < $number) {
+        if ($number < 1 || $this->max_saved_game < $number) {
             return false;
         }
         $this->player_handler->newGame();
         $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
         $offset = 3 * ($number - 1);
-        list($languages, $letters, $words) = array_slice($lines, $offset, 3);
+        [$languages, $letters, $words] = array_slice($lines, $offset, 3);
         $this->letters = new LetterList(explode(' ', $letters), true);
         if ($this->letters->isAbnormal()) {
             echo 'Game might be damaged.';
         }
-        $this->found_words = new Set(count($words) !== 0 ? explode(' ', $words) : []);
+        $this->found_words = new Set($words === '' ? [] : explode(' ', $words));
         # set language and game number
-        $language_list = explode(' ', $languages);
-        $read_number = $language_list[0];
+        [$read_number, $read_lang] = explode(' ', $languages);
         $read_number = grapheme_substr($read_number, 0, grapheme_strlen($read_number) - 1);
-        $read_lang = $language_list[1];
-        $read_lang = grapheme_substr($read_lang, 1, grapheme_strlen($read_number) - 1);
+        $read_lang = grapheme_substr($read_lang, 1, grapheme_strlen($read_lang) - 2);
         $this->game_number = intval($read_number);
         $this->current_lang = $read_lang;
         # this game doesn't have to be saved again in saves.txt yet (changes_to_save), we have a loaded game (thrown_the_dice)
@@ -390,7 +389,7 @@ class GameStatus
 
         # determines if game is already saved in saves.txt
         if ($this->game_number <= $this->max_saved_game) {
-            $archive_temp = file($this->archive_file, FILE_IGNORE_NEW_LINES);
+            $archive_temp = file($this->archive_file);
             $line_number = 3 * ($this->game_number - 1);
             $file = fopen($this->archive_file, 'w');
             # older games
@@ -408,7 +407,7 @@ class GameStatus
         }
 
         # New game is appended (if game_number > max_saved_game)
-        file_put_contents($this->archive_file, $this->archiveEntry() . "\n", FILE_APPEND);
+        file_put_contents($this->archive_file, $this->archiveEntry(), FILE_APPEND);
         $this->max_saved_game++;
         $this->saveGame();
     }
