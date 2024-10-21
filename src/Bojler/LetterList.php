@@ -57,6 +57,6 @@ class LetterList
 
     public function isAbnormal()
     {
-        return count($this->list) != self::SIZE;
+        return count($this->list) !== self::SIZE;
     }
 }
