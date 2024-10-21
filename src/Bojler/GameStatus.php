@@ -447,14 +447,29 @@ class GameStatus
         await($ctx->channel->sendMessage(game_highscore($this, $this->player_handler)));
     }
 
-    public function addWord(Message $ctx, string $word)
+    public function tryAddWord(Message $ctx, string $word)
     {
+        $word_info = $this->approvalStatus($word);
+        #await(easter_egg_trigger($ctx, $word, '_Rev'));
+        if (!$word_info['valid']) {
+            await($ctx->channel->sendMessage("$word doesn't fit the given letters."));
+            return false;
+        }
+
+        if ($this->found_words->contains($word)) {
+            await($ctx->channel->sendMessage("$word was already found."));
+            return false;
+        }
+
+        #await(easter_egg_trigger($ctx, $word));
         $this->found_words->add($word);
         $this->changes_to_save = true;
         if ($this->solutions->contains($word)) {
             $this->addApprovedWord($ctx);
         }
         $this->saveGame();
+        $this->player_handler->playerAddWord($ctx, $word_info);
+        return true;
     }
 
     private function addApprovedWord(Message $ctx)

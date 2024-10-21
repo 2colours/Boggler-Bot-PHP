@@ -466,21 +466,11 @@ $bot->registerCommand(
 function add_solution(Message $ctx, $args)
 {
     $word = $args[0];
-    $word_info = GAME_STATUS->approvalStatus($word);
-    #await(easter_egg_trigger($ctx, $word, '_Rev'));
-    if ($word_info['valid']) {
-        if (GAME_STATUS->found_words->contains($word)) {
-            await($ctx->channel->sendMessage("$word was already found."));
-        } else {
-            #await(easter_egg_trigger($ctx, $word));
-            GAME_STATUS->addWord($ctx, $word);
-            foreach (s_reactions($ctx, $word) as $reaction) {
-                await($ctx->react($reaction));
-            }
-            PlayerHandler::getInstance()->playerAddWord($ctx, $word_info);
+    $success = GAME_STATUS->tryAddWord($ctx, $word);
+    if ($success) {
+        foreach (s_reactions($ctx, $word) as $reaction) {
+            await($ctx->react($reaction));
         }
-    } else {
-        await($ctx->channel->sendMessage("$word doesn't fit the given letters."));
     }
 }
 
