@@ -483,8 +483,16 @@ class GameStatus
     public function tryAddCommunity(Message $ctx, string $word)
     {
         if (in_array($word, $this->community_list)) {
+            await($ctx->channel->sendMessage('Word already in the community list.'));
             return false;
         }
+
+        $approval_dict = $this->approvalStatus($word);
+        if ($approval_dict['any']) {
+            await($ctx->channel->sendMessage('This word is already approved.'));
+            return false;
+        }
+
         file_put_contents(COMMUNITY_WORDLIST_PATHS[$this->current_lang], "$word\n", FILE_APPEND);
         array_push($this->community_list, $word);
         if ($this->wordValidFast($word, $this->letters->lower_cntdict)) {
@@ -493,6 +501,7 @@ class GameStatus
             if ($this->found_words->contains($word)) {
                 $this->addApprovedWord($ctx);
             }
+            $this->player_handler->approveWord($word);
         }
         return true;
     }

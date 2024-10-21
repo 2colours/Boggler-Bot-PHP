@@ -523,8 +523,6 @@ function add(Message $ctx, $args)
     $word = $args[0];
     if (GAME_STATUS->tryAddCommunity($ctx, $word)) {
         await($ctx->react('📝'));
-    } else {
-        await($ctx->channel->sendMessage('Word already in the community list'));
     }
 }
 

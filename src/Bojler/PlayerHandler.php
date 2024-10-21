@@ -105,6 +105,21 @@ class PlayerHandler
         $this->saveFile();
     }
 
+    public function approveWord(string $word)
+    {
+        $content_changed = false;
+        foreach ($this->player_dict as &$player_entry) {
+            if (in_array($word, $player_entry['found_words'])) {
+                $content_changed = true;
+                $player_entry['all_time_approved']++;
+            }
+        }
+
+        if ($content_changed) {
+            $this->saveFile();
+        }
+    }
+
     public function playerRemoveWord(Message $ctx, $word_info)
     {
         foreach ($this->player_dict as &$player_data) {
