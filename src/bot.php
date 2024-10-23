@@ -772,14 +772,14 @@ function progress_bar(string|array $emoji_scale = null)
         return '';
     }
     $progress_bar_length = (int) ceil(GAME_STATUS->end_amount / 10);
-    if (GAME_STATUS->amount_approved_words >= GAME_STATUS->end_amount) {
+    if (GAME_STATUS->getApprovedAmount() >= GAME_STATUS->end_amount) {
         return str_repeat($emoji_scale[array_key_last($emoji_scale)], $progress_bar_length);
     }
-    $full_emoji_number = intdiv(GAME_STATUS->amount_approved_words, 10);
+    $full_emoji_number = intdiv(GAME_STATUS->getApprovedAmount(), 10);
     $progress_bar = str_repeat($emoji_scale[array_key_last($emoji_scale)], $full_emoji_number);
     $rest = GAME_STATUS->end_amount - $full_emoji_number * 10;
     $current_step_size = min($rest, 10);
-    $progress_in_current_step = intdiv((GAME_STATUS->amount_approved_words % 10), $current_step_size);
+    $progress_in_current_step = intdiv((GAME_STATUS->getApprovedAmount() % 10), $current_step_size);
     $empty_emoji_number = $progress_bar_length - $full_emoji_number - 1;
     $progress_bar .= $emoji_scale[$progress_in_current_step * (count($emoji_scale) - 1)];
     $progress_bar .= str_repeat($emoji_scale[0], $empty_emoji_number);
@@ -794,7 +794,7 @@ function found_words_output()
     }
     [$found_word_list_formatted, $found_word_list_length] = [implode(', ', $found_word_list), count($found_word_list)];
     $progress_bar = progress_bar();
-    [$amount_approved_words, $end_amount] = [GAME_STATUS->amount_approved_words, GAME_STATUS->end_amount];
+    [$amount_approved_words, $end_amount] = [GAME_STATUS->getApprovedAmount(), GAME_STATUS->end_amount];
     return <<<END
         _$found_word_list_formatted ($found_word_list_length)_
         $progress_bar ($amount_approved_words/$end_amount)
