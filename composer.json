@@ -14,5 +14,13 @@
         "symfony/dotenv": "^7.0",
         "php-ds/php-ds": "^1.5",
         "react/async": "^4.2"
+    },
+    "require-dev": {
+        "pestphp/pest": "^3.4"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
 }
