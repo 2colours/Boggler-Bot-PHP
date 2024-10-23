@@ -205,7 +205,6 @@ function simple_board(Message $ctx)
 }
 
 # "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
-# TODO does one have to manually lift await or is it auto-detected in called functions?
 function needs_counting(callable $handler)
 {
     return function ($ctx, ...$args) use ($handler) {
@@ -458,7 +457,7 @@ function shuffle2(Message $ctx)
 $bot->registerCommand(
     's',
     decorate_handler(
-        [async(...), ensure_predicate(channel_valid(...)), ENSURE_THROWN_DICE],
+        [async(...), ensure_predicate(channel_valid(...)), ENSURE_THROWN_DICE, needs_counting(...)],
         'add_solution'
     ),
     ['description' => 'add solution'] # TODO aliases S and empty string?
@@ -467,24 +466,11 @@ $bot->registerCommand(
 function add_solution(Message $ctx, $args)
 {
     $word = $args[0];
-    $word_info = GAME_STATUS->approvalStatus($word);
-    #await(easter_egg_trigger($ctx, $word, '_Rev'));
-    if ($word_info['valid']) {
-        if (GAME_STATUS->found_words->contains($word)) {
-            await($ctx->channel->sendMessage("$word was already found."));
-        } else {
-            #await(easter_egg_trigger($ctx, $word));
-            GAME_STATUS->addWord($ctx, $word);
-            foreach (s_reactions($ctx, $word) as $reaction) {
-                await($ctx->react($reaction));
-            }
-            PlayerHandler::getInstance()->playerAddWord($ctx, $word_info);
+    $success = GAME_STATUS->tryAddWord($ctx, $word);
+    if ($success) {
+        foreach (s_reactions($ctx, $word) as $reaction) {
+            await($ctx->react($reaction));
         }
-    } else {
-        await($ctx->channel->sendMessage("$word doesn't fit the given letters."));
-    }
-    if (COUNTER->trigger()) {
-        simple_board($ctx);
     }
 }
 
@@ -537,8 +523,6 @@ function add(Message $ctx, $args)
     $word = $args[0];
     if (GAME_STATUS->tryAddCommunity($ctx, $word)) {
         await($ctx->react('📝'));
-    } else {
-        await($ctx->channel->sendMessage('Word already in the community list'));
     }
 }
 

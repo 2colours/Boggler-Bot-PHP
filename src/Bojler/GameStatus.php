@@ -276,6 +276,7 @@ class GameStatus
             {$this->game_number}. ({$this->current_lang})
             $space_separated_letters_alphabetic
             $space_separated_found_words_alphabetic
+
             END;
     }
 
@@ -300,24 +301,22 @@ class GameStatus
     public function tryLoadOldGame(int $number)
     {
         $this->saveOld();
-        if (1 <= $number && $number <= $this->max_saved_game + 1) {
-            return True;
+        if ($number < 1 || $this->max_saved_game < $number) {
+            return false;
         }
         $this->player_handler->newGame();
         $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
         $offset = 3 * ($number - 1);
-        list($languages, $letters, $words) = array_slice($lines, $offset, 3);
+        [$languages, $letters, $words] = array_slice($lines, $offset, 3);
         $this->letters = new LetterList(explode(' ', $letters), true);
         if ($this->letters->isAbnormal()) {
             echo 'Game might be damaged.';
         }
-        $this->found_words = new Set(count($words) !== 0 ? explode(' ', $words) : []);
+        $this->found_words = new Set($words === '' ? [] : explode(' ', $words));
         # set language and game number
-        $language_list = explode(' ', $languages);
-        $read_number = $language_list[0];
+        [$read_number, $read_lang] = explode(' ', $languages);
         $read_number = grapheme_substr($read_number, 0, grapheme_strlen($read_number) - 1);
-        $read_lang = $language_list[1];
-        $read_lang = grapheme_substr($read_lang, 1, grapheme_strlen($read_number) - 1);
+        $read_lang = grapheme_substr($read_lang, 1, grapheme_strlen($read_lang) - 2);
         $this->game_number = intval($read_number);
         $this->current_lang = $read_lang;
         # this game doesn't have to be saved again in saves.txt yet (changes_to_save), we have a loaded game (thrown_the_dice)
@@ -356,6 +355,7 @@ class GameStatus
         $approval_dict['community'] = in_array($word, $this->community_list);
         $approval_dict['custom_reactions'] = array_key_exists($word, CUSTOM_EMOJIS[$this->current_lang]);
         $approval_dict['any'] = false;
+        $approval_dict['dictionary'] = false;
         foreach (['wordlist', 'community', 'custom_reactions'] as $key) {
             $approval_dict['any'] = $approval_dict['any'] || $approval_dict[$key];
         }
@@ -363,6 +363,7 @@ class GameStatus
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
             if (in_array($word, $this->available_hints[$language])) {
                 $approval_dict[$language] = $word;
+                $approval_dict['dictionary'] = true;
                 $approval_dict['any'] = true;
             }
         }
@@ -388,7 +389,7 @@ class GameStatus
 
         # determines if game is already saved in saves.txt
         if ($this->game_number <= $this->max_saved_game) {
-            $archive_temp = file($this->archive_file, FILE_IGNORE_NEW_LINES);
+            $archive_temp = file($this->archive_file);
             $line_number = 3 * ($this->game_number - 1);
             $file = fopen($this->archive_file, 'w');
             # older games
@@ -406,7 +407,7 @@ class GameStatus
         }
 
         # New game is appended (if game_number > max_saved_game)
-        file_put_contents($this->archive_file, $this->archiveEntry() . "\n", FILE_APPEND);
+        file_put_contents($this->archive_file, $this->archiveEntry(), FILE_APPEND);
         $this->max_saved_game++;
         $this->saveGame();
     }
@@ -445,14 +446,29 @@ class GameStatus
         await($ctx->channel->sendMessage(game_highscore($this, $this->player_handler)));
     }
 
-    public function addWord(Message $ctx, string $word)
+    public function tryAddWord(Message $ctx, string $word)
     {
+        $word_info = $this->approvalStatus($word);
+        #await(easter_egg_trigger($ctx, $word, '_Rev'));
+        if (!$word_info['valid']) {
+            await($ctx->channel->sendMessage("$word doesn't fit the given letters."));
+            return false;
+        }
+
+        if ($this->found_words->contains($word)) {
+            await($ctx->channel->sendMessage("$word was already found."));
+            return false;
+        }
+
+        #await(easter_egg_trigger($ctx, $word));
         $this->found_words->add($word);
         $this->changes_to_save = true;
         if ($this->solutions->contains($word)) {
             $this->addApprovedWord($ctx);
         }
         $this->saveGame();
+        $this->player_handler->playerAddWord($ctx, $word_info);
+        return true;
     }
 
     private function addApprovedWord(Message $ctx)
@@ -466,8 +482,16 @@ class GameStatus
     public function tryAddCommunity(Message $ctx, string $word)
     {
         if (in_array($word, $this->community_list)) {
+            await($ctx->channel->sendMessage('Word already in the community list.'));
             return false;
         }
+
+        $approval_dict = $this->approvalStatus($word);
+        if ($approval_dict['any']) {
+            await($ctx->channel->sendMessage('This word is already approved.'));
+            return false;
+        }
+
         file_put_contents(COMMUNITY_WORDLIST_PATHS[$this->current_lang], "$word\n", FILE_APPEND);
         array_push($this->community_list, $word);
         if ($this->wordValidFast($word, $this->letters->lower_cntdict)) {
@@ -476,6 +500,7 @@ class GameStatus
             if ($this->found_words->contains($word)) {
                 $this->addApprovedWord($ctx);
             }
+            $this->player_handler->approveWord($word);
         }
         return true;
     }
