@@ -374,6 +374,12 @@ class GameStatus
         return $this->approved_words->count();
     }
 
+    #TODO style guide about indicating return type?
+    public function isFoundApproved(string $word) : bool
+    {
+        return $this->approved_words->contains($word);
+    }
+
     private function loadCommunityList()
     {
         $this->community_list = file(COMMUNITY_WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES) ?: [];

@@ -792,13 +792,21 @@ function found_words_output()
     if (count($found_word_list) === 0) {
         return 'No words found yet 😭';
     }
-    [$found_word_list_formatted, $found_word_list_length] = [implode(', ', $found_word_list), count($found_word_list)];
+    [$found_word_list_formatted, $found_word_list_length] = [format_found_words($found_word_list), count($found_word_list)];
     $progress_bar = progress_bar();
     [$amount_approved_words, $end_amount] = [GAME_STATUS->getApprovedAmount(), GAME_STATUS->end_amount];
     return <<<END
         _$found_word_list_formatted ($found_word_list_length)_
         $progress_bar ($amount_approved_words/$end_amount)
         END;
+}
+
+function format_found_words($words)
+{
+    return implode(
+        ', ',
+        array_map(fn($word) => GAME_STATUS->isFoundApproved($word) ? $word : "~~$word~~", $words)
+    );
 }
 
 function acknowledgement_reaction(string $word)
