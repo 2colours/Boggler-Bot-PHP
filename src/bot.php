@@ -218,7 +218,7 @@ function needs_counting(callable $handler)
 # $refusalMessageProducer is a function that can take $ctx
 function ensure_predicate(callable $predicate, callable $refusalMessageProducer = null)
 {
-    return fn ($handler) => function (Message $ctx, ...$args) use ($handler, $predicate, $refusalMessageProducer) {
+    return fn($handler) => function (Message $ctx, ...$args) use ($handler, $predicate, $refusalMessageProducer) {
         if ($predicate($ctx)) {
             $handler($ctx, ...$args);
         } elseif (isset($refusalMessageProducer)) {
@@ -230,7 +230,7 @@ function ensure_predicate(callable $predicate, callable $refusalMessageProducer 
 # [d1, d2, d3, ..., dn], h -> d1 ∘ d2 ∘ d3 ∘ ... ∘ dn ∘ h
 function decorate_handler(array $decorators, callable $handler)
 {
-    return array_reduce(array_reverse($decorators), fn ($aggregate, $current) => $current($aggregate), $handler);
+    return array_reduce(array_reverse($decorators), fn($aggregate, $current) => $current($aggregate), $handler);
 }
 
 # TODO it's dubious whether these are actually constants; gotta think about it
@@ -253,7 +253,7 @@ $bot = new DiscordCommandClient([
 ]);
 
 # TODO more consistency about how the functions send the message? (not super important if we move to slash commands)
-$bot->registerCommand('info', fn () => instructions(GAME_STATUS->current_lang), ['description' => 'show instructions']);
+$bot->registerCommand('info', fn() => instructions(GAME_STATUS->current_lang), ['description' => 'show instructions']);
 $bot->registerCommand('teh', translator_command('English', 'Hungarian'), ['description' => 'translate given word Eng-Hun']);
 $bot->registerCommand('the', translator_command('Hungarian', 'English'), ['description' => 'translate given word Hun-Eng']);
 $bot->registerCommand('thg', translator_command('Hungarian', 'German'), ['description' => 'translate given word Hun-Ger']);
@@ -281,7 +281,7 @@ $bot->registerCommand('stats', function (Message $ctx) {
 
 $bot->registerCommand(
     'trigger',
-    decorate_handler([async(...), ensure_predicate(from_creator(...), fn () => 'This would be very silly now, wouldn\'t it.')], 'trigger'),
+    decorate_handler([async(...), ensure_predicate(from_creator(...), fn() => 'This would be very silly now, wouldn\'t it.')], 'trigger'),
     ['description' => 'testing purposes only']
 );
 function trigger(Message $ctx, $args)
@@ -357,7 +357,7 @@ function see(Message $ctx)
     COUNTER->reset();
 }
 
-define('ENSURE_THROWN_DICE', ensure_predicate(needs_thrown_dice(...), fn () => '_Please load game using_ **b!loadgame** _or start a new game using_ **b!new**'));
+define('ENSURE_THROWN_DICE', ensure_predicate(needs_thrown_dice(...), fn() => '_Please load game using_ **b!loadgame** _or start a new game using_ **b!new**'));
 
 $bot->registerCommand(
     'status',
@@ -391,7 +391,7 @@ function status(Message $ctx)
 $bot->registerCommand(
     'unfound',
     decorate_handler(
-        [async(...), ensure_predicate(enough_found(...), fn () => 'You have to find ' . GAME_STATUS->end_amount . ' words first.'), needs_counting(...)],
+        [async(...), ensure_predicate(enough_found(...), fn() => 'You have to find ' . GAME_STATUS->end_amount . ' words first.'), needs_counting(...)],
         unfound(...)
     ),
     ['description' => 'send unfound Scrabble solutions']
@@ -420,15 +420,15 @@ function left(Message $ctx)
     #$hints_caps = array_map(mb_strtoupper(...), GAME_STATUS->available_hints);
     $unfound_hints_without_empty = array_filter(
         array_map(
-            fn ($hints_for_language) => array_filter($hints_for_language, fn ($hint) => !GAME_STATUS->found_words->contains($hint)),
+            fn($hints_for_language) => array_filter($hints_for_language, fn($hint) => !GAME_STATUS->found_words->contains($hint)),
             GAME_STATUS->available_hints
         ),
-        fn ($hints_for_language) => count($hints_for_language) > 0
+        fn($hints_for_language) => count($hints_for_language) > 0
     );
     $hint_count_by_language = implode(
         ', ',
         array_map(
-            fn ($language, $hints_for_language) => count($hints_for_language) . " $language",
+            fn($language, $hints_for_language) => count($hints_for_language) . " $language",
             array_keys($unfound_hints_without_empty),
             array_values($unfound_hints_without_empty)
         )
@@ -512,7 +512,7 @@ function highscore(Message $ctx)
 $bot->registerCommand(
     'add',
     decorate_handler(
-        [async(...), ensure_predicate(from_native_speaker(...), fn () => 'Only native speakers can use this command.'), needs_counting(...)],
+        [async(...), ensure_predicate(from_native_speaker(...), fn() => 'Only native speakers can use this command.'), needs_counting(...)],
         'add'
     ),
     ['description' => 'add to community wordlist']
@@ -547,7 +547,7 @@ function community_list(Message $ctx)
 $bot->registerCommand(
     'emoji',
     decorate_handler(
-        [async(...), ensure_predicate(emoji_awarded(...), fn (Message $ctx) => 'You have to find ' . CONFIG->getWordCountForEmoji() . ' words first! (currently ' . PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
+        [async(...), ensure_predicate(emoji_awarded(...), fn(Message $ctx) => 'You have to find ' . CONFIG->getWordCountForEmoji() . ' words first! (currently ' . PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
         'emoji'
     ),
     ['description' => 'change your personal emoji']
@@ -590,7 +590,7 @@ $bot->registerCommand(
 function hint_command(string $from_language)
 {
     return function (Message $ctx) use ($from_language) {
-        $unfound_hint_list = array_values(array_filter(GAME_STATUS->available_hints[$from_language], fn ($hint) => !GAME_STATUS->found_words->contains($hint)));
+        $unfound_hint_list = array_values(array_filter(GAME_STATUS->available_hints[$from_language], fn($hint) => !GAME_STATUS->found_words->contains($hint)));
         if (count($unfound_hint_list) === 0) {
             await($ctx->channel->sendMessage('No hints left.'));
             return;
