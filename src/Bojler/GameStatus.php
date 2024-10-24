@@ -45,7 +45,7 @@ class GameStatus
     public $communitylist_solutions;
     public $custom_emoji_solutions;
     public $available_hints;
-    public $amount_approved_words;
+    private Set $approved_words;
 
     public function __construct(string $file, string $archive_file)
     {
@@ -66,7 +66,7 @@ class GameStatus
         $this->solutions = new Set();
         $this->end_amount = DEFAULT_END_AMOUNT;
         #dependent data
-        $this->amount_approved_words = 0;
+        $this->approved_words = new Set();
         $this->game_over_acknowledged = false;
         # changes_to_save determines if we have to save sth in saves.txt. Always true for a loaded current_game or new games (might not be saved yet). False when loading old games. Becomes true with every adding or removing word.
         $this->changes_to_save = false;
@@ -139,8 +139,8 @@ class GameStatus
     {
         $this->findSolutions();
         $this->setEndAmount();
-        $this->countApprovedWords();
-        $this->game_over_acknowledged = $this->amount_approved_words >= $this->end_amount;
+        $this->setApprovedWords();
+        $this->game_over_acknowledged = $this->getApprovedAmount() >= $this->end_amount;
         $this->thrown_the_dice = True;
         # easter egg stuff
         #$this->_easter_egg_conditions();
@@ -237,10 +237,9 @@ class GameStatus
         $this->end_amount = $this->solutions->isEmpty() ? 100 : min(DEFAULT_END_AMOUNT, intdiv($expected_solution_count, 2));
     }
 
-    private function countApprovedWords()
+    private function setApprovedWords()
     {
-        $amount = $this->solutions->diff($this->found_words)->count();
-        $this->amount_approved_words = $this->solutions->count() - $amount;
+        $this->approved_words = $this->solutions->intersect($this->found_words);
     }
 
     public function collator()
@@ -370,6 +369,17 @@ class GameStatus
         return $approval_dict;
     }
 
+    public function getApprovedAmount() : int
+    {
+        return $this->approved_words->count();
+    }
+
+    #TODO style guide about indicating return type?
+    public function isFoundApproved(string $word) : bool
+    {
+        return $this->approved_words->contains($word);
+    }
+
     private function loadCommunityList()
     {
         $this->community_list = file(COMMUNITY_WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES) ?: [];
@@ -464,19 +474,24 @@ class GameStatus
         $this->found_words->add($word);
         $this->changes_to_save = true;
         if ($this->solutions->contains($word)) {
-            $this->addApprovedWord($ctx);
+            $this->addApprovedWord($ctx, $word);
         }
         $this->saveGame();
         $this->player_handler->playerAddWord($ctx, $word_info);
         return true;
     }
 
-    private function addApprovedWord(Message $ctx)
+    private function addApprovedWord(Message $ctx, string $word)
     {
-        $this->amount_approved_words++;
-        if ($this->amount_approved_words === $this->end_amount) {
+        $this->approved_words->add($word);
+        if ($this->getApprovedAmount() === $this->end_amount) {
             $this->ensureGameOver($ctx);
         }
+    }
+
+    private function removeApprovedWord(string $word)
+    {
+        $this->approved_words->remove($word);
     }
 
     public function tryAddCommunity(Message $ctx, string $word)
@@ -498,7 +513,7 @@ class GameStatus
             array_push($this->communitylist_solutions, $word);
             $this->solutions->add($word);
             if ($this->found_words->contains($word)) {
-                $this->addApprovedWord($ctx);
+                $this->addApprovedWord($ctx, $word);
             }
             $this->player_handler->approveWord($word);
         }
@@ -511,7 +526,7 @@ class GameStatus
         # removed words have always to be saved (changes_to_save)
         $this->changes_to_save = true;
         if ($this->solutions->contains($word)) {
-            $this->amount_approved_words--;
+            $this->removeApprovedWord($word);
         }
         $this->saveGame();
     }
