@@ -113,3 +113,8 @@ function game_highscore(GameStatus $status, PlayerHandler $player_handler)
     }
     return $message;
 }
+
+function strikethrough(string $text): string
+{
+    return $text === '' ? '' : "~~$text~~";
+}

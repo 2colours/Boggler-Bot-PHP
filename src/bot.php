@@ -32,7 +32,8 @@ use function Bojler\{
     remove_special_char,
     try_send_msg,
     game_highscore,
-    hungarian_role
+    hungarian_role,
+    strikethrough
 };
 use function React\Async\await;
 use function React\Async\async;
@@ -805,7 +806,7 @@ function format_found_words($words)
 {
     return implode(
         ', ',
-        array_map(fn($word) => GAME_STATUS->isFoundApproved($word) ? $word : "~~$word~~", $words)
+        array_map(fn($word) => GAME_STATUS->isFoundApproved($word) ? $word : strikethrough($word), $words)
     );
 }
 
