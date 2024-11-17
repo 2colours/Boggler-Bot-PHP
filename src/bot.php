@@ -483,7 +483,7 @@ $bot->registerCommand(
         [async(...), ensure_predicate(channel_valid(...)), needs_counting(...)],
         'remove'
     ),
-    ['description' => 'remove solution', 'aliases' => 'r']
+    ['description' => 'remove solution', 'aliases' => ['r']]
 );
 
 function remove(Message $ctx, $args)
