@@ -9,6 +9,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Bojler\{
     ConfigHandler,
+    CustomCommandClient,
     DatabaseHandler,
     DictionaryType,
     GameStatus,
@@ -16,7 +17,6 @@ use Bojler\{
 };
 use Discord\Builders\MessageBuilder;
 use Symfony\Component\Dotenv\Dotenv;
-use Discord\DiscordCommandClient;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Intents;
 use Random\Randomizer;
@@ -243,7 +243,7 @@ const RNG = new Randomizer();
 const BOT_LOGGER = new Logger('bojlerLogger');
 BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Warning));
 
-$bot = new DiscordCommandClient([
+$bot = new CustomCommandClient([
     'prefix' => 'b!',
     'token' => $_ENV['DC_TOKEN'],
     'description' => 'Szórakodtató bot',
