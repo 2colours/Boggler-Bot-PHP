@@ -251,7 +251,8 @@ $bot = new DiscordCommandClient([
         'logger' => BOT_LOGGER,
         'intents' => Intents::getDefaultIntents()
         //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
-    ]
+    ],
+    'caseInsensitiveCommands' => true
 ]);
 
 # TODO more consistency about how the functions send the message? (not super important if we move to slash commands)
