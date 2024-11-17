@@ -33,6 +33,7 @@ use function Bojler\{
     try_send_msg,
     game_highscore,
     hungarian_role,
+    italic,
     strikethrough
 };
 use function React\Async\await;
@@ -490,7 +491,8 @@ function remove(Message $ctx, $args)
     if (GAME_STATUS->found_words->contains($word)) {
         GAME_STATUS->removeWord($word);
         PlayerHandler::getInstance()->playerRemoveWord($ctx, GAME_STATUS->approvalStatus($word));
-        await($ctx->channel->sendMessage("Removed _{$word}_."));
+        $formatted_word = italic($word);
+        await($ctx->channel->sendMessage("Removed $formatted_word."));
     } else {
         await($ctx->channel->sendMessage("$word doesn't appear among the found solutions."));
     }
@@ -597,8 +599,8 @@ function hint_command(string $from_language)
             return;
         }
         $chosen_hint = $unfound_hint_list[array_rand($unfound_hint_list)];
-        $hint_content = get_translation($chosen_hint, new DictionaryType(GAME_STATUS->current_lang, $from_language));
-        await($ctx->channel->sendMessage("hint: _{$hint_content}_"));
+        $formatted_hint_content = italic(get_translation($chosen_hint, new DictionaryType(GAME_STATUS->current_lang, $from_language)));
+        await($ctx->channel->sendMessage("hint: $formatted_hint_content"));
         PlayerHandler::getInstance()->playerUsedHint($ctx, $chosen_hint);
     };
 }
@@ -710,8 +712,8 @@ function reveal(Message $ctx)
     $chosen_word = $left_hints[array_rand($left_hints)];
     $word_length = grapheme_strlen($chosen_word);
     $revealed_indices = RNG->pickArrayKeys(range(0, $word_length - 1), intdiv($word_length, 3));
-    $masked_word = masked_word($chosen_word, $revealed_indices);
-    await($ctx->channel->sendMessage("Hint: _{$masked_word}_"));
+    $formatted_masked_word = italic(masked_word($chosen_word, $revealed_indices));
+    await($ctx->channel->sendMessage("Hint: $formatted_masked_word"));
 }
 
 # Blocks the code - has to be at the bottom

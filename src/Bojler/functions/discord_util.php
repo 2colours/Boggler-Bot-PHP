@@ -118,3 +118,9 @@ function strikethrough(string $text): string
 {
     return $text === '' ? '' : "~~$text~~";
 }
+
+
+function italic(string $text): string
+{
+    return $text === '' ? '' : "_{$text}_";
+}
