@@ -10,7 +10,7 @@ class ConfigHandler
 
     public static function getInstance()
     {
-        if (self::$instance === null) {
+        if (is_null(self::$instance)) {
             self::$instance = new self();
         }
 

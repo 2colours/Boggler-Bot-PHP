@@ -50,7 +50,7 @@ class CustomCommandClient extends DiscordCommandClient
             }
 
             $command = $this->getCommand($command);
-            if ($command === null) {
+            if (is_null($command)) {
                 return;
             }
 
