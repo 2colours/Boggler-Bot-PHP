@@ -15,3 +15,5 @@ _Rationale_: it clearly communicates lack of interpolation - and following this 
 - message-based command handlers shouldn't return anything
 _Rationale_: the return value of command handlers _could_ be used the content of the reply to the message; however, this is not flexible enough and it's by no means obvious to somebody unfamiliar. It's a bad API not to be relied on. It would probably be harder to migrate from it as well.
 _Replacement_: `$ctx->reply($value)` (assuming `$ctx` as the message instance) instead of `return $value`.
+- `is_null` is the preferred way to do a `null`-check
+_Rationale_: in a well-designed codebase, `null`-checks are seldom used - `null` values shouldn't be propagated too much and in general missing values are a special enough case that might demand a design change overall. Since `is_null` is safe to use and stands out more than an `=== null` check, it's a good choice for presenting a special circumstance as special.

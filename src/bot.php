@@ -9,6 +9,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Bojler\{
     ConfigHandler,
+    CustomCommandClient,
     DatabaseHandler,
     DictionaryType,
     GameStatus,
@@ -16,7 +17,6 @@ use Bojler\{
 };
 use Discord\Builders\MessageBuilder;
 use Symfony\Component\Dotenv\Dotenv;
-use Discord\DiscordCommandClient;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Intents;
 use Random\Randomizer;
@@ -33,6 +33,7 @@ use function Bojler\{
     try_send_msg,
     game_highscore,
     hungarian_role,
+    italic,
     strikethrough
 };
 use function React\Async\await;
@@ -242,7 +243,7 @@ const RNG = new Randomizer();
 const BOT_LOGGER = new Logger('bojlerLogger');
 BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Warning));
 
-$bot = new DiscordCommandClient([
+$bot = new CustomCommandClient([
     'prefix' => 'b!',
     'token' => $_ENV['DC_TOKEN'],
     'description' => 'Szórakodtató bot',
@@ -250,6 +251,10 @@ $bot = new DiscordCommandClient([
         'logger' => BOT_LOGGER,
         'intents' => Intents::getDefaultIntents()
         //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
+    ],
+    'caseInsensitiveCommands' => true,
+    'customOptions' => [
+        'locale' => CONFIG->getLocale('Hungarian') # TODO do something with this magic constant here
     ]
 ]);
 
@@ -481,7 +486,7 @@ $bot->registerCommand(
         [async(...), ensure_predicate(channel_valid(...)), needs_counting(...)],
         'remove'
     ),
-    ['description' => 'remove solution', 'aliases' => 'r']
+    ['description' => 'remove solution', 'aliases' => ['r']]
 );
 
 function remove(Message $ctx, $args)
@@ -490,7 +495,8 @@ function remove(Message $ctx, $args)
     if (GAME_STATUS->found_words->contains($word)) {
         GAME_STATUS->removeWord($word);
         PlayerHandler::getInstance()->playerRemoveWord($ctx, GAME_STATUS->approvalStatus($word));
-        await($ctx->channel->sendMessage("Removed _{$word}_."));
+        $formatted_word = italic($word);
+        await($ctx->channel->sendMessage("Removed $formatted_word."));
     } else {
         await($ctx->channel->sendMessage("$word doesn't appear among the found solutions."));
     }
@@ -597,8 +603,8 @@ function hint_command(string $from_language)
             return;
         }
         $chosen_hint = $unfound_hint_list[array_rand($unfound_hint_list)];
-        $hint_content = get_translation($chosen_hint, new DictionaryType(GAME_STATUS->current_lang, $from_language));
-        await($ctx->channel->sendMessage("hint: _{$hint_content}_"));
+        $formatted_hint_content = italic(get_translation($chosen_hint, new DictionaryType(GAME_STATUS->current_lang, $from_language)));
+        await($ctx->channel->sendMessage("hint: $formatted_hint_content"));
         PlayerHandler::getInstance()->playerUsedHint($ctx, $chosen_hint);
     };
 }
@@ -710,8 +716,8 @@ function reveal(Message $ctx)
     $chosen_word = $left_hints[array_rand($left_hints)];
     $word_length = grapheme_strlen($chosen_word);
     $revealed_indices = RNG->pickArrayKeys(range(0, $word_length - 1), intdiv($word_length, 3));
-    $masked_word = masked_word($chosen_word, $revealed_indices);
-    await($ctx->channel->sendMessage("Hint: _{$masked_word}_"));
+    $formatted_masked_word = italic(masked_word($chosen_word, $revealed_indices));
+    await($ctx->channel->sendMessage("Hint: $formatted_masked_word"));
 }
 
 # Blocks the code - has to be at the bottom

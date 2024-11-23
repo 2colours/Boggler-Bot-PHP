@@ -8,9 +8,9 @@ class ConfigHandler
 
     private const CONFIG_PATH = 'param/config.json';
 
-    public static function getInstance()
+    public static function getInstance(): self
     {
-        if (self::$instance === null) {
+        if (is_null(self::$instance)) {
             self::$instance = new self();
         }
 
