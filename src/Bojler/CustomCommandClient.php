@@ -2,6 +2,7 @@
 
 namespace Bojler;
 
+use Collator;
 use Discord\DiscordCommandClient;
 use Discord\Parts\Embed\Embed;
 use React\Promise\PromiseInterface;
@@ -9,9 +10,16 @@ use React\Promise\PromiseInterface;
 # TODO investigate and improve help message
 class CustomCommandClient extends DiscordCommandClient
 {
+    private Collator $collator;
+
     public function __construct(array $options = [])
     {
+        $own_options = $options['customOptions']; # TODO do some validation here as well
+        unset($options['customOptions']);
+
         parent::__construct($options);
+
+        $this->collator = new Collator($own_options['locale']);
 
         # This is completely idiotic, thank DiscordPHP
         $this->on('ready', $this->monkeyPatching(...));

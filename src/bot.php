@@ -252,7 +252,10 @@ $bot = new CustomCommandClient([
         'intents' => Intents::getDefaultIntents()
         //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
     ],
-    'caseInsensitiveCommands' => true
+    'caseInsensitiveCommands' => true,
+    'customOptions' => [
+        'locale' => CONFIG->getLocale('Hungarian') # TODO do something with this magic constant here
+    ]
 ]);
 
 # TODO more consistency about how the functions send the message? (not super important if we move to slash commands)
