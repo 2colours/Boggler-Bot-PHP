@@ -249,8 +249,7 @@ $bot = new CustomCommandClient([
     'description' => 'Szórakodtató bot',
     'discordOptions' => [
         'logger' => BOT_LOGGER,
-        'intents' => Intents::getDefaultIntents()
-        //      | Intents::MESSAGE_CONTENT, // Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
+        'intents' => Intents::getDefaultIntents() | Intents::MESSAGE_CONTENT # Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
     ],
     'caseInsensitiveCommands' => true,
     'customOptions' => [
