@@ -11,7 +11,7 @@ class PlayerHandler
 {
     private static $instance;
 
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();
@@ -35,7 +35,7 @@ class PlayerHandler
         }
         $read_dict = json_decode($read_content, true);
         $this->player_dict = array_map(
-            fn ($player_data) => array_merge($this->default_player, $player_data),
+            fn($player_data) => array_merge($this->default_player, $player_data),
             $read_dict
         );
         $this->saveFile();
