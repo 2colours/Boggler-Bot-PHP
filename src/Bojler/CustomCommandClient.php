@@ -69,64 +69,16 @@ class CustomCommandClient extends DiscordCommandClient
 
     private function defaultHelp($message, $args)
     {
-        $prefix = str_replace((string) $this->user, '@' . $this->username, $this->commandClientOptions['prefix']);
-        $fullCommandString = implode(' ', $args);
+        $prefix = str_replace((string) $this->user, "@{$this->username}", $this->commandClientOptions['prefix']);
 
         if (count($args) > 0) {
-            $command = $this;
-            while (count($args) > 0) {
-                $commandString = array_shift($args);
-                $newCommand = $command->getCommand($commandString);
-
-                if (is_null($newCommand)) {
-                    return "The command {$commandString} does not exist.";
-                }
-
-                $command = $newCommand;
-            }
-
-            $help = $command->getHelp($prefix);
-
-            $embed = new Embed($this);
-            $embed->setAuthor($this->commandClientOptions['name'], $this->client->user->avatar)
-                ->setTitle($prefix . $fullCommandString . '\'s Help')
-                ->setDescription(! empty($help['longDescription']) ? $help['longDescription'] : $help['description'])
-                ->setFooter($this->commandClientOptions['name']);
-
-            if (! empty($help['usage'])) {
-                $embed->addFieldValues('Usage', '``' . $help['usage'] . '``', true);
-            }
-
-            if (! empty($this->aliases)) {
-                $aliasesString = '';
-                foreach ($this->aliases as $alias => $command) {
-                    if ($command != $commandString) {
-                        continue;
-                    }
-
-                    $aliasesString .= "{$alias}\r\n";
-                }
-
-                if (! empty($aliasesString)) {
-                    $embed->addFieldValues('Aliases', $aliasesString, true);
-                }
-            }
-
-            if (! empty($help['subCommandsHelp'])) {
-                foreach ($help['subCommandsHelp'] as $subCommandHelp) {
-                    $embed->addFieldValues($subCommandHelp['command'], $subCommandHelp['description'], true);
-                }
-            }
-
-            $message->channel->sendEmbed($embed);
-
+            $this->defaultHelpWithArgs($message, $prefix, $args);
             return;
         }
 
         $embed = new Embed($this);
         $embed->setAuthor($this->commandClientOptions['name'], $this->client->avatar)
             ->setTitle($this->commandClientOptions['name'])
-            ->setType(Embed::TYPE_RICH)
             ->setFooter($this->commandClientOptions['name']);
 
         $commandsDescription = '';
@@ -138,7 +90,12 @@ class CustomCommandClient extends DiscordCommandClient
                 'value' => $help['description'],
                 'inline' => true,
             ];
-            $commandsDescription .= "\n\n`" . $help['command'] . "`\n" . $help['description'];
+            $commandsDescription .= <<<END
+                
+                
+                `{$help['command']}`
+                {$help['description']}
+                END;
 
             foreach ($help['subCommandsHelp'] as $subCommandHelp) {
                 $embedfields[] = [
@@ -146,7 +103,12 @@ class CustomCommandClient extends DiscordCommandClient
                     'value' => $subCommandHelp['description'],
                     'inline' => true,
                 ];
-                $commandsDescription .= "\n\n`" . $subCommandHelp['command'] . "`\n" . $subCommandHelp['description'];
+                $commandsDescription .= <<<END
+                    
+                    
+                    `{$subCommandHelp['command']}`
+                    {$subCommandHelp['description']}
+                    END;
             }
         }
         // Use embed fields in case commands count is below limit
@@ -157,7 +119,55 @@ class CustomCommandClient extends DiscordCommandClient
             $commandsDescription = '';
         }
 
-        $embed->setDescription(substr($this->commandClientOptions['description'] . $commandsDescription, 0, 2048));
+        $embed->setDescription(substr("{$this->commandClientOptions['description']}$commandsDescription", 0, 2048));
+
+        $message->channel->sendEmbed($embed);
+    }
+
+    private function defaultHelpWithArgs($message, $prefix, $args)
+    {
+        $command = $this;
+        foreach ($args as $commandString) {
+            $newCommand = $command->getCommand($commandString);
+
+            if (is_null($newCommand)) {
+                return "The command $commandString does not exist.";
+            }
+
+            $command = $newCommand;
+        }
+
+        $help = $command->getHelp($prefix);
+
+        $embed = new Embed($this);
+        $fullCommandString = implode(' ', $args);
+        $embed->setAuthor($this->commandClientOptions['name'], $this->client->user->avatar)
+            ->setTitle("$prefix$fullCommandString's Help")
+            ->setDescription($help['longDescription'] ?: $help['description'])
+            ->setFooter($this->commandClientOptions['name']);
+
+        if ($help['usage']) {
+            $embed->addFieldValues('Usage', "``{$help['usage']}``", true);
+        }
+
+        if (count($this->aliases) > 0) {
+            $aliasesString = '';
+            foreach ($this->aliases as $alias => $command) {
+                if ($command !== $commandString) {
+                    continue;
+                }
+
+                $aliasesString .= "$alias\r\n";
+            }
+
+            if ($aliasesString) {
+                $embed->addFieldValues('Aliases', $aliasesString, true);
+            }
+        }
+
+        foreach ($help['subCommandsHelp'] as $subCommandHelp) {
+            $embed->addFieldValues($subCommandHelp['command'], $subCommandHelp['description'], true);
+        }
 
         $message->channel->sendEmbed($embed);
     }
