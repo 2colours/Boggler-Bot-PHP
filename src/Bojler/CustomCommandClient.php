@@ -90,44 +90,22 @@ class CustomCommandClient extends DiscordCommandClient
             ->setFooter($this->commandClientOptions['name']);
 
         $commandsDescription = '';
-        $embedfields = [];
-        foreach ($this->commands as $command) {
-            $help = $command->getHelp($prefix);
-            $embedfields[] = [
-                'name' => $help['command'],
-                'value' => $help['description'],
-                'inline' => true,
-            ];
-            $commandsDescription .= <<<END
-                
-                
-                `{$help['command']}`
-                {$help['description']}
-                END;
-
-            foreach ($help['subCommandsHelp'] as $subCommandHelp) {
-                $embedfields[] = [
-                    'name' => $subCommandHelp['command'],
-                    'value' => $subCommandHelp['description'],
-                    'inline' => true,
-                ];
-                $commandsDescription .= <<<END
-                    
-                    
-                    `{$subCommandHelp['command']}`
-                    {$subCommandHelp['description']}
-                    END;
-            }
+        $this->collator->sort($this->commands); # TODO make sure this causes no problems or retain consistent ordering some way
+        $embed_fields = $this->embedPerCommand($prefix);
+        $texts = $this->textPerCommand($prefix);
+        $max_embeds = 25; # TODO make this a constant
+        # Use embed fields in case commands count is below limit
+        if (count($embed_fields) > $max_embeds) {
+            $embed_fields = $this->groupTexts($texts, 10); # TODO do something with this magic number
         }
-        // Use embed fields in case commands count is below limit
-        if (count($embedfields) <= 25) {
-            foreach ($embedfields as $field) {
-                $embed->addField($field);
-            }
-            $commandsDescription = '';
+        if (count($embed_fields) > $max_embeds) {
+            $embed_fields = [];
+            $commandsDescription = implode("\n\n", $texts);
         }
-
-        $embed->setDescription(substr("{$this->commandClientOptions['description']}$commandsDescription", 0, 2048));
+        foreach ($embed_fields as $field) {
+            $embed->addField($field);
+        }
+        $embed->setDescription(grapheme_substr("{$this->commandClientOptions['description']}$commandsDescription", 0, 2048));
 
         $message->channel->sendEmbed($embed);
     }
@@ -150,13 +128,9 @@ class CustomCommandClient extends DiscordCommandClient
         $embed = new Embed($this);
         $fullCommandString = implode(' ', $args);
         $embed->setAuthor($this->commandClientOptions['name'], $this->client->user->avatar)
-            ->setTitle("$prefix$fullCommandString's Help")
+            ->setTitle("$prefix$fullCommandString {$help['usage']}")
             ->setDescription($help['longDescription'] ?: $help['description'])
             ->setFooter($this->commandClientOptions['name']);
-
-        if ($help['usage']) {
-            $embed->addFieldValues('Usage', "``{$help['usage']}``", true);
-        }
 
         if (count($this->aliases) > 0) {
             $aliasesString = '';
@@ -178,5 +152,63 @@ class CustomCommandClient extends DiscordCommandClient
         }
 
         $message->channel->sendEmbed($embed);
+    }
+
+    private function embedPerCommand(string $prefix): array
+    {
+        $result = [];
+        foreach ($this->commands as $command) {
+            $help = $command->getHelp($prefix);
+            $result[] = [
+                'name' => $help['command'],
+                'value' => $help['description'],
+                'inline' => true,
+            ];
+            foreach ($help['subCommandsHelp'] as $subCommandHelp) {
+                $result[] = [
+                    'name' => $subCommandHelp['command'],
+                    'value' => $subCommandHelp['description'],
+                    'inline' => true,
+                ];
+            }
+        }
+        return $result;
+    }
+
+    private function textPerCommand(string $prefix): array
+    {
+        $result = [];
+        foreach ($this->commands as $command) {
+            $help = $command->getHelp($prefix);
+            $formatted_description = "`{$help['description']}`";
+            $result[] = <<<END
+                **{$help['command']}**
+                $formatted_description
+                END;
+
+            foreach ($help['subCommandsHelp'] as $subCommandHelp) {
+                $formatted_description = "`{$subCommandHelp['description']}`";
+                #TODO it's not nice to have the array flat and allow separation of the command from its subcommands
+                $result[] = <<<END
+                    **{$subCommandHelp['command']}**
+                    $formatted_description
+                    END;
+            }
+        }
+        return $result;
+    }
+
+    private function groupTexts(array $texts, int $groupSize): array
+    {
+        return array_map(
+            fn($grouped_texts, $no) =>
+            [
+                'name' => "Commands #$no.",
+                'value' => grapheme_substr(implode("\n\n", $grouped_texts), 0, 1024), # TODO do something with the magic constant
+                'inline' => true,
+            ],
+            array_chunk($texts, $groupSize),
+            range(1, ceil(count($texts) / $groupSize))
+        );
     }
 }
