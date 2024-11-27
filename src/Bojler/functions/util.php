@@ -72,7 +72,6 @@ function fetch_all(SQLite3Result $db_result)
 
 function masked_word(string $original_word, array $transparent_positions)
 {
-    var_dump($transparent_positions);
     $result = '';
     $bytes_count = strlen($original_word);
     $next = 0;

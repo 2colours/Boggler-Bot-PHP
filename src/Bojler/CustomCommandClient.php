@@ -45,6 +45,8 @@ class CustomCommandClient extends DiscordCommandClient
 
     private function baseMessageHandler($message)
     {
+        $this->logger->debug('Message event received...', [grapheme_substr($message->content, 0, 10)]);
+
         if ($message->author->id === $this->id) {
             return;
         }
@@ -54,6 +56,7 @@ class CustomCommandClient extends DiscordCommandClient
             return;
         }
 
+        $this->logger->debug('Message looked like a command...');
 
         $args = mb_split(' +', $withoutPrefix);
         $command = array_shift($args);

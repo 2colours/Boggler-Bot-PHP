@@ -241,7 +241,7 @@ define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
 const COUNTER = new Counter(10);
 const RNG = new Randomizer();
 const BOT_LOGGER = new Logger('bojlerLogger');
-BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Warning));
+BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Debug));
 
 $bot = new CustomCommandClient([
     'prefix' => 'b!',
