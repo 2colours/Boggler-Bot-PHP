@@ -45,33 +45,40 @@ class CustomCommandClient extends DiscordCommandClient
 
     private function baseMessageHandler($message)
     {
-        if ($message->author->id == $this->id) {
+        $this->logger->debug('Message event received...', [grapheme_substr($message->content, 0, 10)]);
+
+        if ($message->author->id === $this->id) {
             return;
         }
 
-        if ($withoutPrefix = $this->checkForPrefix($message->content)) {
-            $args = mb_split(' +', $withoutPrefix);
-            $command = array_shift($args);
+        $withoutPrefix = $this->checkForPrefix($message->content);
+        if (is_null($withoutPrefix)) {
+            return;
+        }
 
-            if ($command !== null && $this->commandClientOptions['caseInsensitiveCommands']) {
-                $command = strtolower($command);
-            }
+        $this->logger->debug('Message looked like a command...');
 
-            $command = $this->getCommand($command);
-            if (is_null($command)) {
-                return;
-            }
+        $args = mb_split(' +', $withoutPrefix);
+        $command = array_shift($args);
 
-            $result = $command->handle($message, $args);
-            if (is_string($result)) {
-                $result = $message->reply($result);
-            }
+        if ($command !== null && $this->commandClientOptions['caseInsensitiveCommands']) {
+            $command = strtolower($command);
+        }
 
-            if ($result instanceof PromiseInterface) {
-                $result->then(null, function (\Throwable $e) {
-                    $this->logger->warning($e->getTraceAsString());
-                });
-            }
+        $command = $this->getCommand($command);
+        if (is_null($command)) {
+            return;
+        }
+
+        $result = $command->handle($message, $args);
+        if (is_string($result)) {
+            $result = $message->reply($result);
+        }
+
+        if ($result instanceof PromiseInterface) {
+            $result->then(null, function (\Throwable $e) {
+                $this->logger->warning($e->getTraceAsString());
+            });
         }
     }
 
@@ -90,7 +97,7 @@ class CustomCommandClient extends DiscordCommandClient
             ->setFooter($this->commandClientOptions['name']);
 
         $commandsDescription = '';
-        $this->collator->sort($this->commands); # TODO make sure this causes no problems or retain consistent ordering some way
+        $this->collator->asort($this->commands); # TODO make sure this causes no problems or retain consistent ordering some way
         $embed_fields = $this->embedPerCommand($prefix);
         $texts = $this->textPerCommand($prefix);
         $max_embeds = 25; # TODO make this a constant
