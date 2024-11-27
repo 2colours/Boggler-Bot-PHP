@@ -97,7 +97,7 @@ class CustomCommandClient extends DiscordCommandClient
             ->setFooter($this->commandClientOptions['name']);
 
         $commandsDescription = '';
-        $this->collator->sort($this->commands); # TODO make sure this causes no problems or retain consistent ordering some way
+        $this->collator->asort($this->commands); # TODO make sure this causes no problems or retain consistent ordering some way
         $embed_fields = $this->embedPerCommand($prefix);
         $texts = $this->textPerCommand($prefix);
         $max_embeds = 25; # TODO make this a constant
