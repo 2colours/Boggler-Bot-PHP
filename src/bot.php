@@ -118,11 +118,11 @@ function get_translation(string $text, DictionaryType $dictionary)
     return null;
 }
 
-function translator_command(string $src_lang = null, string $target_lang = null)
+function translator_command(string|null $src_lang = null, string|null $target_lang = null)
 {
     return function (Message $ctx, $args) use ($src_lang, $target_lang) {
         $word = $args[0];
-        $ctor_args = isset($src_lang) && isset($target_lang) ? [$src_lang, $target_lang] : DEFAULT_TRANSLATION;
+        $ctor_args = array_map(fn($first_choice, $default) => $first_choice ?? $default, [$src_lang, $target_lang], DEFAULT_TRANSLATION);
         $translation = get_translation($word, new DictionaryType(...$ctor_args));
         if (isset($translation)) {
             await($ctx->channel->sendMessage("$word: ||$translation||"));
@@ -218,7 +218,7 @@ function needs_counting(callable $handler)
 }
 
 # $refusalMessageProducer is a function that can take $ctx
-function ensure_predicate(callable $predicate, callable $refusalMessageProducer = null)
+function ensure_predicate(callable $predicate, callable|null $refusalMessageProducer = null)
 {
     return fn($handler) => function (Message $ctx, ...$args) use ($handler, $predicate, $refusalMessageProducer) {
         if ($predicate($ctx)) {
@@ -766,7 +766,7 @@ function current_emoji_version()
 }
 
 # TODO homogenize the interface: either change all entries to arrays in the config or implement a grapheme split
-function progress_bar(string|array $emoji_scale = null)
+function progress_bar(string|array|null $emoji_scale = null)
 {
     $emoji_scale ??= current_emoji_version()[1];
     if (is_string($emoji_scale)) {

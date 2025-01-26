@@ -185,7 +185,7 @@ class GameStatus
     }
 
     # for a given language gives back which languages you can translate it to
-    public function availableDictionariesFrom(string $origin = null)
+    public function availableDictionariesFrom(string|null $origin = null)
     {
         $origin ??= $this->current_lang;
         return array_filter(AVAILABLE_LANGUAGES, fn ($item) => array_key_exists((new DictionaryType($origin, $item))->asDictstring(), DICTIONARIES));
