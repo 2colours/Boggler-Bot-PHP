@@ -22,7 +22,7 @@ class CustomCommandClient extends DiscordCommandClient
         $this->collator = new Collator($own_options['locale']);
 
         # This is completely idiotic, thank DiscordPHP
-        $this->on('ready', $this->monkeyPatching(...));
+        $this->on('init', $this->monkeyPatching(...));
     }
 
     private function monkeyPatching()
