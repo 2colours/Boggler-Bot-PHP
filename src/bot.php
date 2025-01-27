@@ -756,14 +756,10 @@ function current_emoji_version(): array
     return $current_list[gmp_intval(gmp_mod(gmp_init($hash, 16), count($current_list)))];
 }
 
-# TODO homogenize the interface: either change all entries to arrays in the config or implement a grapheme split
-function progress_bar(string|array|null $emoji_scale = null): string
+function progress_bar(string|null $emoji_scale_str = null): string
 {
-    $emoji_scale ??= current_emoji_version()[1];
-    if (is_string($emoji_scale)) {
-        # This should give the same (same) behavior as Python - split on Unicode characters which aren't necessarily graphemes
-        $emoji_scale = mb_str_split($emoji_scale);
-    }
+    $emoji_scale_str ??= current_emoji_version()[1];
+    $emoji_scale = grapheme_str_split($emoji_scale_str);
     if (count($emoji_scale) < 2) {
         echo 'Error in config. Not enough symbols for progress bar.';
         return '';
