@@ -518,6 +518,11 @@ class GameStatus
         $this->saveGame();
     }
 
+    public function enoughWordsFound()
+    {
+        return $this->found_words->count() >= $this->end_amount;
+    }
+
     public function throwDice()
     {
         $used_permutation = range(0, 15);

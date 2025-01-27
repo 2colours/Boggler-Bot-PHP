@@ -175,12 +175,6 @@ function needs_thrown_dice()
     return GAME_STATUS->thrown_the_dice; # TODO really not nice dependency, especially if we want to move the function
 }
 
-
-# TODO this definitely should be a method provided by GameStatus
-function enough_found()
-{
-    return GAME_STATUS->found_words->count() >= GAME_STATUS->end_amount;
-}
 function emoji_awarded(Message $ctx)
 {
     return PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->getWordCountForEmoji();
@@ -389,7 +383,7 @@ function status(Message $ctx): void
 $bot->registerCommand(
     'unfound',
     decorate_handler(
-        [async(...), ensure_predicate(enough_found(...), fn() => 'You have to find ' . GAME_STATUS->end_amount . ' words first.'), needs_counting(...)],
+        [async(...), ensure_predicate(GAME_STATUS->enoughWordsFound(...), fn() => 'You have to find ' . GAME_STATUS->end_amount . ' words first.'), needs_counting(...)],
         unfound(...)
     ),
     ['description' => 'send unfound Scrabble solutions']
