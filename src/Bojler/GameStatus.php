@@ -84,37 +84,6 @@ class GameStatus
         $this->loadGame();
     }
 
-    # Does the minimum check if the current_game file is right: should be 3 lines and the first 32 characters
-    public function fileValid()
-    {
-        try {
-            $file = fopen($this->file, 'r');
-            $first_line = fgets($file);
-            # Current check: 16 letter + 15 spaces + 1 line break = 32
-            if (grapheme_strlen($first_line) !== 32) {
-                throw new Exception('Wrong amount of letters saved in current_game.');
-            }
-            # Checks if the right amount of letters is saved
-            if (count(explode(' ', $first_line)) != 16) {
-                throw new Exception('File might be damaged.');
-            }
-            for ($i = 0; $i < 2; $i++) {
-                if (fgets($file) === false) {
-                    throw new Exception('File is too short.');
-                }
-            }
-        } catch (Exception $exception) {
-            echo $exception;
-            return false;
-        } finally {
-            if (isset($file)) {
-                fclose($file);
-            }
-        }
-
-        return true;
-    }
-
     public function loadGame()
     {
         $content = file($this->file, FILE_IGNORE_NEW_LINES);

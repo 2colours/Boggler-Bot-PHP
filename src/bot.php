@@ -175,19 +175,12 @@ function needs_thrown_dice()
     return GAME_STATUS->thrown_the_dice; # TODO really not nice dependency, especially if we want to move the function
 }
 
-#Checks if current_game savefile is correctly formatted
-# TODO may be unneeded in the new system
-function savefile_valid()
-{
-    return GAME_STATUS->fileValid();
-}
 
 # TODO this definitely should be a method provided by GameStatus
 function enough_found()
 {
     return GAME_STATUS->found_words->count() >= GAME_STATUS->end_amount;
 }
-
 function emoji_awarded(Message $ctx)
 {
     return PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->getWordCountForEmoji();
