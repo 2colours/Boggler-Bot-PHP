@@ -182,6 +182,11 @@ function emoji_awarded(Message $ctx)
 
 # "handler-ish" functions (not higher order, takes context, DC side effects)
 
+function send_instructions(Message $ctx): void
+{
+    await($ctx->channel->sendMessage(instructions(GAME_STATUS->current_lang)));
+}
+
 # sends the small game board with the found words if they fit into one message
 function simple_board(Message $ctx): void
 {
@@ -244,8 +249,7 @@ $bot = new CustomCommandClient([
     ]
 ]);
 
-# TODO more consistency about how the functions send the message? (not super important if we move to slash commands)
-$bot->registerCommand('info', fn() => instructions(GAME_STATUS->current_lang), ['description' => 'show instructions']);
+$bot->registerCommand('info', send_instructions(...), ['description' => 'show instructions']);
 $bot->registerCommand('teh', translator_command('English', 'Hungarian'), ['description' => 'translate given word Eng-Hun']);
 $bot->registerCommand('the', translator_command('Hungarian', 'English'), ['description' => 'translate given word Hun-Eng']);
 $bot->registerCommand('thg', translator_command('Hungarian', 'German'), ['description' => 'translate given word Hun-Ger']);
