@@ -456,7 +456,7 @@ $bot->registerCommand(
         [async(...), ensure_predicate(channel_valid(...)), ENSURE_THROWN_DICE, needs_counting(...)],
         'add_solution'
     ),
-    ['description' => 'add solution'] # TODO aliases S and empty string?
+    ['description' => 'add solution'] # TODO alias to empty string?
 );
 
 function add_solution(Message $ctx, $args): void
