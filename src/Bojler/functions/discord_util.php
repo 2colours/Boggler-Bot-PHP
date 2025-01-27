@@ -7,9 +7,11 @@ use Discord\Parts\User\Member;
 
 use function React\Async\await;
 
+const MAX_GRAPHEME_NUMBER = 2000;
+
 function try_send_msg(Message $ctx, string $content)
 {
-    $can_be_sent = grapheme_strlen($content) <= 2000; # TODO this magic constant should be moved from here and other places as well
+    $can_be_sent = grapheme_strlen($content) <= MAX_GRAPHEME_NUMBER; # TODO this magic constant should be moved from here and other places as well
     if ($can_be_sent) {
         await($ctx->channel->sendMessage($content));
     }

@@ -27,11 +27,11 @@ function name_shortened(string $name)
 # Might be a way of splitting a too long output string
 function output_split(string $arg)
 {
-    if (grapheme_strlen($arg) <= 2000) {
+    if (grapheme_strlen($arg) <= MAX_GRAPHEME_NUMBER) {
         return [$arg];
     }
-    # 1998, because we should be able to add _ before and after
-    $index = grapheme_strrpos(grapheme_substr($arg, 0, 1998), ' ');
+    # ...-2, because we should be able to add _ before and after
+    $index = grapheme_strrpos(grapheme_substr($arg, 0, MAX_GRAPHEME_NUMBER - 2), ' ');
     return [grapheme_substr($arg, 0, $index), ...output_split(grapheme_substr($arg, $index + 1))];
 }
 
