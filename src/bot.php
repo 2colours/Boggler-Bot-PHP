@@ -245,7 +245,7 @@ $bot = new CustomCommandClient([
     ],
     'caseInsensitiveCommands' => true,
     'customOptions' => [
-        'locale' => CONFIG->getLocale('Hungarian') # TODO do something with this magic constant here
+        'locale' => CONFIG->getLocale(CONFIG->getDefaultTranslation()[0]) # TODO allow configuration of locale during the usage of the bot
     ]
 ]);
 
