@@ -720,23 +720,13 @@ function approval_reaction(string $word): string
         return $custom_reaction_list[array_rand($custom_reaction_list)];
     }
     $approval_status = GAME_STATUS->approvalStatus($word);
-    if (!$approval_status['any']) {
-        return '❔';
-    }
-    if (array_key_exists(GAME_STATUS->base_lang, $approval_status) && $approval_status[GAME_STATUS->base_lang]) {
-        return '☑️';
-    }
-    if ($approval_status['wordlist']) {
-        return '✅';
-    }
-    foreach (array_intersect(AVAILABLE_LANGUAGES, array_keys($approval_status)) as $language) {
-        if ($approval_status[$language]) {
-            return '✅';
-        }
-    }
-    if ($approval_status['community']) {
-        return '✔';
-    }
+    return match (true) {
+        @$approval_status[GAME_STATUS->base_lang] => '☑️',
+        $approval_status['wordlist'] => '✅',
+        array_any(AVAILABLE_LANGUAGES, fn($lang) => @$approval_status[$lang]) => '✅',
+        $approval_status['community'] => '✔',
+        default => '❔'
+    };
 }
 
 # emojis are retrieved in a deterministic way: (current date, sorted letters, emoji list) determine the value
