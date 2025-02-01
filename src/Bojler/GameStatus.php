@@ -573,4 +573,9 @@ class GameStatus
         }
         return $awards;
     }
+
+    public function isLongestSolution(string $word): bool
+    {
+        return $this->longest_solutions->contains($word);
+    }
 }

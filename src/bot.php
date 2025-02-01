@@ -138,7 +138,7 @@ function translator_command(string|null $src_lang = null, string|null $target_la
 function achievements(Message $ctx, string $word, string $command_type)
 {
     $reactions = [];
-    if ($command_type === 's' && (GAME_STATUS->longest_solutions->contains($word))) {
+    if ($command_type === 's' && (GAME_STATUS->isLongestSolution($word))) {
         $reactions = ['🇳', '🇮', '🇨', '🇪'];
     }
     return $reactions;
