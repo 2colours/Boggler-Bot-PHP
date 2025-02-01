@@ -22,29 +22,27 @@ define('CUSTOM_EMOJIS', CONFIG->getCustomEmojis());
 
 class GameStatus
 {
-    # TODO refined permissions (including readonly)
     private readonly PlayerHandler $player_handler;
     private $file;
     private $archive_file;
     private $game_over_acknowledged;
-    public LetterList $letters;
-    public Set $found_words;
-    public $game_number;
-    public $current_lang;
-    public $base_lang;
-    public $planned_lang;
-    public $max_saved_game;
-    public $changes_to_save;
-    public $thrown_the_dice;
-    public $end_amount;
+    private(set) LetterList $letters;
+    private(set) Set $found_words;
+    private(set) int $game_number;
+    private(set) string $current_lang;
+    private(set) string $base_lang;
+    private(set) string $planned_lang;
+    private(set) int $max_saved_game;
+    private(set) bool $changes_to_save;
+    private(set) bool $thrown_the_dice;
+    private(set) int $end_amount;
     private $custom_emoji_solution;
-    public Set $longest_solutions;
-    public Set $solutions;
-    public Set $wordlist_solutions;
-    public $community_list;
-    public $communitylist_solutions;
-    public $custom_emoji_solutions;
-    public $available_hints;
+    private Set $longest_solutions;
+    private(set) Set $solutions;
+    private Set $wordlist_solutions;
+    private $community_list;
+    private $communitylist_solutions;
+    private(set) array $available_hints;
     private Set $approved_words;
 
     public function __construct(string $file, string $archive_file)
@@ -61,7 +59,6 @@ class GameStatus
         #dependent data
         $this->communitylist_solutions = [];
         $this->available_hints = array_map(fn() => [], array_flip(AVAILABLE_LANGUAGES));
-        $this->custom_emoji_solutions = [];
         #dependent data
         $this->solutions = new Set();
         $this->end_amount = DEFAULT_END_AMOUNT;
