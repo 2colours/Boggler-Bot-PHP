@@ -6,15 +6,16 @@ use Collator;
 use Discord\DiscordCommandClient;
 use Discord\Parts\Embed\Embed;
 use React\Promise\PromiseInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 # TODO investigate and improve help message
-class CustomCommandClient extends DiscordCommandClient
+final class CustomCommandClient extends DiscordCommandClient
 {
     private Collator $collator;
 
     public function __construct(array $options = [])
     {
-        $own_options = $options['customOptions']; # TODO do some validation here as well
+        $own_options = $this->resolveCustomOptions($options['customOptions']);
         unset($options['customOptions']);
 
         parent::__construct($options);
@@ -23,6 +24,17 @@ class CustomCommandClient extends DiscordCommandClient
 
         # This is completely idiotic, thank DiscordPHP
         $this->on('init', $this->monkeyPatching(...));
+    }
+
+    private function resolveCustomOptions(array $custom_options)
+    {
+        $resolver = new OptionsResolver();
+
+        $resolver
+            ->setRequired('locale')
+            ->setAllowedTypes('locale', 'string');
+
+        return $resolver->resolve($custom_options);
     }
 
     private function monkeyPatching()
