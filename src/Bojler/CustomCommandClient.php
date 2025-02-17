@@ -13,6 +13,8 @@ final class CustomCommandClient extends DiscordCommandClient
 {
     private Collator $collator;
 
+    public const MAX_EMBEDS = 25;
+
     public function __construct(array $options = [])
     {
         $own_options = $this->resolveCustomOptions($options['customOptions']);
@@ -112,12 +114,11 @@ final class CustomCommandClient extends DiscordCommandClient
         $this->collator->asort($this->commands); # TODO make sure this causes no problems or retain consistent ordering some way
         $embed_fields = $this->embedPerCommand($prefix);
         $texts = $this->textPerCommand($prefix);
-        $max_embeds = 25; # TODO make this a constant
         # Use embed fields in case commands count is below limit
-        if (count($embed_fields) > $max_embeds) {
+        if (count($embed_fields) > self::MAX_EMBEDS) {
             $embed_fields = $this->groupTexts($texts, 10); # TODO do something with this magic number
         }
-        if (count($embed_fields) > $max_embeds) {
+        if (count($embed_fields) > self::MAX_EMBEDS) {
             $embed_fields = [];
             $commandsDescription = implode("\n\n", $texts);
         }
