@@ -9,7 +9,7 @@ use Ds\Set;
 
 use function React\Async\await;
 
-# TODO better dependency injection surely...
+# https://github.com/2colours/Boggler-Bot-PHP/issues/26
 define('CONFIG', ConfigHandler::getInstance());
 define('DEFAULT_TRANSLATION', CONFIG->getDefaultTranslation());
 define('DICE_DICT', CONFIG->getDice());
@@ -47,7 +47,7 @@ class GameStatus
 
     public function __construct(string $file, string $archive_file)
     {
-        $this->player_handler = PlayerHandler::getInstance(); # TODO better injection?
+        $this->player_handler = PlayerHandler::getInstance(); # https://github.com/2colours/Boggler-Bot-PHP/issues/26
         $this->archive_file = $archive_file;
         $this->file = $file;
         $this->letters = new LetterList(array_fill(0, 16, null));

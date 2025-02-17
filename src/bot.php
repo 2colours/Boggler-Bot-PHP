@@ -43,7 +43,7 @@ $dotenv = new Dotenv();
 $dotenv->load('./.env');
 
 const CREATORS = ['297037173541175296', '217319536485990400'];
-# TODO better dependency injection surely...
+# TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
 define('CONFIG', ConfigHandler::getInstance());
 define('IMAGE_FILEPATH_NORMAL', 'live_data/' . CONFIG->getDisplayNormalFileName());
 define('IMAGE_FILEPATH_SMALL', 'live_data/' . CONFIG->getDisplaySmallFileName());
@@ -109,7 +109,7 @@ class Counter
 
 function get_translation(string $text, DictionaryType $dictionary)
 {
-    $db = DatabaseHandler::getInstance(); # TODO better injection?
+    $db = DatabaseHandler::getInstance(); # https://github.com/2colours/Boggler-Bot-PHP/issues/26
     foreach ($db->translate($text, $dictionary) as $translation) {
         if (isset($translation)) {
             return $translation;
@@ -260,7 +260,7 @@ $bot->registerCommand('t', function (Message $ctx, $args): void {
     translator_command(...$translator_args)($ctx, $args);
 }, ['description' => 'translate given word']);
 $bot->registerCommand('stats', function (Message $ctx) {
-    $infos = PlayerHandler::getInstance()->player_dict[$ctx->author->id]; # TODO better injection
+    $infos = PlayerHandler::getInstance()->player_dict[$ctx->author->id]; # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
     if (is_null($infos)) {
         await($ctx->reply('You don\'t have any statistics registered.'));
         return;

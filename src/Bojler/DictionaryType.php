@@ -25,6 +25,6 @@ class DictionaryType
 
     public function asDictcode()
     {
-        return ConfigHandler::getInstance()->getDictionaries()[$this->asDictstring()]; # TODO better injection of singleton
+        return ConfigHandler::getInstance()->getDictionaries()[$this->asDictstring()]; # https://github.com/2colours/Boggler-Bot-PHP/issues/26
     }
 }
