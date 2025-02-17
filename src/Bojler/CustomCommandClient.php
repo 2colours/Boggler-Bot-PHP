@@ -111,7 +111,6 @@ final class CustomCommandClient extends DiscordCommandClient
             ->setFooter($this->commandClientOptions['name']);
 
         $commandsDescription = '';
-        $this->collator->asort($this->commands); # TODO make sure this causes no problems or retain consistent ordering some way
         $embed_fields = $this->embedPerCommand($prefix);
         $texts = $this->textPerCommand($prefix);
         # Use embed fields in case commands count is below limit
@@ -177,7 +176,7 @@ final class CustomCommandClient extends DiscordCommandClient
     private function embedPerCommand(string $prefix): array
     {
         $result = [];
-        foreach ($this->commands as $command) {
+        foreach ($this->sortedCommands() as $command) {
             $help = $command->getHelp($prefix);
             $result[] = [
                 'name' => $help['command'],
@@ -198,7 +197,7 @@ final class CustomCommandClient extends DiscordCommandClient
     private function textPerCommand(string $prefix): array
     {
         $result = [];
-        foreach ($this->commands as $command) {
+        foreach ($this->sortedCommands() as $command) {
             $help = $command->getHelp($prefix);
             $formatted_description = "`{$help['description']}`";
             $result[] = <<<END
@@ -230,5 +229,18 @@ final class CustomCommandClient extends DiscordCommandClient
             array_chunk($texts, $groupSize),
             range(1, ceil(count($texts) / $groupSize))
         );
+    }
+
+    private function sortedCommands(): array
+    {
+        static $last_commands = null;
+        static $last_sorted = null;
+        if ($last_commands != $this->commands) {
+            $last_commands = $this->commands;
+            $last_sorted = $last_commands;
+            uksort($last_sorted, $this->collator->compare(...)); 
+        }
+
+        return $last_sorted;
     }
 }
