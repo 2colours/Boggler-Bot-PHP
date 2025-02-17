@@ -158,7 +158,7 @@ class GameStatus
     }
 
     # gets the refdict instead of creating it every time
-    public function wordValidFast(string $word, array $refdict) # TODO why is there a $refdict passed and $this->letters->lower_cntdict also used??
+    public function wordValidFast(string $word, array $refdict)
     {
         # Pre-processing word for validity check
         $word = mb_ereg_replace('[.\'-]', '', $word);
@@ -169,7 +169,7 @@ class GameStatus
 
         $word_letters = mb_str_split($word);
         foreach ($word_letters as $letter) {
-            if (!array_key_exists($letter, $this->letters->lower_cntdict)) {
+            if (!array_key_exists($letter, $refdict)) {
                 return false;
             }
         }
