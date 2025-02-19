@@ -116,6 +116,41 @@ function game_highscore(GameStatus $status, PlayerHandler $player_handler)
     return $message;
 }
 
+function progress_bar(GameStatus $game_status, string|null $emoji_scale_str = null): string
+{
+    $emoji_scale_str ??= current_emoji_version()[1];
+    $emoji_scale = grapheme_str_split($emoji_scale_str);
+    if (count($emoji_scale) < 2) {
+        echo 'Error in config. Not enough symbols for progress bar.';
+        return '';
+    }
+    $progress_bar_length = (int) ceil($game_status->end_amount / 10);
+    if ($game_status->getApprovedAmount() >= $game_status->end_amount) {
+        return str_repeat($emoji_scale[array_key_last($emoji_scale)], $progress_bar_length);
+    }
+    $full_emoji_number = intdiv($game_status->getApprovedAmount(), 10);
+    $progress_bar = str_repeat($emoji_scale[array_key_last($emoji_scale)], $full_emoji_number);
+    $rest = $game_status->end_amount - $full_emoji_number * 10;
+    $current_step_size = min($rest, 10);
+    $progress_in_current_step = intdiv(($game_status->getApprovedAmount() % 10), $current_step_size);
+    $empty_emoji_number = $progress_bar_length - $full_emoji_number - 1;
+    $progress_bar .= $emoji_scale[$progress_in_current_step * (count($emoji_scale) - 1)];
+    $progress_bar .= str_repeat($emoji_scale[0], $empty_emoji_number);
+    return $progress_bar;
+}
+
+function acknowledgement_reaction(string $word): string
+{
+    $word = remove_special_char($word);
+    $word_length = grapheme_strlen($word);
+    return match (true) {
+        $word_length >= 10 => '💯',
+        $word_length === 9 => '🤯',
+        $word_length > 5 => '🎉',
+        default => '👍'
+    };
+}
+
 function strikethrough(string $text): string
 {
     return $text === '' ? '' : "~~$text~~";

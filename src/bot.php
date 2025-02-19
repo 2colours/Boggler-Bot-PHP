@@ -29,12 +29,13 @@ use Monolog\{
 use function Bojler\{
     masked_word,
     output_split_cursive,
-    remove_special_char,
+    acknowledgement_reaction,
     try_send_msg,
     game_highscore,
     hungarian_role,
     italic,
-    strikethrough
+    strikethrough,
+    progress_bar
 };
 use function React\Async\await;
 use function React\Async\async;
@@ -746,29 +747,6 @@ function current_emoji_version(): array
     return $current_list[gmp_intval(gmp_mod(gmp_init($hash, 16), count($current_list)))];
 }
 
-function progress_bar(string|null $emoji_scale_str = null): string
-{
-    $emoji_scale_str ??= current_emoji_version()[1];
-    $emoji_scale = grapheme_str_split($emoji_scale_str);
-    if (count($emoji_scale) < 2) {
-        echo 'Error in config. Not enough symbols for progress bar.';
-        return '';
-    }
-    $progress_bar_length = (int) ceil(GAME_STATUS->end_amount / 10);
-    if (GAME_STATUS->getApprovedAmount() >= GAME_STATUS->end_amount) {
-        return str_repeat($emoji_scale[array_key_last($emoji_scale)], $progress_bar_length);
-    }
-    $full_emoji_number = intdiv(GAME_STATUS->getApprovedAmount(), 10);
-    $progress_bar = str_repeat($emoji_scale[array_key_last($emoji_scale)], $full_emoji_number);
-    $rest = GAME_STATUS->end_amount - $full_emoji_number * 10;
-    $current_step_size = min($rest, 10);
-    $progress_in_current_step = intdiv((GAME_STATUS->getApprovedAmount() % 10), $current_step_size);
-    $empty_emoji_number = $progress_bar_length - $full_emoji_number - 1;
-    $progress_bar .= $emoji_scale[$progress_in_current_step * (count($emoji_scale) - 1)];
-    $progress_bar .= str_repeat($emoji_scale[0], $empty_emoji_number);
-    return $progress_bar;
-}
-
 function found_words_output()
 {
     $found_word_list = GAME_STATUS->foundWordsSorted();
@@ -776,7 +754,7 @@ function found_words_output()
         return 'No words found yet 😭';
     }
     [$found_word_list_formatted, $found_word_list_length] = [format_found_words($found_word_list), count($found_word_list)];
-    $progress_bar = progress_bar();
+    $progress_bar = progress_bar(GAME_STATUS);
     [$amount_approved_words, $end_amount] = [GAME_STATUS->getApprovedAmount(), GAME_STATUS->end_amount];
     return <<<END
         _$found_word_list_formatted ($found_word_list_length)_
@@ -790,18 +768,6 @@ function format_found_words($words): string
         ', ',
         array_map(fn($word) => GAME_STATUS->isFoundApproved($word) ? $word : strikethrough($word), $words)
     );
-}
-
-function acknowledgement_reaction(string $word): string
-{
-    $word = remove_special_char($word);
-    $word_length = grapheme_strlen($word);
-    return match (true) {
-        $word_length >= 10 => '💯',
-        $word_length === 9 => '🤯',
-        $word_length > 5 => '🎉',
-        default => '👍'
-    };
 }
 
 /*import math
