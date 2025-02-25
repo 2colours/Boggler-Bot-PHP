@@ -20,7 +20,7 @@ define('DICTIONARIES', CONFIG->getDictionaries());
 define('COMMUNITY_WORDLIST_PATHS', array_map(fn($value) => "live_data/$value", CONFIG->getCommunityWordlists()));
 define('CUSTOM_EMOJIS', CONFIG->getCustomEmojis());
 
-class GameStatus
+class GameStatus #not final because of mocking
 {
     private readonly PlayerHandler $player_handler;
     private $file;
@@ -35,7 +35,7 @@ class GameStatus
     private(set) int $max_saved_game;
     private(set) bool $changes_to_save;
     private(set) bool $thrown_the_dice;
-    private(set) int $end_amount;
+    protected(set) int $end_amount; #not private because of mocking
     private $custom_emoji_solution;
     private Set $longest_solutions;
     private(set) Set $solutions;
