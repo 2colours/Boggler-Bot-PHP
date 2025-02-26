@@ -5,10 +5,8 @@ use function Bojler\{
     progress_bar
 };
 use Bojler\{
-    GameStatus,
-    ConfigHandler
+    GameStatus
 };
-use Mockery;
 
 describe('acknowledgement_reaction', function () {
     it('detects short words correctly', function () {
@@ -54,17 +52,74 @@ describe('progress_bar', function () {
         $property->setValue($game_status_mock, $end_amount);
     }
 
-    $mocked_status = Mockery::mock(GameStatus::class);
     $emoji_scales = ['🤾‍♀️🥇', '🥚🐣🐥', '📖🇩🇪', '🥖🇫🇷', '🎨🏞️', '🎲🔠', '☁️🌥️⛅🌤️☀️'];
+    $first_symbols = ['🤾‍♀️', '🥚', '📖', '🥖', '🎨', '🎲', '☁️'];
+    $last_symbols = ['🥇', '🐥', '🇩🇪', '🇫🇷', '🏞️', '🔠', '☀️'];
 
-    test('150 = possible words < found approved words', function () use ($mocked_status, $emoji_scales) {
-        $last_symbols = ['🥇', '🐥', '🇩🇪', '🇫🇷', '🏞️', '🔠', '☀️'];
-        hack_end_amount($mocked_status, 150);
-        $mocked_status->shouldReceive('getApprovedAmount')->andReturn(250);
+    test('100 = word limit < found approved words', function () use ($emoji_scales, $last_symbols) {
+        $expected_emoji_count = 10;
+
+        $mocked_status = Mockery::mock(GameStatus::class);
+        hack_end_amount($mocked_status, 100);
+        $mocked_status->shouldReceive('getApprovedAmount')->andReturn(252);
 
         foreach (array_map(null, $emoji_scales, $last_symbols) as [$current_scale, $current_symbol]) {
+            /** @disregard type hint on mocked object */
             $result = progress_bar($mocked_status, $current_scale);
-            expect($result)->toBe(str_repeat($current_symbol, 15));
+            expect($result)->toBe(str_repeat($current_symbol, $expected_emoji_count));
         }
     });
+
+    test('0 = found approved words < word limit = 123', function () use ($emoji_scales, $first_symbols) {
+        $expected_emoji_count = 13;
+
+        $mocked_status = Mockery::mock(GameStatus::class);
+        hack_end_amount($mocked_status, 123);
+        $mocked_status->shouldReceive('getApprovedAmount')->andReturn(0);
+
+        foreach (array_map(null, $emoji_scales, $first_symbols) as [$current_scale, $current_symbol]) {
+            /** @disregard type hint on mocked object */
+            $result = progress_bar($mocked_status, $current_scale);
+            expect($result)->toBe(str_repeat($current_symbol, $expected_emoji_count));
+        }
+    });
+
+    test('42 = found approved words < word limit = 53', function () use ($emoji_scales, $first_symbols, $last_symbols) {
+        $expected_full_emoji_count = 4;
+        $expected_intermediate_emojis = ['🤾‍♀️', '🥚', '📖', '🥖', '🎨', '🎲', '☁️'];
+        $expected_empty_emoji_count = 1;
+
+        $mocked_status = Mockery::mock(GameStatus::class);
+        hack_end_amount($mocked_status, 53);
+        $mocked_status->shouldReceive('getApprovedAmount')->andReturn(42);
+
+        foreach ($emoji_scales as $current_index => $current_scale) {
+            /** @disregard type hint on mocked object */
+            $result = progress_bar($mocked_status, $current_scale);
+            $expected = str_repeat($last_symbols[$current_index], $expected_full_emoji_count)
+                . $expected_intermediate_emojis[$current_index]
+                . str_repeat($first_symbols[$current_index], $expected_empty_emoji_count);
+            expect($result)->toBe($expected);
+        }
+    });
+
+    test('117 = found approved words < word limit = 118', function () use ($emoji_scales, $first_symbols, $last_symbols) {
+        $expected_full_emoji_count = 11;
+        $expected_intermediate_emojis = ['🤾‍♀️', '🐣', '📖', '🥖', '🎨', '🎲', '🌤️'];
+
+        $mocked_status = Mockery::mock(GameStatus::class);
+        hack_end_amount($mocked_status, 118);
+        $mocked_status->shouldReceive('getApprovedAmount')->andReturn(117);
+
+        foreach ($emoji_scales as $current_index => $current_scale) {
+            /** @disregard type hint on mocked object */
+            $result = progress_bar($mocked_status, $current_scale);
+            $expected = str_repeat($last_symbols[$current_index], $expected_full_emoji_count)
+                . $expected_intermediate_emojis[$current_index];
+            expect($result)->toBe($expected);
+        }
+    });
+
+    # TODO one more test where there is some intermediate state in the middle of the scale and empty slots after
+    # TODO one more test where there is no full emoji at the beginning
 });
