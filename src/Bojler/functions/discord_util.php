@@ -116,25 +116,43 @@ function game_highscore(GameStatus $status, PlayerHandler $player_handler)
     return $message;
 }
 
+# the structure of the progress bar:
+# - every emoji is worth [UNIT] words (*rounded up at the end so the last emoji might be worth less)
+# - if the target number of words is reached: display all emojis "full" ("full" means: last stage on the scale)
+# - otherwise:
+# - in general, the progress bar consists of "full" emojis, "empty" emojis and one intermediate emoji inbetween
+# - the first [N] emojis are "full emojis" (N is [FOUND WORDS] div [UNIT])
+# - the worth of the next emoji is [CURRENT STEP SIZE] (generally [UNIT], might be less if it's
+# the last emoji)
+# - based on the actual completion ([FOUND WORDS] mod [UNIT]), we calculate the progress ratio (to the actual
+# worth) for that emoji
+# - we display the corresponding stage in the scale for that one intermediate emoji
+# - we display the remaining emojis (if there are any) as "empty" (first stage on the scale)
 function progress_bar(GameStatus $game_status, string|null $emoji_scale_str = null): string
 {
+    $unit_value = 10;
     $emoji_scale_str ??= current_emoji_version()[1];
     $emoji_scale = grapheme_str_split($emoji_scale_str);
     if (count($emoji_scale) < 2) {
         echo 'Error in config. Not enough symbols for progress bar.';
         return '';
     }
-    $progress_bar_length = (int) ceil($game_status->end_amount / 10);
+    $progress_bar_length = (int) ceil($game_status->end_amount / $unit_value);
     if ($game_status->getApprovedAmount() >= $game_status->end_amount) {
         return str_repeat($emoji_scale[array_key_last($emoji_scale)], $progress_bar_length);
     }
-    $full_emoji_number = intdiv($game_status->getApprovedAmount(), 10);
+    $full_emoji_number = intdiv($game_status->getApprovedAmount(), $unit_value);
     $progress_bar = str_repeat($emoji_scale[array_key_last($emoji_scale)], $full_emoji_number);
-    $rest = $game_status->end_amount - $full_emoji_number * 10;
-    $current_step_size = min($rest, 10);
-    $progress_in_current_step = intdiv(($game_status->getApprovedAmount() % 10), $current_step_size);
+    $rest = $game_status->end_amount - $full_emoji_number * $unit_value;
+    $current_step_size = min($rest, $unit_value);
+    $progress_in_current_step = ($game_status->getApprovedAmount() % $unit_value) / $current_step_size;
+    # it might seem like the variable above can be >= one but it can't:
+    # the approved amount modulo the unit size can only be greater than the step size if there are
+    # less words (to target amount) not yet covered by the full emojis than actually found words not
+    # covered by the full emojis, which would mean the target number has been reached.
+    # but we handled that as a separate case. 
     $empty_emoji_number = $progress_bar_length - $full_emoji_number - 1;
-    $progress_bar .= $emoji_scale[$progress_in_current_step * (count($emoji_scale) - 1)];
+    $progress_bar .= $emoji_scale[floor($progress_in_current_step * (count($emoji_scale) - 1))];
     $progress_bar .= str_repeat($emoji_scale[0], $empty_emoji_number);
     return $progress_bar;
 }
