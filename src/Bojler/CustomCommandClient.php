@@ -6,15 +6,18 @@ use Collator;
 use Discord\DiscordCommandClient;
 use Discord\Parts\Embed\Embed;
 use React\Promise\PromiseInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 # TODO investigate and improve help message
-class CustomCommandClient extends DiscordCommandClient
+final class CustomCommandClient extends DiscordCommandClient
 {
     private Collator $collator;
 
+    public const MAX_EMBEDS = 25;
+
     public function __construct(array $options = [])
     {
-        $own_options = $options['customOptions']; # TODO do some validation here as well
+        $own_options = $this->resolveCustomOptions($options['customOptions']);
         unset($options['customOptions']);
 
         parent::__construct($options);
@@ -23,6 +26,17 @@ class CustomCommandClient extends DiscordCommandClient
 
         # This is completely idiotic, thank DiscordPHP
         $this->on('init', $this->monkeyPatching(...));
+    }
+
+    private function resolveCustomOptions(array $custom_options)
+    {
+        $resolver = new OptionsResolver();
+
+        $resolver
+            ->setRequired('locale')
+            ->setAllowedTypes('locale', 'string');
+
+        return $resolver->resolve($custom_options);
     }
 
     private function monkeyPatching()
@@ -97,15 +111,13 @@ class CustomCommandClient extends DiscordCommandClient
             ->setFooter($this->commandClientOptions['name']);
 
         $commandsDescription = '';
-        $this->collator->asort($this->commands); # TODO make sure this causes no problems or retain consistent ordering some way
         $embed_fields = $this->embedPerCommand($prefix);
         $texts = $this->textPerCommand($prefix);
-        $max_embeds = 25; # TODO make this a constant
         # Use embed fields in case commands count is below limit
-        if (count($embed_fields) > $max_embeds) {
+        if (count($embed_fields) > self::MAX_EMBEDS) {
             $embed_fields = $this->groupTexts($texts, 10); # TODO do something with this magic number
         }
-        if (count($embed_fields) > $max_embeds) {
+        if (count($embed_fields) > self::MAX_EMBEDS) {
             $embed_fields = [];
             $commandsDescription = implode("\n\n", $texts);
         }
@@ -164,7 +176,7 @@ class CustomCommandClient extends DiscordCommandClient
     private function embedPerCommand(string $prefix): array
     {
         $result = [];
-        foreach ($this->commands as $command) {
+        foreach ($this->sortedCommands() as $command) {
             $help = $command->getHelp($prefix);
             $result[] = [
                 'name' => $help['command'],
@@ -185,7 +197,7 @@ class CustomCommandClient extends DiscordCommandClient
     private function textPerCommand(string $prefix): array
     {
         $result = [];
-        foreach ($this->commands as $command) {
+        foreach ($this->sortedCommands() as $command) {
             $help = $command->getHelp($prefix);
             $formatted_description = "`{$help['description']}`";
             $result[] = <<<END
@@ -217,5 +229,18 @@ class CustomCommandClient extends DiscordCommandClient
             array_chunk($texts, $groupSize),
             range(1, ceil(count($texts) / $groupSize))
         );
+    }
+
+    private function sortedCommands(): array
+    {
+        static $last_commands = null;
+        static $last_sorted = null;
+        if ($last_commands != $this->commands) {
+            $last_commands = $this->commands;
+            $last_sorted = $last_commands;
+            uksort($last_sorted, $this->collator->compare(...)); 
+        }
+
+        return $last_sorted;
     }
 }

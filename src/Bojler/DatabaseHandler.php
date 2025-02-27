@@ -94,7 +94,7 @@ class DatabaseHandler
     private function __construct()
     {
         $this->db = new SQLite3(self::DB_PATH);
-        $this->dictionaries = ConfigHandler::getInstance()->getDictionaries(); # TODO better injection
+        $this->dictionaries = ConfigHandler::getInstance()->getDictionaries(); # https://github.com/2colours/Boggler-Bot-PHP/issues/26
         $this->tableSetup();
         foreach ($this->dictionaries as $dictstring => $dictcode) {
             $dtype = DictionaryType::fromDictstring($dictstring);

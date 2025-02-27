@@ -9,47 +9,45 @@ use Ds\Set;
 
 use function React\Async\await;
 
-# TODO better dependency injection surely...
+# https://github.com/2colours/Boggler-Bot-PHP/issues/26
 define('CONFIG', ConfigHandler::getInstance());
 define('DEFAULT_TRANSLATION', CONFIG->getDefaultTranslation());
 define('DICE_DICT', CONFIG->getDice());
 define('AVAILABLE_LANGUAGES', CONFIG->getAvailableLanguages());
 define('DEFAULT_END_AMOUNT', CONFIG->getDefaultEndAmount());
-define('WORDLIST_PATHS', array_map(fn ($value) => "param/$value", CONFIG->getWordlists()));
+define('WORDLIST_PATHS', array_map(fn($value) => "param/$value", CONFIG->getWordlists()));
 define('DICTIONARIES', CONFIG->getDictionaries());
-define('COMMUNITY_WORDLIST_PATHS', array_map(fn ($value) => "live_data/$value", CONFIG->getCommunityWordlists()));
+define('COMMUNITY_WORDLIST_PATHS', array_map(fn($value) => "live_data/$value", CONFIG->getCommunityWordlists()));
 define('CUSTOM_EMOJIS', CONFIG->getCustomEmojis());
 
-class GameStatus
+class GameStatus #not final because of mocking
 {
-    # TODO refined permissions (including readonly)
     private readonly PlayerHandler $player_handler;
     private $file;
     private $archive_file;
     private $game_over_acknowledged;
-    public LetterList $letters;
-    public Set $found_words;
-    public $game_number;
-    public $current_lang;
-    public $base_lang;
-    public $planned_lang;
-    public $max_saved_game;
-    public $changes_to_save;
-    public $thrown_the_dice;
-    public $end_amount;
+    private(set) LetterList $letters;
+    private(set) Set $found_words;
+    private(set) int $game_number;
+    private(set) string $current_lang;
+    private(set) string $base_lang;
+    private(set) string $planned_lang;
+    private(set) int $max_saved_game;
+    private(set) bool $changes_to_save;
+    private(set) bool $thrown_the_dice;
+    protected(set) int $end_amount; #not private because of mocking
     private $custom_emoji_solution;
-    public Set $longest_solutions;
-    public Set $solutions;
-    public Set $wordlist_solutions;
-    public $community_list;
-    public $communitylist_solutions;
-    public $custom_emoji_solutions;
-    public $available_hints;
+    private Set $longest_solutions;
+    private(set) Set $solutions;
+    private Set $wordlist_solutions;
+    private $community_list;
+    private $communitylist_solutions;
+    private(set) array $available_hints;
     private Set $approved_words;
 
     public function __construct(string $file, string $archive_file)
     {
-        $this->player_handler = PlayerHandler::getInstance(); # TODO better injection?
+        $this->player_handler = PlayerHandler::getInstance(); # https://github.com/2colours/Boggler-Bot-PHP/issues/26
         $this->archive_file = $archive_file;
         $this->file = $file;
         $this->letters = new LetterList(array_fill(0, 16, null));
@@ -60,8 +58,7 @@ class GameStatus
         $this->wordlist_solutions = new Set();
         #dependent data
         $this->communitylist_solutions = [];
-        $this->available_hints = array_map(fn () => [], array_flip(AVAILABLE_LANGUAGES));
-        $this->custom_emoji_solutions = [];
+        $this->available_hints = array_map(fn() => [], array_flip(AVAILABLE_LANGUAGES));
         #dependent data
         $this->solutions = new Set();
         $this->end_amount = DEFAULT_END_AMOUNT;
@@ -82,37 +79,6 @@ class GameStatus
         $this->longest_solutions = new Set();
 
         $this->loadGame();
-    }
-
-    # Does the minimum check if the current_game file is right: should be 3 lines and the first 32 characters
-    public function fileValid()
-    {
-        try {
-            $file = fopen($this->file, 'r');
-            $first_line = fgets($file);
-            # Current check: 16 letter + 15 spaces + 1 line break = 32
-            if (grapheme_strlen($first_line) !== 32) {
-                throw new Exception('Wrong amount of letters saved in current_game.');
-            }
-            # Checks if the right amount of letters is saved
-            if (count(explode(' ', $first_line)) != 16) {
-                throw new Exception('File might be damaged.');
-            }
-            for ($i = 0; $i < 2; $i++) {
-                if (fgets($file) === false) {
-                    throw new Exception('File is too short.');
-                }
-            }
-        } catch (Exception $exception) {
-            echo $exception;
-            return false;
-        } finally {
-            if (isset($file)) {
-                fclose($file);
-            }
-        }
-
-        return true;
     }
 
     public function loadGame()
@@ -151,9 +117,9 @@ class GameStatus
     private function getLongestWords()
     {
         $solutions = $this->solutions->toArray();
-        $solutions_with_length = array_map(fn ($item) => [$item, grapheme_strlen(remove_special_char($item))], $solutions);
-        $longest_solution_length = max(array_map(fn ($item) => $item[1], $solutions_with_length));
-        $this->longest_solutions = new Set(array_map(fn ($item) => $item[0], array_filter($solutions_with_length, fn ($item) => $item[1] === $longest_solution_length)));
+        $solutions_with_length = array_map(fn($item) => [$item, grapheme_strlen(remove_special_char($item))], $solutions);
+        $longest_solution_length = max(array_map(fn($item) => $item[1], $solutions_with_length));
+        $this->longest_solutions = new Set(array_map(fn($item) => $item[0], array_filter($solutions_with_length, fn($item) => $item[1] === $longest_solution_length)));
     }
 
     private function findSolutions()
@@ -169,7 +135,7 @@ class GameStatus
         }
         # communitylist
         $this->loadCommunityList();
-        $this->solutions->add(...array_filter($this->community_list, fn ($word) => $this->wordValidFast($word, $refdict)));
+        $this->solutions->add(...array_filter($this->community_list, fn($word) => $this->wordValidFast($word, $refdict)));
         # custom emojis
         $this->findCustomEmojis($refdict);
         $this->solutions->add(...$this->custom_emoji_solution);
@@ -180,7 +146,7 @@ class GameStatus
         $db = DatabaseHandler::getInstance();
         $refdict = $this->letters->lower_cntdict;
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
-            $this->available_hints[$language] = array_values(array_filter($db->getWords(new DictionaryType($this->current_lang, $language)), fn ($item) => $this->wordValidFast($item, $refdict)));
+            $this->available_hints[$language] = array_values(array_filter($db->getWords(new DictionaryType($this->current_lang, $language)), fn($item) => $this->wordValidFast($item, $refdict)));
         }
     }
 
@@ -188,11 +154,11 @@ class GameStatus
     public function availableDictionariesFrom(string|null $origin = null)
     {
         $origin ??= $this->current_lang;
-        return array_filter(AVAILABLE_LANGUAGES, fn ($item) => array_key_exists((new DictionaryType($origin, $item))->asDictstring(), DICTIONARIES));
+        return array_filter(AVAILABLE_LANGUAGES, fn($item) => array_key_exists((new DictionaryType($origin, $item))->asDictstring(), DICTIONARIES));
     }
 
     # gets the refdict instead of creating it every time
-    public function wordValidFast(string $word, array $refdict) # TODO why is there a $refdict passed and $this->letters->lower_cntdict also used??
+    public function wordValidFast(string $word, array $refdict)
     {
         # Pre-processing word for validity check
         $word = mb_ereg_replace('[.\'-]', '', $word);
@@ -203,7 +169,7 @@ class GameStatus
 
         $word_letters = mb_str_split($word);
         foreach ($word_letters as $letter) {
-            if (!array_key_exists($letter, $this->letters->lower_cntdict)) {
+            if (!array_key_exists($letter, $refdict)) {
                 return false;
             }
         }
@@ -294,7 +260,7 @@ class GameStatus
     private function findWordlistSolutions(array $refdict)
     {
         $content = file(WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES);
-        $this->wordlist_solutions = new Set(array_filter($content, fn ($line) => $this->wordValidFast($line, $refdict)));
+        $this->wordlist_solutions = new Set(array_filter($content, fn($line) => $this->wordValidFast($line, $refdict)));
     }
 
     public function tryLoadOldGame(int $number)
@@ -358,7 +324,7 @@ class GameStatus
         foreach (['wordlist', 'community', 'custom_reactions'] as $key) {
             $approval_dict['any'] = $approval_dict['any'] || $approval_dict[$key];
         }
-        $approval_dict += array_map(fn () => false, array_flip(AVAILABLE_LANGUAGES));
+        $approval_dict += array_map(fn() => false, array_flip(AVAILABLE_LANGUAGES));
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
             if (in_array($word, $this->available_hints[$language])) {
                 $approval_dict[$language] = $word;
@@ -369,13 +335,13 @@ class GameStatus
         return $approval_dict;
     }
 
-    public function getApprovedAmount() : int
+    public function getApprovedAmount(): int
     {
         return $this->approved_words->count();
     }
 
     #TODO style guide about indicating return type?
-    public function isFoundApproved(string $word) : bool
+    public function isFoundApproved(string $word): bool
     {
         return $this->approved_words->contains($word);
     }
@@ -387,7 +353,7 @@ class GameStatus
 
     private function findCustomEmojis(array $refdict)
     {
-        $this->custom_emoji_solution = array_filter(array_keys(CUSTOM_EMOJIS[$this->current_lang]), fn ($word) => $this->wordValidFast($word, $refdict));
+        $this->custom_emoji_solution = array_filter(array_keys(CUSTOM_EMOJIS[$this->current_lang]), fn($word) => $this->wordValidFast($word, $refdict));
     }
 
     private function saveOld()
@@ -549,13 +515,18 @@ class GameStatus
         $this->saveGame();
     }
 
+    public function enoughWordsFound()
+    {
+        return $this->found_words->count() >= $this->end_amount;
+    }
+
     public function throwDice()
     {
         $used_permutation = range(0, 15);
         shuffle($used_permutation);
         $current_dice = DICE_DICT[$this->current_lang];
-        $dice_permutated = array_map(fn ($dice_index) => $current_dice[$dice_index], $used_permutation);
-        $this->letters = new LetterList(array_map(fn ($current_die) => $current_die[array_rand($current_die)], $dice_permutated), just_regenerate: true);
+        $dice_permutated = array_map(fn($dice_index) => $current_dice[$dice_index], $used_permutation);
+        $this->letters = new LetterList(array_map(fn($current_die) => $current_die[array_rand($current_die)], $dice_permutated), just_regenerate: true);
         $this->saveGame();
     }
 
@@ -587,16 +558,21 @@ class GameStatus
             if (count($awards['Best Beginner']) > 0) {
                 break;
             }
-            $awards['Best Beginner'] = array_filter($players, fn ($player) => $this->player_handler->getPlayerField($player, 'role') === 'Beginner');
+            $awards['Best Beginner'] = array_filter($players, fn($player) => $this->player_handler->getPlayerField($player, 'role') === 'Beginner');
         }
         $relevant_players = array_merge(...$highscore);
-        $is_newcomer = fn ($player_data) => count($player_data['found_words']) === $player_data['all_time_found'];
-        $solved_hints = fn ($player_data) => count(array_intersect($player_data['found_words'], $player_data['used_hints']));
-        $awards['Newcomer'] = array_filter($relevant_players, fn ($player) => $is_newcomer($this->player_handler->player_dict[$player]));
-        $most_solved_hints_amount = count($relevant_players) === 0 ? 0 : max(array_map(fn ($player) => $solved_hints($this->player_handler->player_dict[$player]), $relevant_players));
+        $is_newcomer = fn($player_data) => count($player_data['found_words']) === $player_data['all_time_found'];
+        $solved_hints = fn($player_data) => count(array_intersect($player_data['found_words'], $player_data['used_hints']));
+        $awards['Newcomer'] = array_filter($relevant_players, fn($player) => $is_newcomer($this->player_handler->player_dict[$player]));
+        $most_solved_hints_amount = count($relevant_players) === 0 ? 0 : max(array_map(fn($player) => $solved_hints($this->player_handler->player_dict[$player]), $relevant_players));
         if ($most_solved_hints_amount > 0) {
-            $awards['Most solved hints'] = array_filter($relevant_players, fn ($player) => $solved_hints($this->player_handler->player_dict[$player]) === $most_solved_hints_amount);
+            $awards['Most solved hints'] = array_filter($relevant_players, fn($player) => $solved_hints($this->player_handler->player_dict[$player]) === $most_solved_hints_amount);
         }
         return $awards;
+    }
+
+    public function isLongestSolution(string $word): bool
+    {
+        return $this->longest_solutions->contains($word);
     }
 }
