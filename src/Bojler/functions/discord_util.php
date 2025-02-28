@@ -128,7 +128,7 @@ function game_highscore(GameStatus $status, PlayerHandler $player_handler)
 # worth) for that emoji
 # - we display the corresponding stage in the scale for that one intermediate emoji
 # - we display the remaining emojis (if there are any) as "empty" (first stage on the scale)
-function progress_bar(GameStatus $game_status, string|null $emoji_scale_str = null): string
+function progress_bar(GameStatus $game_status, ?string $emoji_scale_str = null): string
 {
     $unit_value = 10;
     $emoji_scale_str ??= current_emoji_version()[1];
