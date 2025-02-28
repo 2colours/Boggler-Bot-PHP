@@ -9,6 +9,11 @@ function remove_special_char(string $word)
     return str_replace(['.', '-'], '', $word);
 }
 
+function textual_length(string $word): int
+{
+    return grapheme_strlen(remove_special_char($word));
+}
+
 
 function name_shortened(string $name)
 {

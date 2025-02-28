@@ -159,8 +159,7 @@ function progress_bar(GameStatus $game_status, string|null $emoji_scale_str = nu
 
 function acknowledgement_reaction(string $word): string
 {
-    $word = remove_special_char($word);
-    $word_length = grapheme_strlen($word);
+    $word_length = textual_length($word);
     return match (true) {
         $word_length >= 10 => '💯',
         $word_length === 9 => '🤯',

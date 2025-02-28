@@ -2,7 +2,6 @@
 
 namespace Bojler;
 
-use Exception;
 use Collator;
 use Discord\Parts\Channel\Message;
 use Ds\Set;
@@ -37,7 +36,6 @@ class GameStatus #not final because of mocking
     private(set) bool $thrown_the_dice;
     protected(set) int $end_amount; #not private because of mocking
     private $custom_emoji_solution;
-    private Set $longest_solutions;
     private(set) Set $solutions;
     private Set $wordlist_solutions;
     private $community_list;
@@ -75,9 +73,6 @@ class GameStatus #not final because of mocking
         #dependent data
         $this->max_saved_game = 0;
 
-        # achievement stuff
-        $this->longest_solutions = new Set();
-
         $this->loadGame();
     }
 
@@ -110,16 +105,11 @@ class GameStatus #not final because of mocking
         $this->thrown_the_dice = True;
         # easter egg stuff
         #$this->_easter_egg_conditions();
-        # achievement stuff
-        $this->getLongestWords();
     }
 
-    private function getLongestWords()
+    public function getLongestWordLength(): int
     {
-        $solutions = $this->solutions->toArray();
-        $solutions_with_length = array_map(fn($item) => [$item, grapheme_strlen(remove_special_char($item))], $solutions);
-        $longest_solution_length = max(array_map(fn($item) => $item[1], $solutions_with_length));
-        $this->longest_solutions = new Set(array_map(fn($item) => $item[0], array_filter($solutions_with_length, fn($item) => $item[1] === $longest_solution_length)));
+        return max(array_map(textual_length(...), $this->solutions->toArray()));
     }
 
     private function findSolutions()
@@ -573,6 +563,6 @@ class GameStatus #not final because of mocking
 
     public function isLongestSolution(string $word): bool
     {
-        return $this->longest_solutions->contains($word);
+        return textual_length($word) === $this->getLongestWordLength();
     }
 }
