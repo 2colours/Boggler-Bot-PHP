@@ -711,6 +711,20 @@ function reveal(Message $ctx): void
     await($ctx->channel->sendMessage("Hint: $formatted_masked_word"));
 }
 
+$bot->registerCommand(
+    'longest',
+    decorate_handler(
+        [async(...), ensure_predicate(channel_valid(...)), needs_counting(...)],
+        longest(...)
+    ),
+    ['description' => 'tell the length of the longest word(s)']
+);
+
+function longest(Message $ctx): void {
+    $formatted_longest_word_length = italic((string) GAME_STATUS->getLongestWordLength());
+    await($ctx->channel->sendMessage("The largest possible word length is: $formatted_longest_word_length."));
+}
+
 # Blocks the code - has to be at the bottom
 $bot->run();
 
