@@ -563,6 +563,6 @@ class GameStatus #not final because of mocking
 
     public function isLongestSolution(string $word): bool
     {
-        return textual_length($word) === $this->getLongestWordLength();
+        return $this->solutions->contains($word) && textual_length($word) >= $this->getLongestWordLength();
     }
 }
