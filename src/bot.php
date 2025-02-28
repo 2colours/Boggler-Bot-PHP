@@ -119,7 +119,7 @@ function get_translation(string $text, DictionaryType $dictionary)
     return null;
 }
 
-function translator_command(string|null $src_lang = null, string|null $target_lang = null)
+function translator_command(?string $src_lang = null, ?string $target_lang = null)
 {
     return function (Message $ctx, $args) use ($src_lang, $target_lang): void {
         $word = $args[0];
@@ -211,7 +211,7 @@ function needs_counting(callable $handler)
 }
 
 # $refusalMessageProducer is a function that can take $ctx
-function ensure_predicate(callable $predicate, callable|null $refusalMessageProducer = null)
+function ensure_predicate(callable $predicate, ?callable $refusalMessageProducer = null)
 {
     return fn($handler) => function (Message $ctx, ...$args) use ($handler, $predicate, $refusalMessageProducer) {
         if ($predicate($ctx)) {
