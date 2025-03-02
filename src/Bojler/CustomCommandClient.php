@@ -22,19 +22,34 @@ final class CustomCommandClient extends DiscordCommandClient
 
         parent::__construct($options);
 
+        $this->commandClientOptions += $own_options;
+
+        if ($own_options['caseInsensitivePrefix']) {
+            foreach ($this->commandClientOptions['prefixes'] as &$prefix) {
+                $prefix = strtolower($prefix);
+            }
+        }
+
         $this->collator = new Collator($own_options['locale']);
 
         # This is completely idiotic, thank DiscordPHP
         $this->on('init', $this->monkeyPatching(...));
     }
 
-    private function resolveCustomOptions(array $custom_options)
+    private function resolveCustomOptions(array $custom_options): array
     {
         $resolver = new OptionsResolver();
 
         $resolver
             ->setRequired('locale')
-            ->setAllowedTypes('locale', 'string');
+            ->setAllowedTypes('locale', 'string')
+            ->setDefined([
+                'locale',
+                'caseInsensitivePrefix'
+            ])
+            ->setDefaults([
+                'caseInsensitivePrefix' => false
+            ]);
 
         return $resolver->resolve($custom_options);
     }
@@ -55,6 +70,15 @@ final class CustomCommandClient extends DiscordCommandClient
                 ]
             );
         }
+    }
+
+    protected function checkForPrefix(string $content): ?string
+    {
+        if ($this->commandClientOptions['caseInsensitivePrefix']) {
+            $content = strtolower($content);
+        }
+
+        return parent::checkForPrefix($content);
     }
 
     private function baseMessageHandler($message)
