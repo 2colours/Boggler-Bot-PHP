@@ -25,22 +25,22 @@ class GameStatus #not final because of mocking
     private $file;
     private $archive_file;
     private $game_over_acknowledged;
-    private(set) LetterList $letters;
-    private(set) Set $found_words;
-    private(set) int $game_number;
-    private(set) string $current_lang;
-    private(set) string $base_lang;
-    private(set) string $planned_lang;
-    private(set) int $max_saved_game;
-    private(set) bool $changes_to_save;
-    private(set) bool $thrown_the_dice;
-    protected(set) int $end_amount; #not private because of mocking
+    public private(set) LetterList $letters;
+    public private(set) Set $found_words;
+    public private(set) int $game_number;
+    public private(set) string $current_lang;
+    public private(set) string $base_lang;
+    public private(set) string $planned_lang;
+    public private(set) int $max_saved_game;
+    public private(set) bool $changes_to_save;
+    public private(set) bool $thrown_the_dice;
+    public protected(set) int $end_amount; #not private because of mocking
     private $custom_emoji_solution;
-    private(set) Set $solutions;
+    public private(set) Set $solutions;
     private Set $wordlist_solutions;
     private $community_list;
     private $communitylist_solutions;
-    private(set) array $available_hints;
+    public private(set) array $available_hints;
     private Set $approved_words;
 
     public function __construct(string $file, string $archive_file)
