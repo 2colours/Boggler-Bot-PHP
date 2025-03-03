@@ -2,7 +2,7 @@
 **NOTE: instructions of the style guide can and should be applied retrospectively as well.**
 - PSR-12 is applied
 _Rationale_: consistency in PHP-verse plus whatever rationale the creators of PSR-12 had.
-_Addendum_: the VS Code Intelephense plugin is used for formatting which seems to have slight incompatibilities with PSR-12 (a known thing: adding an empty line at the end of the file).
+_Addendum_: the project has a dev dependency on phpcs/phpcbf, use that for formatting and notifying about problems.
 - `empty` should never be used
 _Rationale_: the `empty` function performs a bool check against `false` (while guarding against errors from missing values) which is verbose and obfuscated on one hand, and misleading on the other hand (`empty('0')` equals `true` because `'0'` is understood as zero which is as `false` as it gets).
 _Replacement_: appropriate comparison against literal; comparing the size of the content against 0.
