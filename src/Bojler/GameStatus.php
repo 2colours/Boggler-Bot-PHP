@@ -102,7 +102,7 @@ class GameStatus #not final because of mocking
         $this->setEndAmount();
         $this->setApprovedWords();
         $this->game_over_acknowledged = $this->getApprovedAmount() >= $this->end_amount;
-        $this->thrown_the_dice = True;
+        $this->thrown_the_dice = true;
         # easter egg stuff
         #$this->_easter_egg_conditions();
     }

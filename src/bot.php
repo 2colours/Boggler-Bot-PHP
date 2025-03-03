@@ -721,7 +721,8 @@ $bot->registerCommand(
     ['description' => 'tell the length of the longest word(s)']
 );
 
-function longest(Message $ctx): void {
+function longest(Message $ctx): void
+{
     $formatted_longest_word_length = italic((string) GAME_STATUS->getLongestWordLength());
     await($ctx->channel->sendMessage("The largest possible word length is: $formatted_longest_word_length."));
 }

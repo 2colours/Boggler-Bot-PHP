@@ -4,7 +4,6 @@ namespace Bojler;
 
 use SQLite3;
 
-
 class DatabaseHandler
 {
     private static $instance;

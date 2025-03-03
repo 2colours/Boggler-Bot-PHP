@@ -150,7 +150,7 @@ function progress_bar(GameStatus $game_status, ?string $emoji_scale_str = null):
     # the approved amount modulo the unit size can only be greater than the step size if there are
     # less words (to target amount) not yet covered by the full emojis than actually found words not
     # covered by the full emojis, which would mean the target number has been reached.
-    # but we handled that as a separate case. 
+    # but we handled that as a separate case.
     $empty_emoji_number = $progress_bar_length - $full_emoji_number - 1;
     $progress_bar .= $emoji_scale[floor($progress_in_current_step * (count($emoji_scale) - 1))];
     $progress_bar .= str_repeat($emoji_scale[0], $empty_emoji_number);

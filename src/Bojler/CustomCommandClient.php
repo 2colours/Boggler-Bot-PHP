@@ -262,7 +262,7 @@ final class CustomCommandClient extends DiscordCommandClient
         if ($last_commands != $this->commands) {
             $last_commands = $this->commands;
             $last_sorted = $last_commands;
-            uksort($last_sorted, $this->collator->compare(...)); 
+            uksort($last_sorted, $this->collator->compare(...));
         }
 
         return $last_sorted;
