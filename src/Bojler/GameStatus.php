@@ -301,28 +301,28 @@ class GameStatus #not final because of mocking
         return false;
     }
 
-    public function approvalStatus(string $word)
+    public function approvalStatus(string $word): ApprovalData
     {
-        $approval_dict = [];
-        $approval_dict['word'] = $word;
-        $approval_dict['valid'] = $this->wordValidFast($word, $this->letters->lower_cntdict);
-        $approval_dict['wordlist'] = $this->wordlist_solutions->contains($word);
-        $approval_dict['community'] = in_array($word, $this->community_list);
-        $approval_dict['custom_reactions'] = array_key_exists($word, CUSTOM_EMOJIS[$this->current_lang]);
-        $approval_dict['any'] = false;
-        $approval_dict['dictionary'] = false;
+        $approval_data = new ApprovalData();
+        $approval_data->word = $word;
+        $approval_data->valid = $this->wordValidFast($word, $this->letters->lower_cntdict);
+        $approval_data->wordlist = $this->wordlist_solutions->contains($word);
+        $approval_data->community = in_array($word, $this->community_list);
+        $approval_data->custom_reactions = array_key_exists($word, CUSTOM_EMOJIS[$this->current_lang]);
+        $approval_data->any = false;
+        $approval_data->dictionary = false;
         foreach (['wordlist', 'community', 'custom_reactions'] as $key) {
-            $approval_dict['any'] = $approval_dict['any'] || $approval_dict[$key];
+            $approval_data->any = $approval_data->any || $approval_data[$key];
         }
-        $approval_dict += array_map(fn() => false, array_flip(AVAILABLE_LANGUAGES));
+        $approval_data->translations = array_map(fn() => false, array_flip(AVAILABLE_LANGUAGES));
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
             if (in_array($word, $this->available_hints[$language])) {
-                $approval_dict[$language] = $word;
-                $approval_dict['dictionary'] = true;
-                $approval_dict['any'] = true;
+                $approval_data->translations[$language] = $word;
+                $approval_data->dictionary = true;
+                $approval_data->any = true;
             }
         }
-        return $approval_dict;
+        return $approval_data;
     }
 
     public function getApprovedAmount(): int
@@ -416,7 +416,7 @@ class GameStatus #not final because of mocking
     {
         $word_info = $this->approvalStatus($word);
         #await(easter_egg_trigger($ctx, $word, '_Rev'));
-        if (!$word_info['valid']) {
+        if (!$word_info->valid) {
             await($ctx->channel->sendMessage("$word doesn't fit the given letters."));
             return false;
         }
@@ -457,8 +457,8 @@ class GameStatus #not final because of mocking
             return false;
         }
 
-        $approval_dict = $this->approvalStatus($word);
-        if ($approval_dict['any']) {
+        $approval_data = $this->approvalStatus($word);
+        if ($approval_data->any) {
             await($ctx->channel->sendMessage('This word is already approved.'));
             return false;
         }

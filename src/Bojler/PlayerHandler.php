@@ -120,14 +120,14 @@ class PlayerHandler
         }
     }
 
-    public function playerRemoveWord(Message $ctx, $word_info)
+    public function playerRemoveWord(Message $ctx, ApprovalData $word_info)
     {
         foreach ($this->player_dict as &$player_data) {
-            $word_index = array_search($word_info['word'], $player_data['found_words']);
+            $word_index = array_search($word_info->word, $player_data['found_words']);
             if ($word_index !== false) {
                 array_splice($player_data['found_words'], $word_index, 1);
                 $player_data['all_time_found']--;
-                if ($word_info['any']) {
+                if ($word_info->any) {
                     $this->player_dict[$ctx->author->id]['all_time_approved']--;
                 }
             }

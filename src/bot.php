@@ -713,10 +713,10 @@ function approval_reaction(string $word): string
     }
     $approval_status = GAME_STATUS->approvalStatus($word);
     return match (true) {
-        @$approval_status[GAME_STATUS->base_lang] => '☑️',
-        $approval_status['wordlist'] => '✅',
-        array_any(AVAILABLE_LANGUAGES, fn($lang) => @$approval_status[$lang]) => '✅',
-        $approval_status['community'] => '✔',
+        @$approval_status->translations[GAME_STATUS->base_lang] => '☑️',
+        $approval_status->wordlist => '✅',
+        array_any(AVAILABLE_LANGUAGES, fn($lang) => @$approval_status->translations[$lang]) => '✅',
+        $approval_status->community => '✔',
         default => '❔'
     };
 }
