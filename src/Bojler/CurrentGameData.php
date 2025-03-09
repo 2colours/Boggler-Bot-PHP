@@ -37,8 +37,8 @@ class CurrentGameData
     {
         $content = json_decode(file_get_contents($json_file), false);
         $instance = new self();
-        foreach ($instance as $prop_name => &$value) {
-            $value = $content->$prop_name;
+        foreach (array_keys(get_class_vars($instance::class)) as $prop_name) {
+            $instance->$prop_name = $content->$prop_name;
         }
         return $instance;
     }
