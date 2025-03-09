@@ -22,7 +22,7 @@ define('CUSTOM_EMOJIS', CONFIG->getCustomEmojis());
 class GameStatus #not final because of mocking
 {
     private readonly PlayerHandler $player_handler;
-    private $file;
+    private $legacy_file;
     private $archive_file;
     private $game_over_acknowledged;
     public private(set) LetterList $letters;
@@ -43,11 +43,11 @@ class GameStatus #not final because of mocking
     public private(set) array $available_hints;
     private Set $approved_words;
 
-    public function __construct(string $file, string $archive_file)
+    public function __construct(string $current_file, string $archive_file)
     {
         $this->player_handler = PlayerHandler::getInstance(); # https://github.com/2colours/Boggler-Bot-PHP/issues/26
         $this->archive_file = $archive_file;
-        $this->file = $file;
+        $this->legacy_file = $current_file;
         $this->letters = new LetterList(array_fill(0, 16, null));
         $this->found_words = new Set();
         # complete lists
@@ -78,20 +78,23 @@ class GameStatus #not final because of mocking
 
     public function loadGame()
     {
-        $content = file($this->file, FILE_IGNORE_NEW_LINES);
-        if ($content === false || count($content) < 9) {
-            echo 'Save file wrong.';
+        $legacy_parsed = CurrentGameData::fromLegacyFile($this->legacy_file);
+        /*$json_parsed = CurrentGameData::fromJsonFile($this->jsonFile());
+        if ($json_parsed != $legacy_parsed) {
+            echo 'Something went wrong: the file formats don\'t align!';
+            var_dump($json_parsed);
+            var_dump($legacy_parsed);
             return;
-        }
+        }*/
         # Current Game
-        $this->letters = new LetterList(explode(' ', $content[1]));
-        $this->found_words = new Set($content[2] === '' ? [] : explode(' ', $content[2]));
-        $this->game_number = (int) explode("\t", $content[3])[1];
-        $this->current_lang = explode("\t", $content[4])[1];
+        $this->letters = new LetterList($legacy_parsed->letters);
+        $this->found_words = new Set($legacy_parsed->found_words);
+        $this->game_number = $legacy_parsed->game_number;
+        $this->current_lang = $legacy_parsed->current_lang;
         # General Settings
-        $this->base_lang = explode("\t", $content[7])[1];
-        $this->planned_lang = explode("\t", $content[8])[1];
-        $this->max_saved_game = (int) explode("\t", $content[9])[1];
+        $this->base_lang = $legacy_parsed->base_lang;
+        $this->planned_lang = $legacy_parsed->planned_lang;
+        $this->max_saved_game = $legacy_parsed->max_saved_game;
         $this->gameSetup();
         $this->changes_to_save = true;
     }
@@ -203,7 +206,12 @@ class GameStatus #not final because of mocking
         return new Collator(CONFIG->getLocale($this->current_lang));
     }
 
-    public function currentEntry()
+    public function currentEntryJson()
+    {
+        return CurrentGameData::fromStatusObject($this);
+    }
+
+    public function currentEntryLegacy()
     {
         $space_separated_letters = implode(' ', $this->letters->list);
         $space_separated_found_words = implode(' ', $this->found_words->toArray());
@@ -242,9 +250,14 @@ class GameStatus #not final because of mocking
         return $result;
     }
 
+    private function jsonFile(): string {
+        return mb_ereg_replace('\..*?$', '.json', $this->legacy_file);
+    }
+
     public function saveGame()
     {
-        file_put_contents($this->file, $this->currentEntry());
+        file_put_contents($this->legacy_file, $this->currentEntryLegacy());
+        file_put_contents($this->jsonFile(), json_encode($this->currentEntryJson(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
     }
 
     private function findWordlistSolutions(array $refdict)
