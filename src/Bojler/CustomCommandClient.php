@@ -115,7 +115,7 @@ final class CustomCommandClient extends DiscordCommandClient
 
         if ($result instanceof PromiseInterface) {
             $result->then(null, function (\Throwable $e) {
-                $this->logger->warning($e->getTraceAsString());
+                $this->logger->warning($e->getMessage(), [$e->getFile(), $e->getLine(), $e->getTraceAsString()]);
             });
         }
     }
