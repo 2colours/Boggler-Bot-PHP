@@ -312,7 +312,7 @@ class GameStatus #not final because of mocking
         $approval_data->any = false;
         $approval_data->dictionary = false;
         foreach (['wordlist', 'community', 'custom_reactions'] as $key) {
-            $approval_data->any = $approval_data->any || $approval_data[$key];
+            $approval_data->any = $approval_data->any || $approval_data->{$key};
         }
         $approval_data->translations = array_map(fn() => false, array_flip(AVAILABLE_LANGUAGES));
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {

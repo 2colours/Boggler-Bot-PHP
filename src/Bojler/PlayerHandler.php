@@ -94,12 +94,12 @@ class PlayerHandler
         );
     }
 
-    public function playerAddWord(Message $ctx, $word_info)
+    public function playerAddWord(Message $ctx, ApprovalData $word_info)
     {
         $this->playerUpdate($ctx->member);
-        $this->player_dict[$ctx->author->id]['found_words'][] = $word_info['word'];
+        $this->player_dict[$ctx->author->id]['found_words'][] = $word_info->word;
         $this->player_dict[$ctx->author->id]['all_time_found']++;
-        if ($word_info['any']) {
+        if ($word_info->any) {
             $this->player_dict[$ctx->author->id]['all_time_approved']++;
         }
         $this->saveFile();
