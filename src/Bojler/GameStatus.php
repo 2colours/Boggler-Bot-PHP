@@ -5,6 +5,7 @@ namespace Bojler;
 use Collator;
 use Discord\Parts\Channel\Message;
 use Ds\Set;
+use Exception;
 
 use function React\Async\await;
 
@@ -79,13 +80,13 @@ class GameStatus #not final because of mocking
     public function loadGame()
     {
         $legacy_parsed = CurrentGameData::fromLegacyFile($this->legacy_file);
-        /*$json_parsed = CurrentGameData::fromJsonFile($this->jsonFile());
+        $json_parsed = CurrentGameData::fromJsonFile($this->jsonFile());
         if ($json_parsed != $legacy_parsed) {
             echo 'Something went wrong: the file formats don\'t align!';
             var_dump($json_parsed);
             var_dump($legacy_parsed);
-            return;
-        }*/
+            throw new Exception("File formats show inconsistent values; check the logs.");
+        }
         # Current Game
         $this->letters = new LetterList($legacy_parsed->letters);
         $this->found_words = new Set($legacy_parsed->found_words);
