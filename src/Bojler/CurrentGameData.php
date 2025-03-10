@@ -6,13 +6,15 @@ use Exception;
 
 class CurrentGameData
 {
-    public private(set) array $letters;
-    public private(set) array $found_words;
-    public private(set) int $game_number;
-    public private(set) string $current_lang;
-    public private(set) string $base_lang;
-    public private(set) string $planned_lang;
-    public private(set) string $max_saved_game;
+    private function __construct(
+        public private(set) array $letters,
+        public private(set) array $found_words,
+        public private(set) int $game_number,
+        public private(set) string $current_lang,
+        public private(set) string $base_lang,
+        public private(set) string $planned_lang,
+        public private(set) string $max_saved_game
+    ) {}
 
     public static function fromLegacyFile(string $legacy_file): CurrentGameData
     {
@@ -20,39 +22,35 @@ class CurrentGameData
         if ($content === false || count($content) < 10) {
             throw new Exception('Save file wrong.');
         }
-        $instance = new self();
+        $ctor_dict = [];
         # Current Game
-        $instance->letters = explode(' ', $content[1]);
-        $instance->found_words = $content[2] === '' ? [] : explode(' ', $content[2]);
-        $instance->game_number = (int) explode("\t", $content[3])[1];
-        $instance->current_lang = explode("\t", $content[4])[1];
+        $ctor_dict['letters'] = explode(' ', $content[1]);
+        $ctor_dict['found_words'] = $content[2] === '' ? [] : explode(' ', $content[2]);
+        $ctor_dict['game_number'] = (int) explode("\t", $content[3])[1];
+        $ctor_dict['current_lang'] = explode("\t", $content[4])[1];
         # General Settings
-        $instance->base_lang = explode("\t", $content[7])[1];
-        $instance->planned_lang = explode("\t", $content[8])[1];
-        $instance->max_saved_game = (int) explode("\t", $content[9])[1];
-        return $instance;
+        $ctor_dict['base_lang'] = explode("\t", $content[7])[1];
+        $ctor_dict['planned_lang'] = explode("\t", $content[8])[1];
+        $ctor_dict['max_saved_game'] = (int) explode("\t", $content[9])[1];
+        return new self(...$ctor_dict);
     }
 
     public static function fromJsonFile(string $json_file): CurrentGameData
     {
-        $content = json_decode(file_get_contents($json_file), false);
-        $instance = new self();
-        foreach (array_keys(get_class_vars($instance::class)) as $prop_name) {
-            $instance->$prop_name = $content->$prop_name;
-        }
-        return $instance;
+        $content = json_decode(file_get_contents($json_file), true);
+        return new self(...$content);
     }
 
     public static function fromStatusObject(GameStatus $status): CurrentGameData
     {
-        $instance = new self();
-        $instance->letters = $status->letters->list;
-        $instance->found_words = $status->found_words->toArray();
-        $instance->game_number = $status->game_number;
-        $instance->current_lang = $status->current_lang;
-        $instance->base_lang = $status->base_lang;
-        $instance->planned_lang = $status->planned_lang;
-        $instance->max_saved_game = $status->max_saved_game;
-        return $instance;
+        $ctor_dict = [];
+        $ctor_dict['letters'] = $status->letters->list;
+        $ctor_dict['found_words'] = $status->found_words->toArray();
+        $ctor_dict['game_number'] = $status->game_number;
+        $ctor_dict['current_lang'] = $status->current_lang;
+        $ctor_dict['base_lang'] = $status->base_lang;
+        $ctor_dict['planned_lang'] = $status->planned_lang;
+        $ctor_dict['max_saved_game'] = $status->max_saved_game;
+        return new self(...$ctor_dict);
     }
 }
