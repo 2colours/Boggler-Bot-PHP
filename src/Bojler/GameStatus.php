@@ -304,7 +304,7 @@ class GameStatus #not final because of mocking
         $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
         $last_found_words = explode(' ', $lines[array_key_last($lines)]);
         $language_in_parens = explode(' ', $lines[count($lines) - 3])[1];
-        $language = grapheme_substr($language_in_parens, 1, grapheme_strlen($language_in_parens) - 1);
+        $language = grapheme_substr($language_in_parens, 1, grapheme_strlen($language_in_parens) - 2);
         echo $language;
         if ($language != $this->current_lang) {
             return false;
