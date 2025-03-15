@@ -7,7 +7,7 @@ use Discord\Parts\User\Member;
 
 use function React\Async\await;
 
-const MAX_GRAPHEME_NUMBER = 2000;
+const MAX_GRAPHEME_NUMBER = 1500; # "2000 characters" but Discord for some unacceptable reason doesn't count graphemes here so the number goes lower...
 
 function try_send_msg(Message $ctx, string $content)
 {
