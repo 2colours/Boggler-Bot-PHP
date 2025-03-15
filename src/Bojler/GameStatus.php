@@ -306,7 +306,7 @@ class GameStatus #not final because of mocking
         $language_in_parens = explode(' ', $lines[count($lines) - 3])[1];
         $language = grapheme_substr($language_in_parens, 1, grapheme_strlen($language_in_parens) - 1);
         echo $language;
-        if ($language != $this->current_lang) {
+        if ($language !== $this->current_lang) {
             return false;
         }
         if (count($last_found_words) <= 10) {
