@@ -26,7 +26,7 @@ final class CustomCommandClient extends DiscordCommandClient
 
         if ($own_options['caseInsensitivePrefix']) {
             foreach ($this->commandClientOptions['prefixes'] as &$prefix) {
-                $prefix = strtolower($prefix);
+                $prefix = mb_strtolower($prefix);
             }
         }
 
@@ -74,11 +74,15 @@ final class CustomCommandClient extends DiscordCommandClient
 
     protected function checkForPrefix(string $content): ?string
     {
-        if ($this->commandClientOptions['caseInsensitivePrefix']) {
-            $content = strtolower($content);
+        $content_for_check = $this->commandClientOptions['caseInsensitivePrefix'] ? mb_strtolower($content) : $content;
+
+        foreach ($this->commandClientOptions['prefixes'] as $prefix) {
+            if (substr($content_for_check, 0, strlen($prefix)) === $prefix) {
+                return substr($content, strlen($prefix));
+            }
         }
 
-        return parent::checkForPrefix($content);
+        return null;
     }
 
     private function baseMessageHandler($message)
@@ -100,7 +104,7 @@ final class CustomCommandClient extends DiscordCommandClient
         $command = array_shift($args);
 
         if ($command !== null && $this->commandClientOptions['caseInsensitiveCommands']) {
-            $command = strtolower($command);
+            $command = mb_strtolower($command);
         }
 
         $command = $this->getCommand($command);
