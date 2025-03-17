@@ -178,3 +178,13 @@ function italic(string $text): string
 {
     return $text === '' ? '' : "_{$text}_";
 }
+
+function get_translation(string $text, DictionaryType $dictionary, DatabaseHandler $db): ?string
+{
+    foreach ($db->translate($text, $dictionary) as $translation) {
+        if (isset($translation)) {
+            return $translation;
+        }
+    }
+    return null;
+}

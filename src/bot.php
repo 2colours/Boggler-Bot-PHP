@@ -33,6 +33,7 @@ use function Bojler\{
     acknowledgement_reaction,
     try_send_msg,
     game_highscore,
+    get_translation,
     hungarian_role,
     italic,
     strikethrough,
@@ -80,17 +81,6 @@ const INSTRUCTION_TEMPLATE = <<<END
 function instructions(string $lang)
 {
     return str_replace(['{0}', '{1}'], [$lang, EXAMPLES[$lang]], INSTRUCTION_TEMPLATE);
-}
-
-
-function get_translation(string $text, DictionaryType $dictionary, DatabaseHandler $db): ?string
-{
-    foreach ($db->translate($text, $dictionary) as $translation) {
-        if (isset($translation)) {
-            return $translation;
-        }
-    }
-    return null;
 }
 
 function translator_command(?string $src_lang = null, ?string $target_lang = null)
