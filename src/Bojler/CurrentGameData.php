@@ -16,7 +16,7 @@ class CurrentGameData
         public private(set) string $max_saved_game
     ) {}
 
-    public static function fromLegacyFile(string $legacy_file): CurrentGameData
+    public static function fromLegacyFile(string $legacy_file): self
     {
         $content = file($legacy_file, FILE_IGNORE_NEW_LINES);
         if ($content === false || count($content) < 10) {
@@ -35,13 +35,13 @@ class CurrentGameData
         return new self(...$ctor_dict);
     }
 
-    public static function fromJsonFile(string $json_file): CurrentGameData
+    public static function fromJsonFile(string $json_file): self
     {
         $content = json_decode(file_get_contents($json_file), true);
         return new self(...$content);
     }
 
-    public static function fromStatusObject(GameStatus $status): CurrentGameData
+    public static function fromStatusObject(GameStatus $status): self
     {
         $ctor_dict = [];
         $ctor_dict['letters'] = $status->letters->list;
