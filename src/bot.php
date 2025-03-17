@@ -83,9 +83,8 @@ function instructions(string $lang)
 }
 
 
-function get_translation(string $text, DictionaryType $dictionary)
+function get_translation(string $text, DictionaryType $dictionary, DatabaseHandler $db): ?string
 {
-    $db = DatabaseHandler::getInstance(); # https://github.com/2colours/Boggler-Bot-PHP/issues/26
     foreach ($db->translate($text, $dictionary) as $translation) {
         if (isset($translation)) {
             return $translation;
@@ -99,7 +98,7 @@ function translator_command(?string $src_lang = null, ?string $target_lang = nul
     return function (Message $ctx, $args) use ($src_lang, $target_lang): void {
         $word = $args[0];
         $ctor_args = array_map(fn($first_choice, $default) => $first_choice ?? $default, [$src_lang, $target_lang], DEFAULT_TRANSLATION);
-        $translation = get_translation($word, new DictionaryType(...$ctor_args));
+        $translation = get_translation($word, new DictionaryType(...$ctor_args), DatabaseHandler::getInstance()); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
         if (isset($translation)) {
             await($ctx->channel->sendMessage("$word: ||$translation||"));
         } else {
@@ -570,7 +569,7 @@ function hint_command(string $from_language)
             return;
         }
         $chosen_hint = $unfound_hint_list[array_rand($unfound_hint_list)];
-        $formatted_hint_content = italic(get_translation($chosen_hint, new DictionaryType(GAME_STATUS->current_lang, $from_language)));
+        $formatted_hint_content = italic(get_translation($chosen_hint, new DictionaryType(GAME_STATUS->current_lang, $from_language), DatabaseHandler::getInstance())); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
         await($ctx->channel->sendMessage("hint: $formatted_hint_content"));
         PlayerHandler::getInstance()->playerUsedHint($ctx, $chosen_hint);
     };
