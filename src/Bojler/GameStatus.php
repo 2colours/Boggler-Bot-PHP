@@ -251,14 +251,15 @@ class GameStatus #not final because of mocking
         return $result;
     }
 
-    private function jsonFile(): string {
+    private function jsonFile(): string
+    {
         return mb_ereg_replace('\..*?$', '.json', $this->legacy_file);
     }
 
     public function saveGame()
     {
         file_put_contents($this->legacy_file, $this->currentEntryLegacy());
-        file_put_contents($this->jsonFile(), json_encode($this->currentEntryJson(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
+        file_put_contents($this->jsonFile(), json_encode($this->currentEntryJson(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     private function findWordlistSolutions(array $refdict)
