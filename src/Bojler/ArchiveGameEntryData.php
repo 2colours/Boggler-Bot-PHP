@@ -42,7 +42,7 @@ class ArchiveGameEntryData
         $letters_sorted = $status->letters->list;
         $status->collator()->sort($letters_sorted);
         $ctor_dict['letters_sorted'] = $letters_sorted;
-        $ctor_dict['found_words'] = $status->foundWordsSorted();
+        $ctor_dict['found_words_sorted'] = $status->foundWordsSorted();
         $ctor_dict['game_number'] = $status->game_number;
         $ctor_dict['current_lang'] = $status->current_lang;
         return new self(...$ctor_dict);
