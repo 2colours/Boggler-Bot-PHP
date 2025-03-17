@@ -53,4 +53,22 @@ class CurrentGameData
         $ctor_dict['max_saved_game'] = $status->max_saved_game;
         return new self(...$ctor_dict);
     }
+
+    public function toLegacyEntry(): string
+    {
+        $space_separated_letters = implode(' ', $this->letters);
+        $space_separated_found_words = implode(' ', $this->found_words);
+        return <<<END
+            #Current Game
+            $space_separated_letters
+            $space_separated_found_words
+            Game Number\t{$this->game_number}
+            Game Language\t{$this->current_lang}
+
+            # General Settings
+            Base Language\t{$this->base_lang}
+            Planned Language\t{$this->planned_lang}
+            Saved Games\t{$this->max_saved_game}
+            END;
+    }
 }

@@ -207,27 +207,14 @@ class GameStatus #not final because of mocking
         return new Collator(CONFIG->getLocale($this->current_lang));
     }
 
-    public function currentEntryJson()
+    public function currentEntryJson(): CurrentGameData # TODO the name will eventually lose the JSON
     {
         return CurrentGameData::fromStatusObject($this);
     }
 
-    public function currentEntryLegacy()
+    public function currentEntryLegacy(): string
     {
-        $space_separated_letters = implode(' ', $this->letters->list);
-        $space_separated_found_words = implode(' ', $this->found_words->toArray());
-        return <<<END
-            #Current Game
-            $space_separated_letters
-            $space_separated_found_words
-            Game Number\t{$this->game_number}
-            Game Language\t{$this->current_lang}
-
-            # General Settings
-            Base Language\t{$this->base_lang}
-            Planned Language\t{$this->planned_lang}
-            Saved Games\t{$this->max_saved_game}
-            END;
+        return CurrentGameData::fromStatusObject($this)->toLegacyEntry();
     }
 
     public function archiveEntry()
