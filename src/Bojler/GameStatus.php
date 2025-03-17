@@ -24,7 +24,7 @@ class GameStatus #not final because of mocking
 {
     private readonly PlayerHandler $player_handler;
     private $legacy_file;
-    private $archive_file;
+    private $legacy_archive_file;
     private $game_over_acknowledged;
     public private(set) LetterList $letters;
     public private(set) Set $found_words;
@@ -47,7 +47,7 @@ class GameStatus #not final because of mocking
     public function __construct(string $current_file, string $archive_file)
     {
         $this->player_handler = PlayerHandler::getInstance(); # https://github.com/2colours/Boggler-Bot-PHP/issues/26
-        $this->archive_file = $archive_file;
+        $this->legacy_archive_file = $archive_file;
         $this->legacy_file = $current_file;
         $this->letters = new LetterList(array_fill(0, 16, null));
         $this->found_words = new Set();
@@ -217,18 +217,9 @@ class GameStatus #not final because of mocking
         return CurrentGameData::fromStatusObject($this)->toLegacyEntry();
     }
 
-    public function archiveEntry()
+    private function archiveEntryLegacy(): string
     {
-        $letters_sorted = $this->letters->list;
-        $this->collator()->sort($letters_sorted);
-        $space_separated_letters_alphabetic = implode(' ', $letters_sorted);
-        $space_separated_found_words_alphabetic = implode(' ', $this->foundWordsSorted());
-        return <<<END
-            {$this->game_number}. ({$this->current_lang})
-            $space_separated_letters_alphabetic
-            $space_separated_found_words_alphabetic
-
-            END;
+        return ArchiveGameEntryData::fromStatusObject($this)->toLegacyEntry();
     }
 
     public function foundWordsSorted()
@@ -241,6 +232,10 @@ class GameStatus #not final because of mocking
     private function jsonFile(): string
     {
         return mb_ereg_replace('\..*?$', '.json', $this->legacy_file);
+    }
+
+    private function jsonArchiveFile(): string {
+        return mb_ereg_replace('\..*?$', '.json', $this->legacy_archive_file);
     }
 
     public function saveGame()
@@ -262,20 +257,21 @@ class GameStatus #not final because of mocking
             return false;
         }
         $this->player_handler->newGame();
-        $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
-        $offset = 3 * ($number - 1);
-        [$languages, $letters, $words] = array_slice($lines, $offset, 3);
-        $this->letters = new LetterList(explode(' ', $letters), true);
+        $legacy_parsed = ArchiveGameEntryData::fromLegacyFile($this->legacy_archive_file, $number);
+        $json_parsed = ArchiveGameEntryData::fromJsonFile($this->jsonArchiveFile(), $number);
+        /*if ($json_parsed != $legacy_parsed) {
+            echo 'Something went wrong: the file formats don\'t align!';
+            var_dump($json_parsed);
+            var_dump($legacy_parsed);
+            throw new Exception("File formats show inconsistent values; check the logs.");
+        }*/
+        $this->letters = new LetterList($legacy_parsed->letters_sorted, true);
         if ($this->letters->isAbnormal()) {
             echo 'Game might be damaged.';
         }
-        $this->found_words = new Set($words === '' ? [] : explode(' ', $words));
-        # set language and game number
-        [$read_number, $read_lang] = explode(' ', $languages);
-        $read_number = grapheme_substr($read_number, 0, grapheme_strlen($read_number) - 1);
-        $read_lang = grapheme_substr($read_lang, 1, grapheme_strlen($read_lang) - 2);
-        $this->game_number = intval($read_number);
-        $this->current_lang = $read_lang;
+        $this->found_words = new Set($legacy_parsed->found_words_sorted);
+        $this->game_number = $legacy_parsed->game_number;
+        $this->current_lang = $legacy_parsed->current_lang;
         # this game doesn't have to be saved again in saves.txt yet (changes_to_save), we have a loaded game (thrown_the_dice)
         $this->gameSetup();
         $this->changes_to_save = false;
@@ -289,15 +285,19 @@ class GameStatus #not final because of mocking
         if ($this->game_number === $this->max_saved_game) {
             return false;
         }
-        $lines = file($this->archive_file, FILE_IGNORE_NEW_LINES);
-        $last_found_words = explode(' ', $lines[array_key_last($lines)]);
-        $language_in_parens = explode(' ', $lines[count($lines) - 3])[1];
-        $language = grapheme_substr($language_in_parens, 1, grapheme_strlen($language_in_parens) - 2);
-        echo $language;
-        if ($language !== $this->current_lang) {
+        $legacy_parsed = ArchiveGameEntryData::fromLegacyFile($this->legacy_archive_file, $this->max_saved_game);
+        $json_parsed = ArchiveGameEntryData::fromJsonFile($this->jsonArchiveFile(), $this->max_saved_game);
+        /*if ($json_parsed != $legacy_parsed) {
+            echo 'Something went wrong: the file formats don\'t align!';
+            var_dump($json_parsed);
+            var_dump($legacy_parsed);
+            throw new Exception("File formats show inconsistent values; check the logs.");
+        }*/
+        echo $legacy_parsed->current_lang;
+        if ($legacy_parsed->current_lang !== $this->current_lang) {
             return false;
         }
-        if (count($last_found_words) <= 10) {
+        if (count($legacy_parsed->found_words_sorted) <= 10) {
             return true;
         }
         return false;
@@ -357,27 +357,53 @@ class GameStatus #not final because of mocking
 
         # determines if game is already saved in saves.txt
         if ($this->game_number <= $this->max_saved_game) {
-            $archive_temp = file($this->archive_file);
-            $line_number = 3 * ($this->game_number - 1);
-            $file = fopen($this->archive_file, 'w');
-            # older games
-            for ($i = 0; $i < $line_number; $i++) {
-                fwrite($file, $archive_temp[$i]);
-            }
-            # loaded game
-            fwrite($file, $this->archiveEntry());
-            # newer games
-            for ($i = $line_number + 3; $i < count($archive_temp); $i++) {
-                fwrite($file, $archive_temp[$i]);
-            }
-            fclose($file);
+            $this->overwriteArchiveLegacy();
+            $this->overwriteArchiveJson();
             return;
         }
 
         # New game is appended (if game_number > max_saved_game)
-        file_put_contents($this->archive_file, $this->archiveEntry(), FILE_APPEND);
+        $this->appendArchiveLegacy();
+        $this->appendArchiveJson();
         $this->max_saved_game++;
         $this->saveGame();
+    }
+
+    private function overwriteArchiveLegacy(): void
+    {
+        $archive_temp = file($this->legacy_archive_file);
+        $line_number = 3 * ($this->game_number - 1);
+        $file = fopen($this->legacy_archive_file, 'w');
+        # older games
+        for ($i = 0; $i < $line_number; $i++) {
+            fwrite($file, $archive_temp[$i]);
+        }
+        # loaded game
+        fwrite($file, $this->archiveEntryLegacy());
+        # newer games
+        for ($i = $line_number + 3; $i < count($archive_temp); $i++) {
+            fwrite($file, $archive_temp[$i]);
+        }
+        fclose($file);
+    }
+
+    private function overwriteArchiveJson(): void
+    {
+        $content = json_decode(file_get_contents($this->jsonArchiveFile()), true);
+        $content[$this->game_number - 1] = ArchiveGameEntryData::fromStatusObject($this);
+        file_put_contents($this->jsonArchiveFile(), json_encode($content, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
+    }
+   
+    private function appendArchiveLegacy(): void
+    {
+        file_put_contents($this->legacy_archive_file, $this->archiveEntryLegacy(), FILE_APPEND);
+    }
+
+    private function appendArchiveJson(): void
+    {
+        $content = json_decode(file_get_contents($this->jsonArchiveFile()), true);
+        $content[] = ArchiveGameEntryData::fromStatusObject($this);
+        file_put_contents($this->jsonArchiveFile(), json_encode($content, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
     }
 
     public function newGame()
