@@ -331,7 +331,7 @@ class GameStatus #not final because of mocking
         $approval_data->translations = array_map(fn() => false, array_flip(AVAILABLE_LANGUAGES));
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
             if (in_array($word, $this->available_hints[$language])) {
-                $approval_data->translations[$language] = $word;
+                $approval_data->translations[$language] = get_translation($word, new DictionaryType($this->current_lang, $language), DatabaseHandler::getInstance()); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
                 $approval_data->dictionary = true;
                 $approval_data->any = true;
             }
