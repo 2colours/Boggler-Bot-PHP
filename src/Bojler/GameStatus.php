@@ -249,6 +249,12 @@ class GameStatus #not final because of mocking
         $this->wordlist_solutions = new Set(array_filter($content, fn($line) => $this->wordValidFast($line, $refdict)));
     }
 
+    public function synchronizeArchives(): void
+    {
+        $archive_entries = array_map(fn ($number) => ArchiveGameEntryData::fromLegacyFile($this->legacy_archive_file, $number), range(1, $this->max_saved_game));
+        file_put_contents($this->jsonArchiveFile(), json_encode($archive_entries, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
+    }
+
     public function tryLoadOldGame(int $number)
     {
         $this->saveOld();
@@ -257,8 +263,8 @@ class GameStatus #not final because of mocking
         }
         $this->player_handler->newGame();
         $legacy_parsed = ArchiveGameEntryData::fromLegacyFile($this->legacy_archive_file, $number);
-        $json_parsed = ArchiveGameEntryData::fromJsonFile($this->jsonArchiveFile(), $number);
-        /*if ($json_parsed != $legacy_parsed) {
+        /*$json_parsed = ArchiveGameEntryData::fromJsonFile($this->jsonArchiveFile(), $number);
+        if ($json_parsed != $legacy_parsed) {
             echo 'Something went wrong: the file formats don\'t align!';
             var_dump($json_parsed);
             var_dump($legacy_parsed);
@@ -285,8 +291,8 @@ class GameStatus #not final because of mocking
             return false;
         }
         $legacy_parsed = ArchiveGameEntryData::fromLegacyFile($this->legacy_archive_file, $this->max_saved_game);
-        $json_parsed = ArchiveGameEntryData::fromJsonFile($this->jsonArchiveFile(), $this->max_saved_game);
-        /*if ($json_parsed != $legacy_parsed) {
+        /*$json_parsed = ArchiveGameEntryData::fromJsonFile($this->jsonArchiveFile(), $this->max_saved_game);
+        if ($json_parsed != $legacy_parsed) {
             echo 'Something went wrong: the file formats don\'t align!';
             var_dump($json_parsed);
             var_dump($legacy_parsed);
