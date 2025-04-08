@@ -252,6 +252,17 @@ function trigger(Message $ctx, $args): void
 }
 
 $bot->registerCommand(
+    'syncar',
+    decorate_handler([async(...), ensure_predicate(from_creator(...))], synchronize_archives(...)),
+    ['description' => 'testing purposes only']
+);
+function synchronize_archives(Message $ctx): void
+{
+    GAME_STATUS->synchronizeArchives();
+    await($ctx->reply('Archives synchronized based on the legacy format.'));
+}
+
+$bot->registerCommand(
     'nextlang',
     decorate_handler([async(...), ensure_predicate(channel_valid(...))], 'next_language'),
     ['description' => 'change language']

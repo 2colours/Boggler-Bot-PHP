@@ -17,7 +17,7 @@ class DictionaryEntry
     {
         $line_pieces = explode("\t", $line);
         /*debug purposes
-        if (count($line_pieces) != 3) {
+        if (count($line_pieces) !== 3) {
             var_dump($line_pieces);
         }
         */
