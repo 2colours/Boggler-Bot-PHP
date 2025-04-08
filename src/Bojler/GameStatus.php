@@ -264,13 +264,13 @@ class GameStatus #not final because of mocking
         }
         $this->player_handler->newGame();
         $legacy_parsed = ArchiveGameEntryData::fromLegacyFile($this->legacy_archive_file, $number);
-        /*$json_parsed = ArchiveGameEntryData::fromJsonFile($this->jsonArchiveFile(), $number);
+        $json_parsed = ArchiveGameEntryData::fromJsonFile($this->jsonArchiveFile(), $number);
         if ($json_parsed != $legacy_parsed) {
             echo 'Something went wrong: the file formats don\'t align!';
             var_dump($json_parsed);
             var_dump($legacy_parsed);
             throw new Exception("File formats show inconsistent values; check the logs.");
-        }*/
+        }
         $this->letters = new LetterList($legacy_parsed->letters_sorted, true);
         if ($this->letters->isAbnormal()) {
             echo 'Game might be damaged.';
@@ -292,13 +292,13 @@ class GameStatus #not final because of mocking
             return false;
         }
         $legacy_parsed = ArchiveGameEntryData::fromLegacyFile($this->legacy_archive_file, $this->max_saved_game);
-        /*$json_parsed = ArchiveGameEntryData::fromJsonFile($this->jsonArchiveFile(), $this->max_saved_game);
+        $json_parsed = ArchiveGameEntryData::fromJsonFile($this->jsonArchiveFile(), $this->max_saved_game);
         if ($json_parsed != $legacy_parsed) {
             echo 'Something went wrong: the file formats don\'t align!';
             var_dump($json_parsed);
             var_dump($legacy_parsed);
             throw new Exception("File formats show inconsistent values; check the logs.");
-        }*/
+        }
         echo $legacy_parsed->current_lang;
         if ($legacy_parsed->current_lang !== $this->current_lang) {
             return false;
