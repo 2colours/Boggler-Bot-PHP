@@ -49,8 +49,8 @@
       "image_filename": "Boggle_Bild_small.png"
     }
   },
-    "saves_filename": "saves.txt",
-    "current_game": "current_game.txt",
+    "saves_filename": "saves.json",
+    "current_game": "current_game.json",
     "examples": {
       "German": "rot",
       "Hungarian": "ló",
