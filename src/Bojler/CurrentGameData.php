@@ -15,7 +15,8 @@ class CurrentGameData
         public private(set) string $planned_lang,
         public private(set) string $max_saved_game
     ) {}
-
+    
+    # TODO remove this
     public static function fromLegacyFile(string $legacy_file): self
     {
         $content = file($legacy_file, FILE_IGNORE_NEW_LINES);
@@ -54,6 +55,7 @@ class CurrentGameData
         return new self(...$ctor_dict);
     }
 
+    #TODO remove this
     public function toLegacyEntry(): string
     {
         $space_separated_letters = implode(' ', $this->letters);
