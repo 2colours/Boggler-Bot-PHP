@@ -20,7 +20,7 @@ class ValidityInfo
     public function __construct(private string $given_word, array $input_dictionary, array $reference_dictionary)
     {
         foreach (self::listProblems($input_dictionary, $reference_dictionary) as $letter) {
-            $this->problematic_letters[$letter] = [$input_dictionary[$letter], $reference_dictionary[$letter]];
+            $this->problematic_letters[$letter] = [$input_dictionary[$letter], $reference_dictionary[$letter] ?? 0];
         }
     }
 
@@ -30,7 +30,7 @@ class ValidityInfo
             return null;
         }
 
-        $result = "{$this->given_word} doesn't fit the given letters:";
+        $result = "**{$this->given_word}** doesn't fit the given letters:";
         foreach ($this->problematic_letters as $letter => [$needed_count, $available_count]) {
             $italic_letter = italic($letter);
             $result .= "\n$italic_letter: **$needed_count** in the word, **$available_count** available";
