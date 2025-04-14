@@ -162,20 +162,8 @@ class GameStatus #not final because of mocking
         }
         $word = mb_strtolower($word);
 
-        $word_letters = mb_str_split($word);
-        foreach ($word_letters as $letter) {
-            if (!array_key_exists($letter, $refdict)) {
-                return false;
-            }
-        }
-        $wdict = array_count_values($word_letters);
-
-        foreach ($word_letters as $letter) {
-            if ($wdict[$letter] > $refdict[$letter]) {
-                return false;
-            }
-        }
-        return true;
+        $word_letters = grapheme_str_split($word);
+        return new ValidityInfo($word, $word_letters, $refdict);
     }
 
     # TODO isolate this from the class altogether
@@ -316,7 +304,7 @@ class GameStatus #not final because of mocking
     {
         $approval_data = new ApprovalData();
         $approval_data->word = $word;
-        $approval_data->valid = $this->wordValidFast($word, $this->letters->lower_cntdict);
+        $approval_data->validity_info = $this->wordValidFast($word, $this->letters->lower_cntdict);
         $approval_data->wordlist = $this->wordlist_solutions->contains($word);
         $approval_data->community = in_array($word, $this->community_list);
         $approval_data->custom_reactions = array_key_exists($word, CUSTOM_EMOJIS[$this->current_lang]);
@@ -453,8 +441,9 @@ class GameStatus #not final because of mocking
     {
         $word_info = $this->approvalStatus($word);
         #await(easter_egg_trigger($ctx, $word, '_Rev'));
-        if (!$word_info->valid) {
-            await($ctx->channel->sendMessage("$word doesn't fit the given letters."));
+        $problem_message = $word_info->validity_info->message_when_invalid();
+        if (isset($problem_message)) {
+            await($ctx->channel->sendMessage($problem_message));
             return false;
         }
 
