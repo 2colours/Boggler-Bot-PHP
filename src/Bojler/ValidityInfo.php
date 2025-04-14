@@ -2,18 +2,25 @@
 
 namespace Bojler;
 
+use Iterator;
+
 class ValidityInfo
 {
     private array $problematic_letters = []; # letter => [needed_count, available_count]
 
-    public function __construct(private string $given_word, $processed_letters, $reference_dictionary)
+    public static function listProblems(array $input_dictionary, array $reference_dictionary): Iterator
     {
-        $input_dictionary = array_count_values($processed_letters);
-
         foreach (array_keys($input_dictionary) as $letter) {
-            if ($input_dictionary[$letter] > $reference_dictionary[$letter]) {
-                $this->problematic_letters[$letter] = [$input_dictionary[$letter], $reference_dictionary[$letter]];
+            if ($input_dictionary[$letter] > @$reference_dictionary[$letter]) {
+                yield $letter;
             }
+        }
+    }
+
+    public function __construct(private string $given_word, array $input_dictionary, array $reference_dictionary)
+    {
+        foreach (self::listProblems($input_dictionary, $reference_dictionary) as $letter) {
+            $this->problematic_letters[$letter] = [$input_dictionary[$letter], $reference_dictionary[$letter]];
         }
     }
 
