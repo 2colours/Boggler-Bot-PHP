@@ -14,7 +14,8 @@ class CurrentGameData
         public private(set) string $base_lang,
         public private(set) string $planned_lang,
         public private(set) string $max_saved_game
-    ) {}
+    ) {
+    }
 
     public static function fromLegacyFile(string $legacy_file): self
     {
