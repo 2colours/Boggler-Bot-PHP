@@ -11,7 +11,7 @@ class ValidityInfo
     public static function listProblems(array $input_dictionary, array $reference_dictionary): Iterator
     {
         foreach (array_keys($input_dictionary) as $letter) {
-            if ($input_dictionary[$letter] > @$reference_dictionary[$letter]) {
+            if ($input_dictionary[$letter] > ($reference_dictionary[$letter] ?? 0)) {
                 yield $letter;
             }
         }
