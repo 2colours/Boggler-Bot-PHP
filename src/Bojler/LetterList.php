@@ -13,6 +13,7 @@ class LetterList
 {
     public const SIZE = 16;
 
+    # TODO maybe make these private-set?
     public array $list;
     public array $lower_cntdict;
 

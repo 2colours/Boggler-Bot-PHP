@@ -11,7 +11,8 @@ class ArchiveGameEntryData
         public private(set) array $found_words_sorted,
         public private(set) int $game_number,
         public private(set) string $current_lang
-    ) {}
+    ) {
+    }
 
     public static function fromLegacyFile(string $legacy_file, int $number): self
     {
