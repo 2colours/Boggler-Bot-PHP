@@ -29,7 +29,7 @@ class GameStatus #not final because of mocking
     public private(set) LetterList $letters;
     public private(set) Set $found_words;
     public private(set) int $game_number;
-    public private(set) string $current_lang;
+    public protected(set) string $current_lang; #not private because of mocking
     public private(set) string $base_lang;
     public private(set) string $planned_lang;
     public private(set) int $max_saved_game;
