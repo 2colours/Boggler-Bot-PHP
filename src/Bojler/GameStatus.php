@@ -451,7 +451,7 @@ class GameStatus #not final because of mocking
     {
         $word_info = $this->approvalStatus($word);
         #await(easter_egg_trigger($ctx, $word, '_Rev'));
-        $problem_message = $word_info->validity_info->message_when_invalid();
+        $problem_message = $word_info->validity_info->messageWhenValid();
         if (isset($problem_message)) {
             await($ctx->channel->sendMessage($problem_message));
             return false;

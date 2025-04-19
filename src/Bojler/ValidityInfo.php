@@ -24,7 +24,7 @@ class ValidityInfo
         }
     }
 
-    public function message_when_invalid(): ?string
+    public function messageWhenValid(): ?string
     {
         if (count($this->problematic_letters) === 0) {
             return null;
