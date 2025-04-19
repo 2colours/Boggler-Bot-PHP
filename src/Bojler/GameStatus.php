@@ -152,6 +152,7 @@ class GameStatus #not final because of mocking
     }
 
     # gets the refdict instead of creating it every time
+    # TODO isolate this from the class altogether (only $current_lang is a real dependency)
     public function wordValidFast(string $word, array $refdict)
     {
         # Pre-processing word for validity check
@@ -177,6 +178,7 @@ class GameStatus #not final because of mocking
         return true;
     }
 
+    # TODO isolate this from the class altogether
     public function germanLetters(string $word)
     {
         $german_letters = [
