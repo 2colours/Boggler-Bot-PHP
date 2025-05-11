@@ -29,6 +29,7 @@ use Monolog\{
 
 use function Bojler\{
     masked_word,
+    decorate_handler,
     output_split_cursive,
     acknowledgement_reaction,
     try_send_msg,
@@ -184,12 +185,6 @@ function ensure_predicate(callable $predicate, ?callable $refusalMessageProducer
             await($ctx->reply($refusalMessageProducer($ctx)));
         }
     };
-}
-
-# [d1, d2, d3, ..., dn], h -> d1 ∘ d2 ∘ d3 ∘ ... ∘ dn ∘ h
-function decorate_handler(array $decorators, callable $handler)
-{
-    return array_reduce(array_reverse($decorators), fn($aggregate, $current) => $current($aggregate), $handler);
 }
 
 # TODO it's dubious whether these are actually constants; gotta think about it
