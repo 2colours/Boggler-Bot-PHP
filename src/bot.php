@@ -8,13 +8,13 @@ mb_regex_encoding('UTF-8');
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Bojler\{
-  ConfigHandler,
-  Counter,
-  CustomCommandClient,
-  DatabaseHandler,
-  DictionaryType,
-  GameStatus,
-  PlayerHandler,
+    ConfigHandler,
+    Counter,
+    CustomCommandClient,
+    DatabaseHandler,
+    DictionaryType,
+    GameStatus,
+    PlayerHandler,
 };
 use Discord\Builders\MessageBuilder;
 use Symfony\Component\Dotenv\Dotenv;
@@ -22,23 +22,23 @@ use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Intents;
 use Random\Randomizer;
 use Monolog\{
-  Logger,
-  Handler\StreamHandler,
-  Level,
+    Logger,
+    Handler\StreamHandler,
+    Level,
 };
 
 use function Bojler\{
-  masked_word,
-  decorate_handler,
-  output_split_cursive,
-  acknowledgement_reaction,
-  try_send_msg,
-  game_highscore,
-  get_translation,
-  hungarian_role,
-  italic,
-  strikethrough,
-  progress_bar
+    masked_word,
+    decorate_handler,
+    output_split_cursive,
+    acknowledgement_reaction,
+    try_send_msg,
+    game_highscore,
+    get_translation,
+    hungarian_role,
+    italic,
+    strikethrough,
+    progress_bar
 };
 use function React\Async\await;
 
@@ -178,11 +178,11 @@ function needs_counting(callable $handler)
 function ensure_predicate(callable $predicate, ?callable $refusalMessageProducer = null)
 {
     return fn($handler) => function (Message $ctx, ...$args) use ($handler, $predicate, $refusalMessageProducer) {
-    if ($predicate($ctx)) {
-      $handler($ctx, ...$args);
-    } elseif (isset($refusalMessageProducer)) {
-      await($ctx->reply($refusalMessageProducer($ctx)));
-    }
+        if ($predicate($ctx)) {
+            $handler($ctx, ...$args);
+        } elseif (isset($refusalMessageProducer)) {
+            await($ctx->reply($refusalMessageProducer($ctx)));
+        }
     };
 }
 
@@ -195,18 +195,18 @@ const BOT_LOGGER = new Logger('bojlerLogger');
 BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Debug));
 
 $bot = new CustomCommandClient([
-  'prefix' => 'b!',
-  'token' => $_ENV['DC_TOKEN'],
-  'description' => 'Szórakodtató bot',
-  'discordOptions' => [
-    'logger' => BOT_LOGGER,
-    'intents' => Intents::getDefaultIntents() | Intents::MESSAGE_CONTENT # Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
-  ],
-  'caseInsensitiveCommands' => true,
-  'customOptions' => [
-    'locale' => CONFIG->getLocale(CONFIG->getDefaultTranslation()[0]), # TODO allow configuration of locale during the usage of the bot
-    'caseInsensitivePrefix' => true
-  ]
+    'prefix' => 'b!',
+    'token' => $_ENV['DC_TOKEN'],
+    'description' => 'Szórakodtató bot',
+    'discordOptions' => [
+        'logger' => BOT_LOGGER,
+        'intents' => Intents::getDefaultIntents() | Intents::MESSAGE_CONTENT # Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
+    ],
+    'caseInsensitiveCommands' => true,
+    'customOptions' => [
+        'locale' => CONFIG->getLocale(CONFIG->getDefaultTranslation()[0]), # TODO allow configuration of locale during the usage of the bot
+        'caseInsensitivePrefix' => true
+    ]
 ]);
 
 $bot->registerCommand('info', send_instructions(...), ['description' => 'show instructions']);
@@ -272,7 +272,7 @@ $bot->registerCommand(
 );
 function new_game(Message $ctx): void
 {
-  # this isn't perfect, but at least it won't display this "found words" always when just having looked at an old game for a second. That would be annoying.
+    # this isn't perfect, but at least it won't display this "found words" always when just having looked at an old game for a second. That would be annoying.
     if (GAME_STATUS->changes_to_save) {
         await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, PlayerHandler::getInstance())));
         $message = 'All words found in the last game: ' . found_words_output() . "\n\n" . instructions(GAME_STATUS->planned_lang) . "\n\n";
@@ -356,7 +356,7 @@ $bot->registerCommand(
 function unfound(Message $ctx): void
 {
     $unfound_file = 'live_data/unfound_solutions.txt';
-  #$found_words_caps = array_map(mb_strtoupper(...), GAME_STATUS->found_words->toArray());
+    #$found_words_caps = array_map(mb_strtoupper(...), GAME_STATUS->found_words->toArray());
     file_put_contents($unfound_file, implode("\n", GAME_STATUS->solutions->diff(GAME_STATUS->found_words)->toArray()));
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($unfound_file)));
 }
@@ -373,7 +373,7 @@ $bot->registerCommand(
 function left(Message $ctx): void
 {
     $amount = GAME_STATUS->solutions->diff(GAME_STATUS->found_words)->count();
-  #$hints_caps = array_map(mb_strtoupper(...), GAME_STATUS->available_hints);
+    #$hints_caps = array_map(mb_strtoupper(...), GAME_STATUS->available_hints);
     $unfound_hints_without_empty = array_filter(
         array_map(
             fn($hints_for_language) => array_filter($hints_for_language, fn($hint) => !GAME_STATUS->found_words->contains($hint)),
@@ -576,7 +576,7 @@ $bot->registerCommand(
 function load_game(Message $ctx, $args): void
 {
     $game_number = (int) $args[0];
-  # Checks for changes before showing "found words" every time when just skipping through old games. That would be annoying.
+    # Checks for changes before showing "found words" every time when just skipping through old games. That would be annoying.
     if (GAME_STATUS->changes_to_save) {
         $message = 'All words found in the last game: ' . found_words_output();
         if (!try_send_msg($ctx, $message)) {
@@ -589,7 +589,7 @@ function load_game(Message $ctx, $args): void
         await($ctx->channel->sendMessage('The requested game doesn\'t exist.'));
         return;
     }
-  # here current_lang, because this is loaded from saves.txt
+    # here current_lang, because this is loaded from saves.txt
     $game_number = GAME_STATUS->game_number;
     $current_lang = GAME_STATUS->current_lang;
     $found_words_output = found_words_output();
@@ -617,13 +617,13 @@ $bot->registerCommand(
 
 function random(Message $ctx): void
 {
-  # random game between 1 and max_saved_game - after one calling, newest game is saved, too. Newest game can appear as second random call
+    # random game between 1 and max_saved_game - after one calling, newest game is saved, too. Newest game can appear as second random call
     $number = random_int(1, GAME_STATUS->max_saved_game + 1);
     if (GAME_STATUS->thrown_the_dice) {
         await($ctx->channel->sendMessage('All words found in the last game: ' . found_words_output()));
     }
     GAME_STATUS->tryLoadOldGame($number);
-  # here current_lang, because this is loaded from saves.txt
+    # here current_lang, because this is loaded from saves.txt
     $game_number = GAME_STATUS->game_number;
     $current_lang = GAME_STATUS->current_lang;
     $found_words_output = found_words_output();
