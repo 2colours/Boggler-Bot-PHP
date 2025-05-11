@@ -14,6 +14,7 @@ class ArchiveGameEntryData
     ) {
     }
 
+    #TODO remove this
     public static function fromLegacyFile(string $legacy_file, int $number): self
     {
         $lines = file($legacy_file, FILE_IGNORE_NEW_LINES);
@@ -49,6 +50,7 @@ class ArchiveGameEntryData
         return new self(...$ctor_dict);
     }
 
+    # TODO remove this
     public function toLegacyEntry(): string
     {
         $space_separated_letters_alphabetic = implode(' ', $this->letters_sorted);
