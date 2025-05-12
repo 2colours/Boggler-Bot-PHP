@@ -87,3 +87,9 @@ function masked_word(string $original_word, array $transparent_positions)
     }
     return $result;
 }
+
+# [d1, d2, d3, ..., dn], h -> d1 ∘ d2 ∘ d3 ∘ ... ∘ dn ∘ h
+function decorate_handler(array $decorators, callable $handler)
+{
+    return array_reduce(array_reverse($decorators), fn($aggregate, $current) => $current($aggregate), $handler);
+}

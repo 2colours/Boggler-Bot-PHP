@@ -3,10 +3,13 @@
 namespace Bojler;
 
 use Collator;
+use Discord\CommandClient\Command;
 use Discord\DiscordCommandClient;
 use Discord\Parts\Embed\Embed;
 use React\Promise\PromiseInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+
+use function React\Async\async;
 
 # TODO investigate and improve help message
 final class CustomCommandClient extends DiscordCommandClient
@@ -34,6 +37,11 @@ final class CustomCommandClient extends DiscordCommandClient
 
         # This is completely idiotic, thank DiscordPHP
         $this->on('init', $this->monkeyPatching(...));
+    }
+
+    public function registerCommand(string $command, $callable, array $options = []): Command
+    {
+        return parent::registerCommand($command, async($callable), $options);
     }
 
     private function resolveCustomOptions(array $custom_options): array
