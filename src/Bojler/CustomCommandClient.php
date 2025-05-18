@@ -8,12 +8,13 @@ use Discord\Parts\Embed\Embed;
 use React\Promise\PromiseInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-# TODO investigate and improve help message
 final class CustomCommandClient extends DiscordCommandClient
 {
     private Collator $collator;
 
     public const MAX_EMBEDS = 25;
+    public const MAX_FIELD_LENGTH = 1024;
+    public const HELP_COMMANDS_PER_COLUMN = 10;
 
     public function __construct(array $options = [])
     {
@@ -143,7 +144,7 @@ final class CustomCommandClient extends DiscordCommandClient
         $texts = $this->textPerCommand($prefix);
         # Use embed fields in case commands count is below limit
         if (count($embed_fields) > self::MAX_EMBEDS) {
-            $embed_fields = $this->groupTexts($texts, 10); # TODO do something with this magic number
+            $embed_fields = $this->groupTexts($texts, self::HELP_COMMANDS_PER_COLUMN);
         }
         if (count($embed_fields) > self::MAX_EMBEDS) {
             $embed_fields = [];
@@ -251,7 +252,7 @@ final class CustomCommandClient extends DiscordCommandClient
             fn($grouped_texts, $no) =>
             [
                 'name' => "Commands #$no.",
-                'value' => grapheme_substr(implode("\n\n", $grouped_texts), 0, 1024), # TODO do something with the magic constant
+                'value' => grapheme_substr(implode("\n\n", $grouped_texts), 0, self::MAX_FIELD_LENGTH),
                 'inline' => true,
             ],
             array_chunk($texts, $groupSize),
