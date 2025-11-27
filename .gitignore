@@ -1,4 +1,5 @@
 .env
 /vendor/
 /.vscode/
-live_data/
+/live_data
+/ecosystem.json
