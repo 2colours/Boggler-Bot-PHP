@@ -48,7 +48,6 @@ describe('progress_bar', function () {
     {
         $reflection = new ReflectionClass($game_status_mock);
         $property = $reflection->getProperty('end_amount');
-        $property->setAccessible(true);
         $property->setValue($game_status_mock, $end_amount);
     }
 

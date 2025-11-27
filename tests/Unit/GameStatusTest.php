@@ -19,7 +19,6 @@ describe('wordValidFast', function () {
     {
         $reflection = new ReflectionClass($game_status_mock);
         $property = $reflection->getProperty('current_lang');
-        $property->setAccessible(true);
         $property->setValue($game_status_mock, $current_lang);
     }
 

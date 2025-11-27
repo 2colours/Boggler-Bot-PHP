@@ -16,7 +16,7 @@
         "react/async": "^4.2"
     },
     "require-dev": {
-        "pestphp/pest": "^3.4",
+        "pestphp/pest": "^4.0",
         "mockery/mockery": "^1.6",
         "squizlabs/php_codesniffer": "^3.0"
     },
