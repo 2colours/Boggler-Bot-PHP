@@ -29,6 +29,7 @@
         "start": [
             "Composer\\Config::disableProcessTimeout",
             "php -c . src/bot.php"
-        ]
+        ],
+	"test": "vendor/bin/pest"
     }
 }
