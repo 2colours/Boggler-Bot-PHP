@@ -40,7 +40,7 @@ class LetterList
     {
         $manager = new ImageManager(Driver::class);
         $image = $manager->create($img_w, $img_h)->fill('white');
-        $font = new Font(realpath('param/arial.ttf'));
+        $font = new Font('param/arial.ttf');
         $font->setSize($font_size);
         $font->setColor('rgb(0, 178, 238)');
 
