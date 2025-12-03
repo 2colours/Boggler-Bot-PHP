@@ -16,6 +16,7 @@ use Bojler\{
     GameStatus,
     PlayerHandler,
 };
+use DI\Container;
 use Discord\Builders\MessageBuilder;
 use Symfony\Component\Dotenv\Dotenv;
 use Discord\Parts\Channel\Message;
@@ -40,6 +41,7 @@ use function Bojler\{
     strikethrough,
     progress_bar
 };
+use function DI\factory;
 use function React\Async\await;
 
 $dotenv = new Dotenv();
@@ -48,13 +50,15 @@ $dotenv->load('./.env');
 const CREATORS = ['297037173541175296', '217319536485990400'];
 # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
 define('CONFIG', ConfigHandler::getInstance());
-define('IMAGE_FILEPATH_NORMAL', 'live_data/' . CONFIG->getDisplayNormalFileName());
-define('IMAGE_FILEPATH_SMALL', 'live_data/' . CONFIG->getDisplaySmallFileName());
-define('SAVES_FILEPATH', 'live_data/' . CONFIG->getSavesFileName());
-define('CURRENT_GAME', 'live_data/' . CONFIG->getCurrentGameFileName());
+define('LIVE_DATA_PREFIX', 'live_data' . DIRECTORY_SEPARATOR);
+define('IMAGE_FILEPATH_NORMAL', LIVE_DATA_PREFIX . CONFIG->getDisplayNormalFileName());
+define('IMAGE_FILEPATH_SMALL', LIVE_DATA_PREFIX . CONFIG->getDisplaySmallFileName());
+define('SAVES_FILEPATH', LIVE_DATA_PREFIX . CONFIG->getSavesFileName());
+define('CURRENT_GAME', LIVE_DATA_PREFIX . CONFIG->getCurrentGameFileName());
 define('EXAMPLES', CONFIG->getExamples());
 define('COMMUNITY_WORDLISTS', CONFIG->getCommunityWordlists());
 define('DICTIONARIES', CONFIG->getDictionaries());
+define('DEFAULT_TRANSLATION', CONFIG->getDefaultTranslation());
 define('HOME_SERVER', $_ENV['HOME_SERVER']);
 define('HOME_CHANNEL', $_ENV['HOME_CHANNEL']);
 define('PROGRESS_BAR_VERSION', CONFIG->getProgressBarVersion());
@@ -142,7 +146,8 @@ function needs_thrown_dice()
 
 function emoji_awarded(Message $ctx)
 {
-    return PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->getWordCountForEmoji();
+    global $container;
+    return $container->get(PlayerHandler::class)->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->getWordCountForEmoji();
 }
 
 # "handler-ish" functions (not higher order, takes context, DC side effects)
@@ -186,8 +191,13 @@ function ensure_predicate(callable $predicate, ?callable $refusalMessageProducer
     };
 }
 
+$container = new Container([
+    ConfigHandler::class => factory(ConfigHandler::getInstance(...)),
+    PlayerHandler::class => factory(PlayerHandler::getInstance(...)),
+    GameStatus::class => DI\autowire()->constructor(LIVE_DATA_PREFIX)
+]);
 # TODO it's dubious whether these are actually constants; gotta think about it
-define('GAME_STATUS', new GameStatus(CURRENT_GAME, SAVES_FILEPATH));
+define('GAME_STATUS', $container->get(GameStatus::class));
 # define('easter_egg_handler', new EasterEggHandler(GAME_STATUS->found_words_set));
 const COUNTER = new Counter(10);
 const RNG = new Randomizer();
@@ -219,8 +229,8 @@ $bot->registerCommand('t', function (Message $ctx, $args): void {
     $translator_args = channel_valid($ctx) ? [GAME_STATUS->current_lang, GAME_STATUS->base_lang] : [];
     translator_command(...$translator_args)($ctx, $args);
 }, ['description' => 'translate given word']);
-$bot->registerCommand('stats', function (Message $ctx) {
-    $infos = PlayerHandler::getInstance()->player_dict[$ctx->author->id]; # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
+$bot->registerCommand('stats', function (Message $ctx) use ($container) {
+    $infos = $container->get(PlayerHandler::class)->player_dict[$ctx->author->id];
     if (is_null($infos)) {
         await($ctx->reply('You don\'t have any statistics registered.'));
         return;
@@ -274,7 +284,8 @@ function new_game(Message $ctx): void
 {
     # this isn't perfect, but at least it won't display this "found words" always when just having looked at an old game for a second. That would be annoying.
     if (GAME_STATUS->changes_to_save) {
-        await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, PlayerHandler::getInstance())));
+        global $container;
+        await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, $container->get(PlayerHandler::class))));
         $message = 'All words found in the last game: ' . found_words_output() . "\n\n" . instructions(GAME_STATUS->planned_lang) . "\n\n";
         foreach (output_split_cursive($message) as $item) {
             await($ctx->channel->sendMessage($item));
@@ -355,7 +366,7 @@ $bot->registerCommand(
 
 function unfound(Message $ctx): void
 {
-    $unfound_file = 'live_data/unfound_solutions.txt';
+    $unfound_file = LIVE_DATA_PREFIX . 'unfound_solutions.txt';
     #$found_words_caps = array_map(mb_strtoupper(...), GAME_STATUS->found_words->toArray());
     file_put_contents($unfound_file, implode("\n", GAME_STATUS->solutions->diff(GAME_STATUS->found_words)->toArray()));
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($unfound_file)));
@@ -444,7 +455,8 @@ function remove(Message $ctx, $args): void
     $word = $args[0];
     if (GAME_STATUS->found_words->contains($word)) {
         GAME_STATUS->removeWord($word);
-        PlayerHandler::getInstance()->playerRemoveWord($ctx, GAME_STATUS->approvalStatus($word));
+        global $container;
+        $container->get(PlayerHandler::class)->playerRemoveWord($ctx, GAME_STATUS->approvalStatus($word));
         $formatted_word = italic($word);
         await($ctx->channel->sendMessage("Removed $formatted_word."));
     } else {
@@ -460,7 +472,8 @@ $bot->registerCommand(
 
 function highscore(Message $ctx): void
 {
-    await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, PlayerHandler::getInstance())));
+    global $container;
+    await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, $container->get(PlayerHandler::class))));
 }
 
 $bot->registerCommand(
@@ -488,7 +501,7 @@ $bot->registerCommand(
 
 function community_list(Message $ctx): void
 {
-    $file_to_send = 'live_data/' . COMMUNITY_WORDLISTS[GAME_STATUS->current_lang];
+    $file_to_send = LIVE_DATA_PREFIX . COMMUNITY_WORDLISTS[GAME_STATUS->current_lang];
     if (!is_file($file_to_send)) {
         touch($file_to_send);
     }
@@ -498,7 +511,7 @@ function community_list(Message $ctx): void
 $bot->registerCommand(
     'emoji',
     decorate_handler(
-        [ensure_predicate(emoji_awarded(...), fn(Message $ctx) => 'You have to find ' . CONFIG->getWordCountForEmoji() . ' words first! (currently ' . PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
+        [ensure_predicate(emoji_awarded(...), fn(Message $ctx) => 'You have to find ' . CONFIG->getWordCountForEmoji() . ' words first! (currently ' . $container->get(PlayerHandler::class)->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
         'emoji'
     ),
     ['description' => 'change your personal emoji']
@@ -507,7 +520,8 @@ $bot->registerCommand(
 function emoji(Message $ctx, $args): void
 {
     $emoji_str = $args[0];
-    PlayerHandler::getInstance()->setEmoji($ctx->author->id, $emoji_str);
+    global $container;
+    $container->get(PlayerHandler::class)->setEmoji($ctx->author->id, $emoji_str);
     await($ctx->channel->sendMessage("Changed emoji to $emoji_str."));
 }
 
@@ -549,7 +563,8 @@ function hint_command(string $from_language)
         $chosen_hint = $unfound_hint_list[array_rand($unfound_hint_list)];
         $formatted_hint_content = italic(get_translation($chosen_hint, new DictionaryType(GAME_STATUS->current_lang, $from_language), DatabaseHandler::getInstance())); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
         await($ctx->channel->sendMessage("hint: $formatted_hint_content"));
-        PlayerHandler::getInstance()->playerUsedHint($ctx, $chosen_hint);
+        global $container;
+        $container->get(PlayerHandler::class)->playerUsedHint($ctx, $chosen_hint);
     };
 }
 
@@ -648,7 +663,8 @@ $bot->registerCommand(
 
 function reveal(Message $ctx): void
 {
-    $player_hints = PlayerHandler::getInstance()->getPlayerField($ctx->author->id, 'used_hints');
+    global $container;
+    $player_hints = $container->get(PlayerHandler::class)->getPlayerField($ctx->author->id, 'used_hints');
     $left_hints = array_diff($player_hints, GAME_STATUS->found_words->toArray());
     if (count($left_hints) === 0) {
         await($ctx->channel->sendMessage('You have no unsolved hints left.'));

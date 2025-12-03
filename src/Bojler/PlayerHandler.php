@@ -6,28 +6,28 @@ use Discord\Parts\{
     Channel\Message,
     User\Member,
 };
+use Psr\Container\ContainerInterface;
 
 class PlayerHandler
 {
     private static $instance;
 
-    public static function getInstance(): self
+    public static function getInstance(ContainerInterface $container): self
     {
         if (is_null(self::$instance)) {
-            self::$instance = new self();
+            self::$instance = new self($container->get(ConfigHandler::class));
         }
 
         return self::$instance;
     }
 
-
     public const PLAYER_SAVES_PATH = 'live_data/player_saves.json';
-    private readonly mixed $default_player;
+    private readonly array $default_player; # injection-dependent
     public $player_dict;
 
-    private function __construct()
+    private function __construct(ConfigHandler $config)
     {
-        $this->default_player = ConfigHandler::getInstance()->getPlayerDefaults(); # https://github.com/2colours/Boggler-Bot-PHP/issues/26
+        $this->default_player = $config->getPlayerDefaults();
         $read_content = file_get_contents(self::PLAYER_SAVES_PATH);
         if ($read_content === false) {
             $read_content = '{}';
