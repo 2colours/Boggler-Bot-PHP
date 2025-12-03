@@ -3,26 +3,14 @@
 namespace Bojler;
 
 use Collator;
+use DI\FactoryInterface;
 use Discord\Parts\Channel\Message;
 use Ds\Set;
-use Exception;
 
 use function React\Async\await;
 
-# https://github.com/2colours/Boggler-Bot-PHP/issues/26
-define('CONFIG', ConfigHandler::getInstance());
-define('DEFAULT_TRANSLATION', CONFIG->getDefaultTranslation());
-define('DICE_DICT', CONFIG->getDice());
-define('AVAILABLE_LANGUAGES', CONFIG->getAvailableLanguages());
-define('DEFAULT_END_AMOUNT', CONFIG->getDefaultEndAmount());
-define('WORDLIST_PATHS', array_map(fn($value) => "param/$value", CONFIG->getWordlists()));
-define('DICTIONARIES', CONFIG->getDictionaries());
-define('COMMUNITY_WORDLIST_PATHS', array_map(fn($value) => "live_data/$value", CONFIG->getCommunityWordlists()));
-define('CUSTOM_EMOJIS', CONFIG->getCustomEmojis());
-
 class GameStatus #not final because of mocking
 {
-    private readonly PlayerHandler $player_handler;
     private string $file;
     private string $archive_file;
     private $game_over_acknowledged;
@@ -43,13 +31,39 @@ class GameStatus #not final because of mocking
     private $communitylist_solutions;
     public private(set) array $available_hints;
     private Set $approved_words;
+    # set constructor from injection
+    private readonly PlayerHandler $player_handler;
+    private readonly ConfigHandler $config;
+    private readonly FactoryInterface $factory;
+    # injection-dependent
+    private readonly array $default_translation;
+    private readonly int $default_end_amount;
+    private readonly array $dice_dict;
+    private readonly array $available_languages;
+    private readonly array $wordlist_paths;
+    private readonly array $dictionaries;
+    private readonly array $community_wordlist_paths;
+    private readonly array $custom_emojis;
 
-    public function __construct(string $current_file, string $archive_file)
+    public function __construct(string $live_data_prefix, PlayerHandler $player_handler, ConfigHandler $config, FactoryInterface $factory)
     {
-        $this->player_handler = PlayerHandler::getInstance(); # https://github.com/2colours/Boggler-Bot-PHP/issues/26
-        $this->archive_file = $archive_file;
-        $this->file = $current_file;
-        $this->letters = new LetterList(array_fill(0, 16, null));
+        # injected
+        $this->player_handler = $player_handler;
+        $this->config = $config;
+        $this->factory = $factory;
+        # injection-dependent
+        $this->default_translation = $this->config->getDefaultTranslation();
+        $this->default_end_amount = $this->config->getDefaultEndAmount();
+        $this->dice_dict = $this->config->getDice();
+        $this->available_languages = $this->config->getAvailableLanguages();
+        $this->wordlist_paths = array_map(fn($value) => "param/$value", $this->config->getWordlists());
+        $this->dictionaries = $this->config->getDictionaries();
+        $this->community_wordlist_paths = array_map(fn($value) => $live_data_prefix . $value, $this->config->getCommunityWordlists());
+        $this->custom_emojis = $this->config->getCustomEmojis();
+
+        $this->archive_file = $live_data_prefix . $this->config->getSavesFileName();
+        $this->file = $live_data_prefix . $this->config->getCurrentGameFileName();
+        $this->letters = $this->factory->make(LetterList::class, ['data' => array_fill(0, 16, null)]);
         $this->found_words = new Set();
         # complete lists
         $this->community_list = [];
@@ -57,19 +71,19 @@ class GameStatus #not final because of mocking
         $this->wordlist_solutions = new Set();
         #dependent data
         $this->communitylist_solutions = [];
-        $this->available_hints = array_map(fn() => [], array_flip(AVAILABLE_LANGUAGES));
+        $this->available_hints = array_map(fn() => [], array_flip($this->available_languages));
         #dependent data
         $this->solutions = new Set();
-        $this->end_amount = DEFAULT_END_AMOUNT;
+        $this->end_amount = $this->default_end_amount;
         #dependent data
         $this->approved_words = new Set();
         $this->game_over_acknowledged = false;
         # changes_to_save determines if we have to save sth in saves.txt. Always true for a loaded current_game or new games (might not be saved yet). False when loading old games. Becomes true with every adding or removing word.
         $this->changes_to_save = false;
         $this->thrown_the_dice = false;
-        $this->planned_lang = DEFAULT_TRANSLATION[0];
-        $this->current_lang = DEFAULT_TRANSLATION[0];
-        $this->base_lang = DEFAULT_TRANSLATION[1];
+        $this->planned_lang = $this->default_translation[0];
+        $this->current_lang = $this->default_translation[0];
+        $this->base_lang = $this->default_translation[1];
         $this->game_number = 0;
         #dependent data
         $this->max_saved_game = 0;
@@ -81,7 +95,7 @@ class GameStatus #not final because of mocking
     {
         $parsed = CurrentGameData::fromJsonFile($this->file);
         # Current Game
-        $this->letters = new LetterList($parsed->letters);
+        $this->letters = $this->factory->make(LetterList::class, ['data' => $parsed->letters]);
         $this->found_words = new Set($parsed->found_words);
         $this->game_number = $parsed->game_number;
         $this->current_lang = $parsed->current_lang;
@@ -141,7 +155,7 @@ class GameStatus #not final because of mocking
     public function availableDictionariesFrom(?string $origin = null)
     {
         $origin ??= $this->current_lang;
-        return array_filter(AVAILABLE_LANGUAGES, fn($item) => array_key_exists((new DictionaryType($origin, $item))->asDictstring(), DICTIONARIES));
+        return array_filter($this->available_languages, fn($item) => array_key_exists((new DictionaryType($origin, $item))->asDictstring(), $this->dictionaries));
     }
 
     # gets the refdict instead of creating it every time
@@ -187,7 +201,7 @@ class GameStatus #not final because of mocking
     private function setEndAmount()
     {
         $expected_solution_count = $this->wordlist_solutions->count();
-        $this->end_amount = $this->solutions->isEmpty() ? 100 : min(DEFAULT_END_AMOUNT, intdiv($expected_solution_count, 2));
+        $this->end_amount = $this->solutions->isEmpty() ? 100 : min($this->default_end_amount, intdiv($expected_solution_count, 2));
     }
 
     private function setApprovedWords()
@@ -197,7 +211,7 @@ class GameStatus #not final because of mocking
 
     public function collator()
     {
-        return new Collator(CONFIG->getLocale($this->current_lang));
+        return new Collator($this->config->getLocale($this->current_lang));
     }
 
     public function currentEntryJson(): CurrentGameData # TODO the name will eventually lose the JSON
@@ -219,7 +233,7 @@ class GameStatus #not final because of mocking
 
     private function findWordlistSolutions(array $refdict)
     {
-        $content = file(WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES);
+        $content = file($this->wordlist_paths[$this->current_lang], FILE_IGNORE_NEW_LINES);
         $this->wordlist_solutions = new Set(array_filter($content, fn($line) => $this->wordValidFast($line, $refdict)));
     }
 
@@ -232,7 +246,7 @@ class GameStatus #not final because of mocking
         $this->player_handler->newGame();
 
         $parsed = ArchiveGameEntryData::fromJsonFile($this->archive_file, $number);
-        $this->letters = new LetterList($parsed->letters_sorted, true);
+        $this->letters = $this->factory->make(LetterList::class, ['data' => $parsed->letters_sorted, 'preshuffle' => true]);
         if ($this->letters->isAbnormal()) {
             echo 'Game might be damaged.';
         }
@@ -271,13 +285,13 @@ class GameStatus #not final because of mocking
         $approval_data->validity_info = $this->wordValid($word, $this->letters->lower_cntdict);
         $approval_data->wordlist = $this->wordlist_solutions->contains($word);
         $approval_data->community = in_array($word, $this->community_list);
-        $approval_data->custom_reactions = array_key_exists($word, CUSTOM_EMOJIS[$this->current_lang]);
+        $approval_data->custom_reactions = array_key_exists($word, $this->custom_emojis[$this->current_lang]);
         $approval_data->any = false;
         $approval_data->dictionary = false;
         foreach (['wordlist', 'community', 'custom_reactions'] as $key) {
             $approval_data->any = $approval_data->any || $approval_data->{$key};
         }
-        $approval_data->translations = array_map(fn() => false, array_flip(AVAILABLE_LANGUAGES));
+        $approval_data->translations = array_map(fn() => false, array_flip($this->available_languages));
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
             if (in_array($word, $this->available_hints[$language])) {
                 $approval_data->translations[$language] = get_translation($word, new DictionaryType($this->current_lang, $language), DatabaseHandler::getInstance()); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
@@ -301,12 +315,12 @@ class GameStatus #not final because of mocking
 
     private function loadCommunityList()
     {
-        $this->community_list = file(COMMUNITY_WORDLIST_PATHS[$this->current_lang], FILE_IGNORE_NEW_LINES) ?: [];
+        $this->community_list = file($this->community_wordlist_paths[$this->current_lang], FILE_IGNORE_NEW_LINES) ?: [];
     }
 
     private function findCustomEmojis(array $refdict)
     {
-        $this->custom_emoji_solution = array_filter(array_keys(CUSTOM_EMOJIS[$this->current_lang]), fn($word) => $this->wordValidFast($word, $refdict));
+        $this->custom_emoji_solution = array_filter(array_keys($this->custom_emojis[$this->current_lang]), fn($word) => $this->wordValidFast($word, $refdict));
     }
 
     private function saveOld()
@@ -428,7 +442,7 @@ class GameStatus #not final because of mocking
             return false;
         }
 
-        file_put_contents(COMMUNITY_WORDLIST_PATHS[$this->current_lang], "$word\n", FILE_APPEND);
+        file_put_contents($this->community_wordlist_paths[$this->current_lang], "$word\n", FILE_APPEND);
         array_push($this->community_list, $word);
         if ($this->wordValidFast($word, $this->letters->lower_cntdict)) {
             array_push($this->communitylist_solutions, $word);
@@ -479,9 +493,9 @@ class GameStatus #not final because of mocking
     {
         $used_permutation = range(0, 15);
         shuffle($used_permutation);
-        $current_dice = DICE_DICT[$this->current_lang];
+        $current_dice = $this->dice_dict[$this->current_lang];
         $dice_permutated = array_map(fn($dice_index) => $current_dice[$dice_index], $used_permutation);
-        $this->letters = new LetterList(array_map(fn($current_die) => $current_die[array_rand($current_die)], $dice_permutated), just_regenerate: true);
+        $this->letters = $this->factory->make(LetterList::class, ['data' => array_map(fn($current_die) => $current_die[array_rand($current_die)], $dice_permutated), 'just_regenerate' => true]);
         $this->saveGame();
     }
 

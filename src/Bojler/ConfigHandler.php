@@ -18,7 +18,7 @@ class ConfigHandler
     }
 
 
-    private readonly mixed $config;
+    private readonly array $config;
 
     private function __construct()
     {

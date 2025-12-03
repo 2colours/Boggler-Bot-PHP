@@ -21,7 +21,7 @@ class DatabaseHandler
     private const DB_PATH = 'param/dictionary.db';
 
     public readonly SQLite3 $db;
-    public readonly mixed $dictionaries;
+    public readonly mixed $dictionaries; # TODO look into typing
 
     private function tableSetup()
     {
