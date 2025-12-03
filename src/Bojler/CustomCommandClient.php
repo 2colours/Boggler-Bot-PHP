@@ -111,7 +111,7 @@ final class CustomCommandClient extends DiscordCommandClient
         $args = mb_split(' +', $withoutPrefix);
         $command = array_shift($args);
 
-        if ($command !== null && $this->commandClientOptions['caseInsensitiveCommands']) {
+        if (!is_null($command) && $this->commandClientOptions['caseInsensitiveCommands']) {
             $command = mb_strtolower($command);
         }
 
