@@ -105,7 +105,7 @@ function translator_command(?string $src_lang = null, ?string $target_lang = nul
 # internal context-dependent functions that aren't really related to command handling
 
 #Determines which emoji reaction a certain word deserves - it doesn't remove special characters
-function achievements(Message $ctx, string $word, string $command_type)
+function achievements(string $word, string $command_type)
 {
     $reactions = [];
     if ($command_type === 's' && (GAME_STATUS->isLongestSolution($word))) {
@@ -114,10 +114,10 @@ function achievements(Message $ctx, string $word, string $command_type)
     return $reactions;
 }
 
-function s_reactions(Message $ctx, string $word)
+function s_reactions(string $word)
 {
     $reaction_list = [acknowledgement_reaction($word), approval_reaction($word)];
-    return array_merge($reaction_list, achievements($ctx, $word, 's'));
+    return array_merge($reaction_list, achievements($word, 's'));
 }
 
 # "predicate-ish" functions (not higher order, takes context, performs a check)
@@ -437,7 +437,7 @@ function add_solution(Message $ctx, $args): void
     $word = $args[0];
     $success = GAME_STATUS->tryAddWord($ctx, $word);
     if ($success) {
-        foreach (s_reactions($ctx, $word) as $reaction) {
+        foreach (s_reactions($word) as $reaction) {
             await($ctx->react($reaction));
         }
     }
