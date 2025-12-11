@@ -206,7 +206,7 @@ const RNG = new Randomizer();
 const BOT_LOGGER = new Logger('bojlerLogger');
 BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Debug));
 
-$bot = new CustomCommandClient([
+$bot = new CustomCommandClient($container, [
     'prefix' => 'b!',
     'token' => $_ENV['DC_TOKEN'],
     'description' => 'Szórakodtató bot',
@@ -219,7 +219,7 @@ $bot = new CustomCommandClient([
         'locale' => CONFIG->getLocale(CONFIG->getDefaultTranslation()[0]), # TODO allow configuration of locale during the usage of the bot
         'caseInsensitivePrefix' => true
     ]
-]);
+]); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
 
 $bot->registerCommand('info', send_instructions(...), ['description' => 'show instructions']);
 $bot->registerCommand('teh', translator_command('English', 'Hungarian'), ['description' => 'translate given word Eng-Hun']);

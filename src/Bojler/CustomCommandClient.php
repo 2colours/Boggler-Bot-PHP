@@ -8,6 +8,7 @@ use Discord\DiscordCommandClient;
 use Discord\Parts\Embed\Embed;
 use React\Promise\PromiseInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use DI\FactoryInterface;
 
 use function React\Async\async;
 
@@ -15,11 +16,14 @@ use function React\Async\async;
 final class CustomCommandClient extends DiscordCommandClient
 {
     private Collator $collator;
+    private readonly FactoryInterface $di_factory; # TODO loosen dependency to PSR ContainerInterface - DictionaryType might need a factory
 
     public const MAX_EMBEDS = 25;
 
-    public function __construct(array $options = [])
+    public function __construct(FactoryInterface $factory, array $options = [])
     {
+        $this->di_factory = $factory;
+
         $own_options = $this->resolveCustomOptions($options['customOptions']);
         unset($options['customOptions']);
 
@@ -120,7 +124,10 @@ final class CustomCommandClient extends DiscordCommandClient
             return;
         }
 
-        $result = $command->handle($message, $args);
+        $context = $message;
+        $context->di_factory = $this->di_factory; # TODO rework this simple hack maybe
+
+        $result = $command->handle($context, $args);
         if (is_string($result)) {
             $result = $message->reply($result);
         }
