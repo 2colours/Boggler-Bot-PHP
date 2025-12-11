@@ -35,6 +35,7 @@ class GameStatus #not final because of mocking
     private readonly PlayerHandler $player_handler;
     private readonly ConfigHandler $config;
     private readonly FactoryInterface $factory;
+    private readonly DatabaseHandler $db;
     # injection-dependent
     private readonly array $default_translation;
     private readonly int $default_end_amount;
@@ -45,9 +46,10 @@ class GameStatus #not final because of mocking
     private readonly array $community_wordlist_paths;
     private readonly array $custom_emojis;
 
-    public function __construct(string $live_data_prefix, PlayerHandler $player_handler, ConfigHandler $config, FactoryInterface $factory)
+    public function __construct(string $live_data_prefix, DatabaseHandler $db, PlayerHandler $player_handler, ConfigHandler $config, FactoryInterface $factory)
     {
         # injected
+        $this->db = $db;
         $this->player_handler = $player_handler;
         $this->config = $config;
         $this->factory = $factory;
@@ -144,10 +146,9 @@ class GameStatus #not final because of mocking
 
     private function findHints()
     {
-        $db = DatabaseHandler::getInstance();
         $refdict = $this->letters->lower_cntdict;
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
-            $this->available_hints[$language] = array_values(array_filter($db->getWords(new DictionaryType($this->current_lang, $language)), fn($item) => $this->wordValidFast($item, $refdict)));
+            $this->available_hints[$language] = array_values(array_filter($this->db->getWords($this->factory->make(DictionaryType::class, ['src_lang' => $this->current_lang, 'target_lang' => $language])), fn($item) => $this->wordValidFast($item, $refdict)));
         }
     }
 
@@ -155,7 +156,7 @@ class GameStatus #not final because of mocking
     public function availableDictionariesFrom(?string $origin = null)
     {
         $origin ??= $this->current_lang;
-        return array_filter($this->available_languages, fn($item) => array_key_exists((new DictionaryType($origin, $item))->asDictstring(), $this->dictionaries));
+        return array_filter($this->available_languages, fn($item) => array_key_exists($this->factory->make(DictionaryType::class, ['src_lang' => $origin, 'target_lang' => $item])->asDictstring(), $this->dictionaries));
     }
 
     # gets the refdict instead of creating it every time
@@ -294,7 +295,7 @@ class GameStatus #not final because of mocking
         $approval_data->translations = array_map(fn() => false, array_flip($this->available_languages));
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
             if (in_array($word, $this->available_hints[$language])) {
-                $approval_data->translations[$language] = get_translation($word, new DictionaryType($this->current_lang, $language), DatabaseHandler::getInstance()); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
+                $approval_data->translations[$language] = get_translation($word, $this->factory->make(DictionaryType::class, ['src_lang' => $this->current_lang, 'target_lang' => $language]), $this->db);
                 $approval_data->dictionary = true;
                 $approval_data->any = true;
             }
