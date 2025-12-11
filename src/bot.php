@@ -17,10 +17,12 @@ use Bojler\{
     PlayerHandler,
 };
 use DI\Container;
+use DI\FactoryInterface;
 use Discord\Builders\MessageBuilder;
 use Symfony\Component\Dotenv\Dotenv;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Intents;
+use Invoker\InvokerInterface;
 use Random\Randomizer;
 use Monolog\{
     Logger,
@@ -89,11 +91,10 @@ function instructions(string $lang)
 
 function translator_command(?string $src_lang = null, ?string $target_lang = null)
 {
-    return function (Message $ctx, $args) use ($src_lang, $target_lang): void {
+    return function (DatabaseHandler $db, Message $ctx, $args) use ($src_lang, $target_lang): void {
         $word = $args[0];
         $ctor_args = array_map(fn($first_choice, $default) => $first_choice ?? $default, [$src_lang, $target_lang], DEFAULT_TRANSLATION);
-        global $container;
-        $translation = get_translation($word, new DictionaryType(...$ctor_args), $container->get(DatabaseHandler::class));
+        $translation = get_translation($word, new DictionaryType(...$ctor_args), $db);
         if (isset($translation)) {
             await($ctx->channel->sendMessage("$word: ||$translation||"));
         } else {
@@ -145,10 +146,9 @@ function needs_thrown_dice()
     return GAME_STATUS->thrown_the_dice; # TODO really not nice dependency, especially if we want to move the function
 }
 
-function emoji_awarded(Message $ctx)
+function emoji_awarded(PlayerHandler $player, Message $ctx)
 {
-    global $container;
-    return $container->get(PlayerHandler::class)->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->getWordCountForEmoji();
+    return $player->getPlayerField($ctx->author->id, 'all_time_found') >= CONFIG->getWordCountForEmoji();
 }
 
 # "handler-ish" functions (not higher order, takes context, DC side effects)
@@ -172,8 +172,8 @@ function simple_board(Message $ctx): void
 # "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
 function needs_counting(callable $handler)
 {
-    return function ($ctx, ...$args) use ($handler) {
-        $handler($ctx, ...$args);
+    return function (InvokerInterface $invoker, $ctx, $args) use ($handler) {
+        $invoker->call($handler, ['ctx' => $ctx, 'args' => $args]);
         if (COUNTER->trigger()) {
             simple_board($ctx);
         }
@@ -183,11 +183,11 @@ function needs_counting(callable $handler)
 # $refusalMessageProducer is a function that can take $ctx
 function ensure_predicate(callable $predicate, ?callable $refusalMessageProducer = null)
 {
-    return fn($handler) => function (Message $ctx, ...$args) use ($handler, $predicate, $refusalMessageProducer) {
-        if ($predicate($ctx)) {
-            $handler($ctx, ...$args);
+    return fn($handler) => function (InvokerInterface $invoker, Message $ctx, $args) use ($handler, $predicate, $refusalMessageProducer) {
+        if ($invoker->call($predicate, ['ctx' => $ctx])) {
+            $invoker->call($handler, ['ctx' => $ctx, 'args' => $args]);
         } elseif (isset($refusalMessageProducer)) {
-            await($ctx->reply($refusalMessageProducer($ctx)));
+            await($ctx->reply($invoker->call($refusalMessageProducer, ['ctx' => $ctx])));
         }
     };
 }
@@ -231,8 +231,8 @@ $bot->registerCommand('t', function (Message $ctx, $args): void {
     $translator_args = channel_valid($ctx) ? [GAME_STATUS->current_lang, GAME_STATUS->base_lang] : [];
     translator_command(...$translator_args)($ctx, $args);
 }, ['description' => 'translate given word']);
-$bot->registerCommand('stats', function (Message $ctx) use ($container) {
-    $infos = $container->get(PlayerHandler::class)->player_dict[$ctx->author->id];
+$bot->registerCommand('stats', function (PlayerHandler $player, Message $ctx) {
+    $infos = $player->player_dict[$ctx->author->id];
     if (is_null($infos)) {
         await($ctx->reply('You don\'t have any statistics registered.'));
         return;
@@ -282,12 +282,11 @@ $bot->registerCommand(
     decorate_handler([ensure_predicate(channel_valid(...))], new_game(...)),
     ['description' => 'start new game']
 );
-function new_game(Message $ctx): void
+function new_game(PlayerHandler $player, Message $ctx): void
 {
     # this isn't perfect, but at least it won't display this "found words" always when just having looked at an old game for a second. That would be annoying.
     if (GAME_STATUS->changes_to_save) {
-        global $container;
-        await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, $container->get(PlayerHandler::class))));
+        await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, $player)));
         $message = 'All words found in the last game: ' . found_words_output() . "\n\n" . instructions(GAME_STATUS->planned_lang) . "\n\n";
         foreach (output_split_cursive($message) as $item) {
             await($ctx->channel->sendMessage($item));
@@ -434,6 +433,7 @@ $bot->registerCommand(
 
 function add_solution(Message $ctx, $args): void
 {
+    var_dump($args);
     $word = $args[0];
     $success = GAME_STATUS->tryAddWord($ctx, $word);
     if ($success) {
@@ -452,13 +452,12 @@ $bot->registerCommand(
     ['description' => 'remove solution', 'aliases' => ['r']]
 );
 
-function remove(Message $ctx, $args): void
+function remove(PlayerHandler $player, Message $ctx, $args): void
 {
     $word = $args[0];
     if (GAME_STATUS->found_words->contains($word)) {
         GAME_STATUS->removeWord($word);
-        global $container;
-        $container->get(PlayerHandler::class)->playerRemoveWord($ctx, GAME_STATUS->approvalStatus($word));
+        $player->playerRemoveWord($ctx, GAME_STATUS->approvalStatus($word));
         $formatted_word = italic($word);
         await($ctx->channel->sendMessage("Removed $formatted_word."));
     } else {
@@ -472,10 +471,9 @@ $bot->registerCommand(
     ['description' => 'send highscore']
 );
 
-function highscore(Message $ctx): void
+function highscore(PlayerHandler $player, Message $ctx): void
 {
-    global $container;
-    await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, $container->get(PlayerHandler::class))));
+    await($ctx->channel->sendMessage(game_highscore(GAME_STATUS, $player)));
 }
 
 $bot->registerCommand(
@@ -513,17 +511,16 @@ function community_list(Message $ctx): void
 $bot->registerCommand(
     'emoji',
     decorate_handler(
-        [ensure_predicate(emoji_awarded(...), fn(Message $ctx) => 'You have to find ' . CONFIG->getWordCountForEmoji() . ' words first! (currently ' . $container->get(PlayerHandler::class)->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
+        [ensure_predicate(emoji_awarded(...), fn(PlayerHandler $player, Message $ctx) => 'You have to find ' . CONFIG->getWordCountForEmoji() . ' words first! (currently ' . $player->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
         'emoji'
     ),
     ['description' => 'change your personal emoji']
 );
 
-function emoji(Message $ctx, $args): void
+function emoji(PlayerHandler $player, Message $ctx, $args): void
 {
     $emoji_str = $args[0];
-    global $container;
-    $container->get(PlayerHandler::class)->setEmoji($ctx->author->id, $emoji_str);
+    $player->setEmoji($ctx->author->id, $emoji_str);
     await($ctx->channel->sendMessage("Changed emoji to $emoji_str."));
 }
 
@@ -556,18 +553,16 @@ $bot->registerCommand(
 
 function hint_command(string $from_language)
 {
-    return function (Message $ctx) use ($from_language): void {
+    return function (FactoryInterface $factory, PlayerHandler $player, DatabaseHandler $db, Message $ctx) use ($from_language): void {
         $unfound_hint_list = array_values(array_filter(GAME_STATUS->available_hints[$from_language], fn($hint) => !GAME_STATUS->found_words->contains($hint)));
         if (count($unfound_hint_list) === 0) {
             await($ctx->channel->sendMessage('No hints left.'));
             return;
         }
         $chosen_hint = $unfound_hint_list[array_rand($unfound_hint_list)];
-        global $container;
-        $formatted_hint_content = italic(get_translation($chosen_hint, $container->make(DictionaryType::class, ['src_lang' => GAME_STATUS->current_lang, 'target_lang' => $from_language]), $container->get(DatabaseHandler::class)));
+        $formatted_hint_content = italic(get_translation($chosen_hint, $factory->make(DictionaryType::class, ['src_lang' => GAME_STATUS->current_lang, 'target_lang' => $from_language]), $db));
         await($ctx->channel->sendMessage("hint: $formatted_hint_content"));
-        global $container;
-        $container->get(PlayerHandler::class)->playerUsedHint($ctx, $chosen_hint);
+        $player->playerUsedHint($ctx, $chosen_hint);
     };
 }
 
@@ -664,10 +659,9 @@ $bot->registerCommand(
     ['description' => 'reveal letters of a previously requested hint']
 );
 
-function reveal(Message $ctx): void
+function reveal(PlayerHandler $player, Message $ctx): void
 {
-    global $container;
-    $player_hints = $container->get(PlayerHandler::class)->getPlayerField($ctx->author->id, 'used_hints');
+    $player_hints = $player->getPlayerField($ctx->author->id, 'used_hints');
     $left_hints = array_diff($player_hints, GAME_STATUS->found_words->toArray());
     if (count($left_hints) === 0) {
         await($ctx->channel->sendMessage('You have no unsolved hints left.'));
