@@ -5,6 +5,7 @@ use function Bojler\{
     progress_bar
 };
 use Bojler\{
+    ConfigHandler,
     GameStatus
 };
 
@@ -64,7 +65,7 @@ describe('progress_bar', function () {
 
         foreach (array_map(null, $emoji_scales, $last_symbols) as [$current_scale, $current_symbol]) {
             /** @disregard type hint on mocked object */
-            $result = progress_bar($mocked_status, $current_scale);
+            $result = progress_bar(ConfigHandler::getInstance(), $mocked_status, $current_scale);
             expect($result)->toBe(str_repeat($current_symbol, $expected_emoji_count));
         }
     });
@@ -78,7 +79,7 @@ describe('progress_bar', function () {
 
         foreach (array_map(null, $emoji_scales, $first_symbols) as [$current_scale, $current_symbol]) {
             /** @disregard type hint on mocked object */
-            $result = progress_bar($mocked_status, $current_scale);
+            $result = progress_bar(ConfigHandler::getInstance(), $mocked_status, $current_scale);
             expect($result)->toBe(str_repeat($current_symbol, $expected_emoji_count));
         }
     });
@@ -94,7 +95,7 @@ describe('progress_bar', function () {
 
         foreach ($emoji_scales as $current_index => $current_scale) {
             /** @disregard type hint on mocked object */
-            $result = progress_bar($mocked_status, $current_scale);
+            $result = progress_bar(ConfigHandler::getInstance(), $mocked_status, $current_scale);
             $expected = str_repeat($last_symbols[$current_index], $expected_full_emoji_count)
                 . $expected_intermediate_emojis[$current_index]
                 . str_repeat($first_symbols[$current_index], $expected_empty_emoji_count);
@@ -112,7 +113,7 @@ describe('progress_bar', function () {
 
         foreach ($emoji_scales as $current_index => $current_scale) {
             /** @disregard type hint on mocked object */
-            $result = progress_bar($mocked_status, $current_scale);
+            $result = progress_bar(ConfigHandler::getInstance(), $mocked_status, $current_scale);
             $expected = str_repeat($last_symbols[$current_index], $expected_full_emoji_count)
                 . $expected_intermediate_emojis[$current_index];
             expect($result)->toBe($expected);

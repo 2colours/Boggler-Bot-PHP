@@ -2,16 +2,17 @@
 
 namespace Bojler;
 
+use Psr\Container\ContainerInterface;
 use SQLite3;
 
 class DatabaseHandler
 {
     private static $instance;
 
-    public static function getInstance(): self
+    public static function getInstance(ContainerInterface $container): self
     {
         if (is_null(self::$instance)) {
-            self::$instance = new self();
+            self::$instance = new self($container->get(ConfigHandler::class));
         }
 
         return self::$instance;
@@ -21,7 +22,7 @@ class DatabaseHandler
     private const DB_PATH = 'param/dictionary.db';
 
     public readonly SQLite3 $db;
-    public readonly mixed $dictionaries;
+    public readonly mixed $dictionaries; # TODO look into typing
 
     private function tableSetup()
     {
@@ -90,13 +91,13 @@ class DatabaseHandler
         return array_column($db_results, 0);
     }
 
-    private function __construct()
+    private function __construct(ConfigHandler $config)
     {
         $this->db = new SQLite3(self::DB_PATH);
-        $this->dictionaries = ConfigHandler::getInstance()->getDictionaries(); # https://github.com/2colours/Boggler-Bot-PHP/issues/26
+        $this->dictionaries = $config->getDictionaries();
         $this->tableSetup();
         foreach ($this->dictionaries as $dictstring => $dictcode) {
-            $dtype = DictionaryType::fromDictstring($dictstring);
+            $dtype = DictionaryType::fromDictstring($config, $dictstring);
             if (!$this->importSucceeded($dtype)) {
                 $this->importData('dictionary', "param/dict_import{$dictcode}.txt");
             }

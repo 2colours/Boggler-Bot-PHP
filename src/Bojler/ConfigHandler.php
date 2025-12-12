@@ -18,7 +18,7 @@ class ConfigHandler
     }
 
 
-    private readonly mixed $config;
+    private readonly array $config;
 
     private function __construct()
     {
@@ -50,14 +50,14 @@ class ConfigHandler
         return $this->config['display']['small'];
     }
 
-    public function getDisplayNormalFileName()
+    public function getDisplayNormalFilePath(string $prefix)
     {
-        return $this->getDisplayNormalRecord()['image_filename'];
+        return $prefix . $this->getDisplayNormalRecord()['image_filename'];
     }
 
-    public function getDisplaySmallFileName()
+    public function getDisplaySmallFilePath(string $prefix)
     {
-        return $this->getDisplaySmallRecord()['image_filename'];
+        return $prefix . $this->getDisplaySmallRecord()['image_filename'];
     }
 
     public function getSavesFileName()

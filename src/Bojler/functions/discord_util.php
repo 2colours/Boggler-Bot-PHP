@@ -128,10 +128,10 @@ function game_highscore(GameStatus $status, PlayerHandler $player_handler)
 # worth) for that emoji
 # - we display the corresponding stage in the scale for that one intermediate emoji
 # - we display the remaining emojis (if there are any) as "empty" (first stage on the scale)
-function progress_bar(GameStatus $game_status, ?string $emoji_scale_str = null): string
+function progress_bar(ConfigHandler $config, GameStatus $game_status, ?string $emoji_scale_str = null): string
 {
     $unit_value = 10;
-    $emoji_scale_str ??= current_emoji_version()[1];
+    $emoji_scale_str ??= current_emoji_version($config, $game_status)[1];
     $emoji_scale = grapheme_str_split($emoji_scale_str);
     if (count($emoji_scale) < 2) {
         echo 'Error in config. Not enough symbols for progress bar.';
@@ -155,6 +155,24 @@ function progress_bar(GameStatus $game_status, ?string $emoji_scale_str = null):
     $progress_bar .= $emoji_scale[floor($progress_in_current_step * (count($emoji_scale) - 1))];
     $progress_bar .= str_repeat($emoji_scale[0], $empty_emoji_number);
     return $progress_bar;
+}
+
+# emojis are retrieved in a deterministic way: (current date, sorted letters, emoji list) determine the value
+# special dates have a unique emoji list to be used
+# in general, the letters are hashed modulo the length of the emoji list, to obtain the index in the emoji list
+function current_emoji_version(ConfigHandler $config, GameStatus $game): array
+{
+    $progress_bar_version = $config->getProgressBarVersion();
+    $letter_list = $game->letters->list;
+    $game->collator()->sort($letter_list);
+    $hash = md5(implode(' ', $letter_list));
+    $date = date('md');
+    if (array_key_exists($date, $progress_bar_version)) {
+        $current_list = $progress_bar_version[$date];
+    } else {
+        $current_list = $progress_bar_version['default'];
+    }
+    return $current_list[gmp_intval(gmp_mod(gmp_init($hash, 16), count($current_list)))];
 }
 
 function acknowledgement_reaction(string $word): string

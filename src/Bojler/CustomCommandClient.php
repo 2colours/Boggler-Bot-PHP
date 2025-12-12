@@ -5,9 +5,11 @@ namespace Bojler;
 use Collator;
 use Discord\CommandClient\Command;
 use Discord\DiscordCommandClient;
+use Discord\Parts\Channel\Message;
 use Discord\Parts\Embed\Embed;
 use React\Promise\PromiseInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Invoker\InvokerInterface;
 
 use function React\Async\async;
 
@@ -15,11 +17,14 @@ use function React\Async\async;
 final class CustomCommandClient extends DiscordCommandClient
 {
     private Collator $collator;
+    private readonly InvokerInterface $invoker;
 
     public const MAX_EMBEDS = 25;
 
-    public function __construct(array $options = [])
+    public function __construct(InvokerInterface $invoker, array $options = [])
     {
+        $this->invoker = $invoker;
+
         $own_options = $this->resolveCustomOptions($options['customOptions']);
         unset($options['customOptions']);
 
@@ -41,7 +46,7 @@ final class CustomCommandClient extends DiscordCommandClient
 
     public function registerCommand(string $command, $callable, array $options = []): Command
     {
-        return parent::registerCommand($command, async($callable), $options);
+        return parent::registerCommand($command, async(fn(Message $message, array $args) => $this->invoker->call($callable, ['ctx' => $message, 'args' => $args])), $options);
     }
 
     private function resolveCustomOptions(array $custom_options): array
@@ -132,12 +137,12 @@ final class CustomCommandClient extends DiscordCommandClient
         }
     }
 
-    private function defaultHelp($message, $args)
+    private function defaultHelp($ctx, $args)
     {
         $prefix = str_replace((string) $this->user, "@{$this->username}", $this->commandClientOptions['prefix']);
 
         if (count($args) > 0) {
-            $this->defaultHelpWithArgs($message, $prefix, $args);
+            $this->defaultHelpWithArgs($ctx, $prefix, $args);
             return;
         }
 
@@ -162,7 +167,7 @@ final class CustomCommandClient extends DiscordCommandClient
         }
         $embed->setDescription(grapheme_substr("{$this->commandClientOptions['description']}$commandsDescription", 0, 2048));
 
-        $message->channel->sendEmbed($embed);
+        $ctx->channel->sendEmbed($embed);
     }
 
     private function defaultHelpWithArgs($message, $prefix, $args)
