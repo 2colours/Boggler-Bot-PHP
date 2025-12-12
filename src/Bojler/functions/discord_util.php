@@ -131,7 +131,7 @@ function game_highscore(GameStatus $status, PlayerHandler $player_handler)
 function progress_bar(GameStatus $game_status, ?string $emoji_scale_str = null): string
 {
     $unit_value = 10;
-    $emoji_scale_str ??= current_emoji_version()[1];
+    $emoji_scale_str ??= current_emoji_version($game_status)[1];
     $emoji_scale = grapheme_str_split($emoji_scale_str);
     if (count($emoji_scale) < 2) {
         echo 'Error in config. Not enough symbols for progress bar.';

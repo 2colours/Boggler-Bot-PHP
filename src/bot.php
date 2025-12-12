@@ -91,10 +91,12 @@ function instructions(string $lang)
 
 function translator_command(?string $src_lang = null, ?string $target_lang = null)
 {
-    return function (DatabaseHandler $db, Message $ctx, $args) use ($src_lang, $target_lang): void {
-        $word = $args[0];
-        $ctor_args = array_map(fn($first_choice, $default) => $first_choice ?? $default, [$src_lang, $target_lang], DEFAULT_TRANSLATION);
-        $translation = get_translation($word, new DictionaryType(...$ctor_args), $db);
+    $src_lang ??= DEFAULT_TRANSLATION[0];
+    $target_lang ??= DEFAULT_TRANSLATION[1];
+    $ctor_args = compact('src_lang', 'target_lang');
+    return function (FactoryInterface $factory, DatabaseHandler $db, Message $ctx, $args) use ($ctor_args): void {
+        $word = $args[0];        
+        $translation = get_translation($word, $factory->make(DictionaryType::class, [...$ctor_args]), $db);
         if (isset($translation)) {
             await($ctx->channel->sendMessage("$word: ||$translation||"));
         } else {
@@ -357,7 +359,7 @@ function status(GameStatus $game, Message $ctx): void
 $bot->registerCommand(
     'unfound',
     decorate_handler(
-        [ensure_predicate($game->enoughWordsFound(...), fn() => 'You have to find ' . $game->end_amount . ' words first.'), needs_counting(...)],
+        [ensure_predicate(fn(GameStatus $game) => $game->enoughWordsFound(), fn(GameStatus $game) => 'You have to find ' . $game->end_amount . ' words first.'), needs_counting(...)],
         unfound(...)
     ),
     ['description' => 'send unfound Scrabble solutions']
