@@ -157,6 +157,23 @@ function progress_bar(GameStatus $game_status, ?string $emoji_scale_str = null):
     return $progress_bar;
 }
 
+# emojis are retrieved in a deterministic way: (current date, sorted letters, emoji list) determine the value
+# special dates have a unique emoji list to be used
+# in general, the letters are hashed modulo the length of the emoji list, to obtain the index in the emoji list
+function current_emoji_version(GameStatus $game): array
+{
+    $letter_list = $game->letters->list;
+    $game->collator()->sort($letter_list);
+    $hash = md5(implode(' ', $letter_list));
+    $date = date('md');
+    if (array_key_exists($date, PROGRESS_BAR_VERSION)) {
+        $current_list = PROGRESS_BAR_VERSION[$date];
+    } else {
+        $current_list = PROGRESS_BAR_VERSION['default'];
+    }
+    return $current_list[gmp_intval(gmp_mod(gmp_init($hash, 16), count($current_list)))];
+}
+
 function acknowledgement_reaction(string $word): string
 {
     $word_length = textual_length($word);
