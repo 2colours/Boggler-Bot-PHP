@@ -165,9 +165,9 @@ function simple_board(InvokerInterface $invoker, ConfigHandler $config, Message 
 # "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
 function needs_counting(callable $handler)
 {
-    return function (InvokerInterface $invoker, $ctx, $args) use ($handler) {
+    return function (Counter $counter, InvokerInterface $invoker, $ctx, $args) use ($handler) {
         $invoker->call($handler, ['ctx' => $ctx, 'args' => $args]);
-        if (COUNTER->trigger()) {
+        if ($counter->trigger()) {
             $invoker->call(simple_board(...), ['ctx' => $ctx]);
         }
     };
@@ -189,12 +189,12 @@ $container = new Container([
     ConfigHandler::class => factory(ConfigHandler::getInstance(...)),
     DatabaseHandler::class => factory(DatabaseHandler::getInstance(...)),
     PlayerHandler::class => factory(PlayerHandler::getInstance(...)),
-    GameStatus::class => DI\autowire()->constructor(LIVE_DATA_PREFIX)
+    GameStatus::class => DI\autowire()->constructor(LIVE_DATA_PREFIX),
+    Counter::class => new Counter(10),
+    Randomizer::class => new Randomizer()
 ]);
 # TODO it's dubious whether these are actually constants; gotta think about it
 # define('easter_egg_handler', new EasterEggHandler($game->found_words_set));
-const COUNTER = new Counter(10);
-const RNG = new Randomizer();
 const BOT_LOGGER = new Logger('bojlerLogger');
 BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Debug));
 
@@ -214,11 +214,11 @@ $bot = new CustomCommandClient($container, [
 ]); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
 
 $bot->registerCommand('info', send_instructions(...), ['description' => 'show instructions']);
-$bot->registerCommand('teh', translator_command(CONFIG, 'English', 'Hungarian'), ['description' => 'translate given word Eng-Hun']);
-$bot->registerCommand('the', translator_command(CONFIG, 'Hungarian', 'English'), ['description' => 'translate given word Hun-Eng']);
-$bot->registerCommand('thg', translator_command(CONFIG, 'Hungarian', 'German'), ['description' => 'translate given word Hun-Ger']);
-$bot->registerCommand('tgh', translator_command(CONFIG, 'German', 'Hungarian'), ['description' => 'translate given word Ger-Hun']);
-$bot->registerCommand('thh', translator_command(CONFIG, 'Hungarian', 'Hungarian'), ['description' => 'translate given word Hun-Hun']);
+$bot->registerCommand('teh', translator_command($container->get(ConfigHandler::class), 'English', 'Hungarian'), ['description' => 'translate given word Eng-Hun']);
+$bot->registerCommand('the', translator_command($container->get(ConfigHandler::class), 'Hungarian', 'English'), ['description' => 'translate given word Hun-Eng']);
+$bot->registerCommand('thg', translator_command($container->get(ConfigHandler::class), 'Hungarian', 'German'), ['description' => 'translate given word Hun-Ger']);
+$bot->registerCommand('tgh', translator_command($container->get(ConfigHandler::class), 'German', 'Hungarian'), ['description' => 'translate given word Ger-Hun']);
+$bot->registerCommand('thh', translator_command($container->get(ConfigHandler::class), 'Hungarian', 'Hungarian'), ['description' => 'translate given word Hun-Hun']);
 $bot->registerCommand('t', function (GameStatus $game, Message $ctx, $args): void {
     $translator_args = channel_valid($ctx) ? [$game->current_lang, $game->base_lang] : [];
     translator_command(...$translator_args)($ctx, $args);
@@ -275,7 +275,7 @@ $bot->registerCommand(
     decorate_handler([ensure_predicate(channel_valid(...))], new_game(...)),
     ['description' => 'start new game']
 );
-function new_game(ConfigHandler $config, GameStatus $game, PlayerHandler $player, Message $ctx): void
+function new_game(Counter $counter, ConfigHandler $config, GameStatus $game, PlayerHandler $player, Message $ctx): void
 {
     # this isn't perfect, but at least it won't display this "found words" always when just having looked at an old game for a second. That would be annoying.
     if ($game->changes_to_save) {
@@ -290,7 +290,7 @@ function new_game(ConfigHandler $config, GameStatus $game, PlayerHandler $player
 
     $ctx->channel->broadcastTyping(); # TODO better synchronization maybe?
     $game->newGame();
-    COUNTER->reset();
+    $counter->reset();
 
     $game_number = $game->game_number;
     $solutions_count = $game->solutions->count();
@@ -308,14 +308,14 @@ $bot->registerCommand(
     ['description' => 'show current game']
 );
 
-function see(InvokerInterface $invoker, ConfigHandler $config, GameStatus $game, Message $ctx): void
+function see(Counter $counter, InvokerInterface $invoker, ConfigHandler $config, GameStatus $game, Message $ctx): void
 {
     $message = '**Game #' . $game->game_number . ': Already found words:** ' . $invoker->call(found_words_output(...));
     foreach (output_split_cursive($message) as $part) {
         await($ctx->channel->sendMessage($part));
     }
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplaySmallFilePath(LIVE_DATA_PREFIX))));
-    COUNTER->reset();
+    $counter->reset();
 }
 
 define('ENSURE_THROWN_DICE', ensure_predicate(needs_thrown_dice(...), fn() => '_Please load game using_ **b!loadgame** _or start a new game using_ **b!new**'));
@@ -326,7 +326,7 @@ $bot->registerCommand(
     ['description' => 'show current status of the game']
 );
 
-function status(InvokerInterface $invoker, ConfigHandler $config, GameStatus $game, Message $ctx): void
+function status(Counter $counter, InvokerInterface $invoker, ConfigHandler $config, GameStatus $game, Message $ctx): void
 {
     $space_separated_letters = implode(' ', $game->letters->list);
     $found_words_output = $invoker->call(found_words_output(...));
@@ -345,7 +345,7 @@ function status(InvokerInterface $invoker, ConfigHandler $config, GameStatus $ga
         await($ctx->channel->sendMessage($part));
     }
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplaySmallFilePath(LIVE_DATA_PREFIX))));
-    COUNTER->reset();
+    $counter->reset();
 }
 
 $bot->registerCommand(
@@ -578,7 +578,7 @@ $bot->registerCommand(
     ['description' => 'load older games (see: oldgames), example: b!loadgame 5']
 );
 
-function load_game(InvokerInterface $invoker, ConfigHandler $config, GameStatus $game, Message $ctx, $args): void
+function load_game(Counter $counter, InvokerInterface $invoker, ConfigHandler $config, GameStatus $game, Message $ctx, $args): void
 {
     $game_number = (int) $args[0];
     # Checks for changes before showing "found words" every time when just skipping through old games. That would be annoying.
@@ -608,7 +608,7 @@ function load_game(InvokerInterface $invoker, ConfigHandler $config, GameStatus 
         await($ctx->channel->sendMessage($part));
     }
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplayNormalFilePath(LIVE_DATA_PREFIX))));
-    COUNTER->reset();
+    $counter->reset();
 }
 
 $bot->registerCommand(
@@ -620,7 +620,7 @@ $bot->registerCommand(
     ['description' => 'load random old game']
 );
 
-function random(ConfigHandler $config, GameStatus $game, Message $ctx): void
+function random(Counter $counter, ConfigHandler $config, GameStatus $game, Message $ctx): void
 {
     # random game between 1 and max_saved_game - after one calling, newest game is saved, too. Newest game can appear as second random call
     $number = random_int(1, $game->max_saved_game + 1);
@@ -639,7 +639,7 @@ function random(ConfigHandler $config, GameStatus $game, Message $ctx): void
     **Already found words:** $found_words_output
     END;
     await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplayNormalFilePath(LIVE_DATA_PREFIX))));
-    COUNTER->reset();
+    $counter->reset();
 }
 
 $bot->registerCommand(
@@ -651,7 +651,7 @@ $bot->registerCommand(
     ['description' => 'reveal letters of a previously requested hint']
 );
 
-function reveal(GameStatus $game, PlayerHandler $player, Message $ctx): void
+function reveal(Randomizer $randomizer, GameStatus $game, PlayerHandler $player, Message $ctx): void
 {
     $player_hints = $player->getPlayerField($ctx->author->id, 'used_hints');
     $left_hints = array_diff($player_hints, $game->found_words->toArray());
@@ -661,7 +661,7 @@ function reveal(GameStatus $game, PlayerHandler $player, Message $ctx): void
     }
     $chosen_word = $left_hints[array_rand($left_hints)];
     $word_length = grapheme_strlen($chosen_word);
-    $revealed_indices = RNG->pickArrayKeys(range(0, $word_length - 1), intdiv($word_length, 3));
+    $revealed_indices = $randomizer->pickArrayKeys(range(0, $word_length - 1), intdiv($word_length, 3));
     $formatted_masked_word = italic(masked_word($chosen_word, $revealed_indices));
     await($ctx->channel->sendMessage("Hint: $formatted_masked_word"));
 }
