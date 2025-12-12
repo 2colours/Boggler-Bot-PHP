@@ -51,9 +51,9 @@ $dotenv = new Dotenv();
 $dotenv->load('./.env');
 
 const CREATORS = ['297037173541175296', '217319536485990400'];
-# TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
 define('CONFIG', ConfigHandler::getInstance());
 define('LIVE_DATA_PREFIX', 'live_data' . DIRECTORY_SEPARATOR);
+# TODO https://github.com/2colours/Boggler-Bot-PHP/issues/48
 define('HOME_SERVER', $_ENV['HOME_SERVER']);
 define('HOME_CHANNEL', $_ENV['HOME_CHANNEL']);
 
@@ -211,7 +211,7 @@ $bot = new CustomCommandClient($container, [
         'locale' => CONFIG->getLocale(CONFIG->getDefaultTranslation()[0]), # TODO allow configuration of locale during the usage of the bot
         'caseInsensitivePrefix' => true
     ]
-]); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/26
+]); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/49
 
 $bot->registerCommand('info', send_instructions(...), ['description' => 'show instructions']);
 $bot->registerCommand('teh', translator_command($container->get(ConfigHandler::class), 'English', 'Hungarian'), ['description' => 'translate given word Eng-Hun']);
