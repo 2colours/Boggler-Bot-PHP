@@ -27,6 +27,8 @@
         }
     },
     "scripts": {
+	"format-check": "vendor/bin/phpcs --standard=psr12 src -n",
+	"format-autofix": "vendor/bin/phpcbf --standard=psr12 src -n",
         "start": [
             "Composer\\Config::disableProcessTimeout",
             "php -c . src/bot.php"
