@@ -37,12 +37,8 @@ class GameStatus #not final because of mocking
     private readonly FactoryInterface $factory;
     private readonly DatabaseHandler $db;
     # injection-dependent
-    private readonly array $default_translation;
     private readonly int $default_end_amount;
-    private readonly array $dice_dict;
     private readonly array $available_languages;
-    private readonly array $wordlist_paths;
-    private readonly array $dictionaries;
     private readonly array $community_wordlist_paths;
     private readonly array $custom_emojis;
 
@@ -54,12 +50,8 @@ class GameStatus #not final because of mocking
         $this->config = $config;
         $this->factory = $factory;
         # injection-dependent
-        $this->default_translation = $this->config->getDefaultTranslation();
         $this->default_end_amount = $this->config->getDefaultEndAmount();
-        $this->dice_dict = $this->config->getDice();
         $this->available_languages = $this->config->getAvailableLanguages();
-        $this->wordlist_paths = array_map(fn($value) => "param/$value", $this->config->getWordlists());
-        $this->dictionaries = $this->config->getDictionaries();
         $this->community_wordlist_paths = array_map(fn($value) => $live_data_prefix . $value, $this->config->getCommunityWordlists());
         $this->custom_emojis = $this->config->getCustomEmojis();
 
@@ -83,9 +75,10 @@ class GameStatus #not final because of mocking
         # changes_to_save determines if we have to save sth in saves.txt. Always true for a loaded current_game or new games (might not be saved yet). False when loading old games. Becomes true with every adding or removing word.
         $this->changes_to_save = false;
         $this->thrown_the_dice = false;
-        $this->planned_lang = $this->default_translation[0];
-        $this->current_lang = $this->default_translation[0];
-        $this->base_lang = $this->default_translation[1];
+        $default_translation = $this->config->getDefaultTranslation();
+        $this->planned_lang = $default_translation[0];
+        $this->current_lang = $default_translation[0];
+        $this->base_lang = $default_translation[1];
         $this->game_number = 0;
         #dependent data
         $this->max_saved_game = 0;
@@ -156,7 +149,7 @@ class GameStatus #not final because of mocking
     public function availableDictionariesFrom(?string $origin = null)
     {
         $origin ??= $this->current_lang;
-        return array_filter($this->available_languages, fn($item) => array_key_exists($this->factory->make(DictionaryType::class, ['src_lang' => $origin, 'target_lang' => $item])->asDictstring(), $this->dictionaries));
+        return array_filter($this->available_languages, fn($item) => array_key_exists($this->factory->make(DictionaryType::class, ['src_lang' => $origin, 'target_lang' => $item])->asDictstring(), $this->config->getDictionaries()));
     }
 
     # gets the refdict instead of creating it every time
@@ -234,7 +227,8 @@ class GameStatus #not final because of mocking
 
     private function findWordlistSolutions(array $refdict)
     {
-        $content = file($this->wordlist_paths[$this->current_lang], FILE_IGNORE_NEW_LINES);
+        $wordlist_paths = array_map(fn($value) => "param/$value", $this->config->getWordlists());
+        $content = file($wordlist_paths[$this->current_lang], FILE_IGNORE_NEW_LINES);
         $this->wordlist_solutions = new Set(array_filter($content, fn($line) => $this->wordValidFast($line, $refdict)));
     }
 
@@ -494,7 +488,7 @@ class GameStatus #not final because of mocking
     {
         $used_permutation = range(0, 15);
         shuffle($used_permutation);
-        $current_dice = $this->dice_dict[$this->current_lang];
+        $current_dice = $this->config->getDice()[$this->current_lang];
         $dice_permutated = array_map(fn($dice_index) => $current_dice[$dice_index], $used_permutation);
         $this->letters = $this->factory->make(LetterList::class, ['data' => array_map(fn($current_die) => $current_die[array_rand($current_die)], $dice_permutated), 'just_regenerate' => true]);
         $this->saveGame();
