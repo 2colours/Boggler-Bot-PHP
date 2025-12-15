@@ -13,10 +13,11 @@ use Bojler\{
     CustomCommandClient,
     DatabaseHandler,
     DictionaryType,
+    EnvironmentHandler,
     GameStatus,
     PlayerHandler,
 };
-use DI\Container;
+use DI\ContainerBuilder;
 use DI\FactoryInterface;
 use Discord\Builders\MessageBuilder;
 use Symfony\Component\Dotenv\Dotenv;
@@ -53,9 +54,6 @@ $dotenv->load('./.env');
 const CREATORS = ['297037173541175296', '217319536485990400'];
 define('CONFIG', ConfigHandler::getInstance());
 define('LIVE_DATA_PREFIX', 'live_data' . DIRECTORY_SEPARATOR);
-# TODO https://github.com/2colours/Boggler-Bot-PHP/issues/48
-define('HOME_SERVER', $_ENV['HOME_SERVER']);
-define('HOME_CHANNEL', $_ENV['HOME_CHANNEL']);
 
 const INSTRUCTION_TEMPLATE = <<<END
     __***Szórakodtató bot***__
@@ -128,9 +126,9 @@ function from_creator(Message $ctx)
 }
 
 #Checks if the current message is in the tracked channel
-function channel_valid(Message $ctx)
+function channel_valid(EnvironmentHandler $env, Message $ctx)
 {
-    return $ctx->guild?->id === HOME_SERVER && $ctx->channel?->id === HOME_CHANNEL;
+    return $ctx->guild?->id === $env->getHomeServerId() && $ctx->channel?->id === $env->getHomeChannelId();
 }
 
 #Checks if dice are thrown, thrown_the_dice exists just for this
@@ -185,14 +183,21 @@ function ensure_predicate(callable $predicate, ?callable $refusalMessageProducer
     };
 }
 
-$container = new Container([
+$builder = new ContainerBuilder();
+if ((new EnvironmentHandler())->isRunningInProduction())
+{
+    $builder->enableCompilation('php_cache');
+}
+$builder->addDefinitions([
     ConfigHandler::class => factory(ConfigHandler::getInstance(...)),
     DatabaseHandler::class => factory(DatabaseHandler::getInstance(...)),
     PlayerHandler::class => factory(PlayerHandler::getInstance(...)),
     GameStatus::class => DI\autowire()->constructor(LIVE_DATA_PREFIX),
     Counter::class => new Counter(10),
-    Randomizer::class => new Randomizer()
+    Randomizer::class => new Randomizer(),
+    EnvironmentHandler::class => new EnvironmentHandler()
 ]);
+$container = $builder->build();
 # TODO it's dubious whether these are actually constants; gotta think about it
 # define('easter_egg_handler', new EasterEggHandler($game->found_words_set));
 const BOT_LOGGER = new Logger('bojlerLogger');
@@ -200,7 +205,7 @@ BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Debug));
 
 $bot = new CustomCommandClient($container, [
     'prefix' => 'b!',
-    'token' => $_ENV['DC_TOKEN'],
+    'token' => $container->get(EnvironmentHandler::class)->getDiscordToken(),
     'description' => 'Szórakodtató bot',
     'discordOptions' => [
         'logger' => BOT_LOGGER,
@@ -219,9 +224,13 @@ $bot->registerCommand('the', translator_command($container->get(ConfigHandler::c
 $bot->registerCommand('thg', translator_command($container->get(ConfigHandler::class), 'Hungarian', 'German'), ['description' => 'translate given word Hun-Ger']);
 $bot->registerCommand('tgh', translator_command($container->get(ConfigHandler::class), 'German', 'Hungarian'), ['description' => 'translate given word Ger-Hun']);
 $bot->registerCommand('thh', translator_command($container->get(ConfigHandler::class), 'Hungarian', 'Hungarian'), ['description' => 'translate given word Hun-Hun']);
-$bot->registerCommand('t', function (GameStatus $game, Message $ctx, $args): void {
-    $translator_args = channel_valid($ctx) ? [$game->current_lang, $game->base_lang] : [];
-    translator_command(...$translator_args)($ctx, $args);
+$bot->registerCommand('t', function (InvokerInterface $invoker, GameStatus $game, Message $ctx, $args): void {
+    $translator_args = $invoker->call(channel_valid(...), compact('ctx'))
+        ? ['src_lang' => $game->current_lang, 'target_lang' => $game->base_lang]
+        : [];
+    translator_command(...)
+        |> (fn($tbuilder) => $invoker->call($tbuilder, $translator_args))
+        |> (fn($handler) => $invoker->call($handler, compact('ctx', 'args')));
 }, ['description' => 'translate given word']);
 $bot->registerCommand('stats', function (PlayerHandler $player, Message $ctx) {
     $infos = $player->player_dict[$ctx->author->id];
