@@ -1,0 +1,37 @@
+---
+- name: Deploy Boggler bot
+  hosts: bot_host
+  vars:
+    current_databank: '/home/{{ ansible_user }}/private_databank/boggler'
+    current_instance: '/home/{{ ansible_user }}/boggler-bot'
+
+  tasks:
+
+  - name: Clone repo
+    ansible.builtin.git:
+      repo: https://github.com/2colours/Boggler-Bot-PHP.git
+      dest: '{{ current_instance }}'
+      single_branch: yes
+      version: main
+  
+  - name: Create link for .env file
+    ansible.builtin.file:
+      src: '{{ current_databank }}/.env'
+      dest: '{{ current_instance }}/.env'
+      state: link
+
+  - name: Create link for data folder
+    ansible.builtin.file:
+      src: '{{ current_databank }}/live_data'
+      dest: '{{ current_instance }}/live_data'
+      state: link
+
+  - name: Install packages using Composer
+    ansible.builtin.shell: composer install
+    args:
+      chdir: '{{ current_instance }}'
+
+  - name: Touch lock file to enforce restart
+    ansible.builtin.file:
+      path: '{{ current_instance }}/composer.lock'
+      state: touch

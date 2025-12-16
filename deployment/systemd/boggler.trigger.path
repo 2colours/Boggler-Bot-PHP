@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch for Boggler instance
+
+[Path]
+PathChanged=<project repo path>/src/
+PathChanged=<project repo path>/composer.lock
+
+[Install]
+WantedBy=multi-user.target
