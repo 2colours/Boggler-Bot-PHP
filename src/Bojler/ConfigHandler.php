@@ -4,23 +4,11 @@ namespace Bojler;
 
 class ConfigHandler
 {
-    private static $instance;
-
     private const CONFIG_PATH = 'param/config.json';
-
-    public static function getInstance(): self
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
-    }
-
 
     private readonly array $config;
 
-    private function __construct()
+    public function __construct()
     {
         $this->config = json_decode(file_get_contents(self::CONFIG_PATH), true);
     }

@@ -10,22 +10,11 @@ use Psr\Container\ContainerInterface;
 
 class PlayerHandler
 {
-    private static $instance;
-
-    public static function getInstance(ContainerInterface $container): self
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new self($container->get(ConfigHandler::class));
-        }
-
-        return self::$instance;
-    }
-
     public const PLAYER_SAVES_PATH = 'live_data/player_saves.json';
     private readonly array $default_player; # injection-dependent
     public $player_dict;
 
-    private function __construct(ConfigHandler $config)
+    public function __construct(ConfigHandler $config)
     {
         $this->default_player = $config->getPlayerDefaults();
         $read_content = file_get_contents(self::PLAYER_SAVES_PATH);

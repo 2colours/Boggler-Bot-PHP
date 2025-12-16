@@ -52,7 +52,6 @@ $dotenv = new Dotenv();
 $dotenv->load('./.env');
 
 const CREATORS = ['297037173541175296', '217319536485990400'];
-define('CONFIG', ConfigHandler::getInstance());
 define('LIVE_DATA_PREFIX', 'live_data' . DIRECTORY_SEPARATOR);
 
 const INSTRUCTION_TEMPLATE = <<<END
@@ -184,14 +183,13 @@ function ensure_predicate(callable $predicate, ?callable $refusalMessageProducer
 }
 
 $builder = new ContainerBuilder();
-if ((new EnvironmentHandler())->isRunningInProduction())
-{
+if ((new EnvironmentHandler())->isRunningInProduction()) {
     $builder->enableCompilation('php_cache');
 }
 $builder->addDefinitions([
-    ConfigHandler::class => factory(ConfigHandler::getInstance(...)),
-    DatabaseHandler::class => factory(DatabaseHandler::getInstance(...)),
-    PlayerHandler::class => factory(PlayerHandler::getInstance(...)),
+    ConfigHandler::class => new ConfigHandler(),
+    DatabaseHandler::class => DI\autowire(),
+    PlayerHandler::class => DI\autowire(),
     GameStatus::class => DI\autowire()->constructor(LIVE_DATA_PREFIX),
     Counter::class => new Counter(10),
     Randomizer::class => new Randomizer(),
@@ -213,7 +211,7 @@ $bot = new CustomCommandClient($container, [
     ],
     'caseInsensitiveCommands' => true,
     'customOptions' => [
-        'locale' => CONFIG->getLocale(CONFIG->getDefaultTranslation()[0]), # TODO allow configuration of locale during the usage of the bot
+        'locale' => $container->get(ConfigHandler::class)->getLocale($container->get(ConfigHandler::class)->getDefaultTranslation()[0]), # TODO allow configuration of locale during the usage of the bot
         'caseInsensitivePrefix' => true
     ]
 ]); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/49
@@ -228,9 +226,8 @@ $bot->registerCommand('t', function (InvokerInterface $invoker, GameStatus $game
     $translator_args = $invoker->call(channel_valid(...), compact('ctx'))
         ? ['src_lang' => $game->current_lang, 'target_lang' => $game->base_lang]
         : [];
-    translator_command(...)
-        |> (fn($tbuilder) => $invoker->call($tbuilder, $translator_args))
-        |> (fn($handler) => $invoker->call($handler, compact('ctx', 'args')));
+    $handler = $invoker->call(translator_command(...), $translator_args);
+    $invoker->call($handler, compact('ctx', 'args'));
 }, ['description' => 'translate given word']);
 $bot->registerCommand('stats', function (PlayerHandler $player, Message $ctx) {
     $infos = $player->player_dict[$ctx->author->id];

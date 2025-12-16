@@ -7,17 +7,6 @@ use SQLite3;
 
 class DatabaseHandler
 {
-    private static $instance;
-
-    public static function getInstance(ContainerInterface $container): self
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new self($container->get(ConfigHandler::class));
-        }
-
-        return self::$instance;
-    }
-
     public const TABLES = ['dictionary' => DictionaryEntry::class];
     private const DB_PATH = 'param/dictionary.db';
 
@@ -91,7 +80,7 @@ class DatabaseHandler
         return array_column($db_results, 0);
     }
 
-    private function __construct(ConfigHandler $config)
+    public function __construct(ConfigHandler $config)
     {
         $this->db = new SQLite3(self::DB_PATH);
         $this->dictionaries = $config->getDictionaries();
