@@ -31,7 +31,7 @@
     args:
       chdir: '{{ current_instance }}'
 
-  - name: Touch lock file to enforce restart
-    ansible.builtin.file:
-      path: '{{ current_instance }}/composer.lock'
-      state: touch
+  - name: Delete cached files and enforce restart
+    ansible.builtin.shell: rm php_cache/* && touch php_cache
+    args:
+      chdir: '{{ current_instance }}'
