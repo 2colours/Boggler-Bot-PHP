@@ -32,6 +32,6 @@
       chdir: '{{ current_instance }}'
 
   - name: Delete cached files and enforce restart
-    ansible.builtin.shell: rm php_cache/* && touch php_cache
+    ansible.builtin.shell: rm -f php_cache/* && touch php_cache
     args:
       chdir: '{{ current_instance }}'
