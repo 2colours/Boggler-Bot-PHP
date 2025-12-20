@@ -170,26 +170,11 @@ class GameStatus #not final because of mocking
         # Pre-processing word for validity check
         $word = mb_ereg_replace('[.\'-]', '', $word);
         if ($this->current_lang === 'German') {
-            $word = $this->germanLetters($word);
+            $word = german_letters($word);
         }
         $word = mb_strtolower($word);
 
         return grapheme_str_split($word);
-    }
-
-    # TODO isolate this from the class altogether
-    public function germanLetters(string $word)
-    {
-        $german_letters = [
-            'ä' => 'ae',
-            'ö' => 'oe',
-            'ü' => 'ue',
-            'Ä' => 'AE',
-            'Ö' => 'OE',
-            'Ü' => 'UE',
-            'ß' => 'ss'
-        ];
-        return str_replace(array_keys($german_letters), array_values($german_letters), $word);
     }
 
     private function setEndAmount()
