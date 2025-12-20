@@ -56,7 +56,9 @@ describe('progress_bar', function () {
     $first_symbols = ['🤾‍♀️', '🥚', '📖', '🥖', '🎨', '🎲', '☁️'];
     $last_symbols = ['🥇', '🐥', '🇩🇪', '🇫🇷', '🏞️', '🔠', '☀️'];
 
-    test('100 = word limit < found approved words', function () use ($emoji_scales, $last_symbols) {
+    $config_handler = new ConfigHandler();
+
+    test('100 = word limit < found approved words', function () use ($config_handler, $emoji_scales, $last_symbols) {
         $expected_emoji_count = 10;
 
         $mocked_status = Mockery::mock(GameStatus::class);
@@ -65,12 +67,12 @@ describe('progress_bar', function () {
 
         foreach (array_map(null, $emoji_scales, $last_symbols) as [$current_scale, $current_symbol]) {
             /** @disregard type hint on mocked object */
-            $result = progress_bar(ConfigHandler::getInstance(), $mocked_status, $current_scale);
+            $result = progress_bar($config_handler, $mocked_status, $current_scale);
             expect($result)->toBe(str_repeat($current_symbol, $expected_emoji_count));
         }
     });
 
-    test('0 = found approved words < word limit = 123', function () use ($emoji_scales, $first_symbols) {
+    test('0 = found approved words < word limit = 123', function () use ($config_handler, $emoji_scales, $first_symbols) {
         $expected_emoji_count = 13;
 
         $mocked_status = Mockery::mock(GameStatus::class);
@@ -79,12 +81,12 @@ describe('progress_bar', function () {
 
         foreach (array_map(null, $emoji_scales, $first_symbols) as [$current_scale, $current_symbol]) {
             /** @disregard type hint on mocked object */
-            $result = progress_bar(ConfigHandler::getInstance(), $mocked_status, $current_scale);
+            $result = progress_bar($config_handler, $mocked_status, $current_scale);
             expect($result)->toBe(str_repeat($current_symbol, $expected_emoji_count));
         }
     });
 
-    test('42 = found approved words < word limit = 53', function () use ($emoji_scales, $first_symbols, $last_symbols) {
+    test('42 = found approved words < word limit = 53', function () use ($config_handler, $emoji_scales, $first_symbols, $last_symbols) {
         $expected_full_emoji_count = 4;
         $expected_intermediate_emojis = ['🤾‍♀️', '🥚', '📖', '🥖', '🎨', '🎲', '☁️'];
         $expected_empty_emoji_count = 1;
@@ -95,7 +97,7 @@ describe('progress_bar', function () {
 
         foreach ($emoji_scales as $current_index => $current_scale) {
             /** @disregard type hint on mocked object */
-            $result = progress_bar(ConfigHandler::getInstance(), $mocked_status, $current_scale);
+            $result = progress_bar($config_handler, $mocked_status, $current_scale);
             $expected = str_repeat($last_symbols[$current_index], $expected_full_emoji_count)
                 . $expected_intermediate_emojis[$current_index]
                 . str_repeat($first_symbols[$current_index], $expected_empty_emoji_count);
@@ -103,7 +105,7 @@ describe('progress_bar', function () {
         }
     });
 
-    test('117 = found approved words < word limit = 118', function () use ($emoji_scales, $first_symbols, $last_symbols) {
+    test('117 = found approved words < word limit = 118', function () use ($config_handler, $emoji_scales, $last_symbols) {
         $expected_full_emoji_count = 11;
         $expected_intermediate_emojis = ['🤾‍♀️', '🐣', '📖', '🥖', '🎨', '🎲', '🌤️'];
 
@@ -113,7 +115,7 @@ describe('progress_bar', function () {
 
         foreach ($emoji_scales as $current_index => $current_scale) {
             /** @disregard type hint on mocked object */
-            $result = progress_bar(ConfigHandler::getInstance(), $mocked_status, $current_scale);
+            $result = progress_bar($config_handler, $mocked_status, $current_scale);
             $expected = str_repeat($last_symbols[$current_index], $expected_full_emoji_count)
                 . $expected_intermediate_emojis[$current_index];
             expect($result)->toBe($expected);
