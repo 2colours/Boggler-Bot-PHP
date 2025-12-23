@@ -6,7 +6,6 @@ use Discord\Parts\{
     Channel\Message,
     User\Member,
 };
-use Psr\Container\ContainerInterface;
 
 class PlayerHandler
 {

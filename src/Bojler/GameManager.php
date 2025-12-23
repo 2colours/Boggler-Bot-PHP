@@ -38,9 +38,8 @@ class GameManager
         $default_translation = $config->getDefaultTranslation();
         $this->base_lang = $default_translation[1];
         $this->planned_lang = $default_translation[0];
-        $this->max_saved_game = 0; # TODO! check
 
-        $this->loadGame();
+        $this->loadGame(); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/40 et al.
     }
 
     public function currentEntryJson(): CurrentGameData # TODO the name will eventually lose the JSON
@@ -115,7 +114,6 @@ class GameManager
     {
         $this->saveOld();
         $this->player_handler->newGame();
-        # TODO! make sure planned lang is used for creating the new game
         if ($this->checkNewestGame()) {
             $this->tryLoadOldGame($this->max_saved_game);
             return;
@@ -152,7 +150,6 @@ class GameManager
         }
 
         $parsed = ArchiveGameEntryData::fromJsonFile($this->archive_file, $this->max_saved_game);
-        echo $parsed->current_lang;
         if ($parsed->current_lang !== $this->current_game->current_lang) {
             return false;
         }

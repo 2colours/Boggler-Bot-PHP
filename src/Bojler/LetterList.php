@@ -10,9 +10,8 @@ class LetterList
 {
     public const SIZE = 16;
 
-    # TODO maybe make these private-set?
-    public array $list;
-    public array $lower_cntdict;
+    public private(set) array $list;
+    public private(set) array $lower_cntdict;
 
     # injection-dependent
     private readonly array $display_normal;
