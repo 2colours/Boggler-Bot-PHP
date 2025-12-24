@@ -38,7 +38,7 @@ class GameStatus #not final because of mocking
     private readonly array $available_languages;
     private readonly array $custom_emojis;
 
-    public function __construct(GameManager $manager, DatabaseHandler $db, PlayerHandler $player_handler, ConfigHandler $config, FactoryInterface $factory)
+    public function __construct(GameManager $manager, DatabaseHandler $db, PlayerHandler $player_handler, ConfigHandler $config, FactoryInterface $factory, CurrentGameData|ArchiveGameEntryData|NewGamePayload $payload)
     {
         # injected
         $this->db = $db;
@@ -51,9 +51,52 @@ class GameStatus #not final because of mocking
         $this->available_languages = $this->config->getAvailableLanguages();
         $this->custom_emojis = $this->config->getCustomEmojis();
 
-        # main fields currently initialized via the initializeXXX methods
-
         $this->thrown_the_dice = false;
+        
+        match (get_class($payload)) {
+            CurrentGameData::class => $this->initializeFromCurrent($payload),
+            ArchiveGameEntryData::class => $this->initializeFromArchive($payload),
+            NewGamePayload::class => $this->initializeNew($payload)
+        };
+
+        $this->gameSetup();
+    }
+
+    private function initializeFromCurrent(CurrentGameData $parsed)
+    {
+        $this->letters = $this->factory->make(LetterList::class, ['data' => $parsed->letters]);
+        $this->found_words = new Set($parsed->found_words);
+        $this->game_number = $parsed->game_number;
+        $this->current_lang = $parsed->current_lang;
+    }
+
+    private function initializeFromArchive(ArchiveGameEntryData $parsed)
+    {
+        $this->letters = $this->factory->make(LetterList::class, ['data' => $parsed->letters_sorted, 'preshuffle' => true]);
+        if ($this->letters->isAbnormal()) {
+            echo 'Game might be damaged.';
+        }
+        $this->found_words = new Set($parsed->found_words_sorted);
+        $this->game_number = $parsed->game_number;
+        $this->current_lang = $parsed->current_lang;
+    }
+
+    private function initializeNew(NewGamePayload $new_data)
+    {
+        $this->found_words = new Set();
+        $this->throwDice();
+        $this->game_number = $new_data->games_so_far + 1;
+        $this->current_lang = $new_data->planned_language;
+    }
+
+    private function throwDice()
+    {
+        $used_permutation = range(0, 15);
+        shuffle($used_permutation);
+        $current_dice = $this->config->getDice()[$this->current_lang];
+        $dice_permutated = array_map(fn($dice_index) => $current_dice[$dice_index], $used_permutation);
+        $this->letters = $this->factory->make(LetterList::class, ['data' => array_map(fn($current_die) => $current_die[array_rand($current_die)], $dice_permutated), 'just_regenerate' => true]);
+        $this->manager->saveGame(); # TODO revise
     }
 
     private function gameSetup()
@@ -270,49 +313,6 @@ class GameStatus #not final because of mocking
     public function enoughWordsFound()
     {
         return $this->found_words->count() >= $this->end_amount;
-    }
-    # TODO visibility, final position
-    public function initializeFromCurrent(CurrentGameData $parsed)
-    {
-        $this->letters = $this->factory->make(LetterList::class, ['data' => $parsed->letters]);
-        $this->found_words = new Set($parsed->found_words);
-        $this->game_number = $parsed->game_number;
-        $this->current_lang = $parsed->current_lang;
-
-        $this->gameSetup();
-    }
-    # TODO visibility, final position
-    public function initializeFromArchive(ArchiveGameEntryData $parsed)
-    {
-        $this->letters = $this->factory->make(LetterList::class, ['data' => $parsed->letters_sorted, 'preshuffle' => true]);
-        if ($this->letters->isAbnormal()) {
-            echo 'Game might be damaged.';
-        }
-        $this->found_words = new Set($parsed->found_words_sorted);
-        $this->game_number = $parsed->game_number;
-        $this->current_lang = $parsed->current_lang;
-
-        $this->gameSetup();
-    }
-    # TODO visibility, final position
-    public function initializeNew(int $games_so_far, string $planned_language)
-    {
-        $this->found_words = new Set();
-        $this->throwDice();
-        $this->game_number = $games_so_far + 1;
-        $this->current_lang = $planned_language;
-
-        $this->gameSetup();
-    }
-
-    private function throwDice()
-    {
-        $used_permutation = range(0, 15);
-        shuffle($used_permutation);
-        $current_dice = $this->config->getDice()[$this->current_lang];
-        $dice_permutated = array_map(fn($dice_index) => $current_dice[$dice_index], $used_permutation);
-        $this->letters = $this->factory->make(LetterList::class, ['data' => array_map(fn($current_die) => $current_die[array_rand($current_die)], $dice_permutated), 'just_regenerate' => true]);
-        $this->manager->saveGame(); # TODO revise
     }
 
     public function gameAwards()

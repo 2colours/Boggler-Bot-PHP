@@ -61,8 +61,7 @@ class GameManager
     private function loadGame()
     {
         $parsed = CurrentGameData::fromJsonFile($this->file);
-        $this->current_game = $this->factory->createInstace($this);
-        $this->current_game->initializeFromCurrent($parsed);
+        $this->current_game = $this->factory->createInstanceFromCurrent($this, $parsed);
 
         # General Settings
         $this->base_lang = $parsed->base_lang;
@@ -119,8 +118,7 @@ class GameManager
             return;
         }
 
-        $this->current_game = $this->factory->createInstace($this);
-        $this->current_game->initializeNew($this->max_saved_game, $this->planned_lang);
+        $this->current_game = $this->factory->createInstanceFromNew($this, new NewGamePayload($this->max_saved_game, $this->planned_lang));
         # we have a game (thrown_the_dice), this new game will be saved, even if empty and is not yet in saves.txt (changes_to_save)
         $this->changes_to_save = true;
     }
@@ -134,8 +132,7 @@ class GameManager
         $this->player_handler->newGame();
 
         $parsed = ArchiveGameEntryData::fromJsonFile($this->archive_file, $number);
-        $this->current_game = $this->factory->createInstace($this);
-        $this->current_game->initializeFromArchive($parsed);
+        $this->current_game = $this->factory->createInstanceFromArchive($this, $parsed);
         # this game doesn't have to be saved again in saves.txt yet (changes_to_save), we have a loaded game (thrown_the_dice)
         $this->changes_to_save = false;
         $this->saveGame();

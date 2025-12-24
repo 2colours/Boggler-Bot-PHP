@@ -19,8 +19,18 @@ class GameStatusFactory
         $this->factory = $factory;
     }
 
-    public function createInstace(GameManager $owner): GameStatus
+    public function createInstanceFromCurrent(GameManager $owner, CurrentGameData $data): GameStatus
     {
-        return new GameStatus($owner, $this->db, $this->player_handler, $this->config, $this->factory);
+        return new GameStatus($owner, $this->db, $this->player_handler, $this->config, $this->factory, $data);
+    }
+
+    public function createInstanceFromNew(GameManager $owner, NewGamePayload $data): GameStatus
+    {
+        return new GameStatus($owner, $this->db, $this->player_handler, $this->config, $this->factory, $data);
+    }
+
+    public function createInstanceFromArchive(GameManager $owner, ArchiveGameEntryData $data): GameStatus
+    {
+        return new GameStatus($owner, $this->db, $this->player_handler, $this->config, $this->factory, $data);
     }
 }
