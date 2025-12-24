@@ -17,7 +17,7 @@ class GameStatus #not final because of mocking
     public private(set) int $game_number;
     public protected(set) string $current_lang; #not private because of mocking
 
-    public private(set) bool $thrown_the_dice; # TODO! decide on the fate of this
+    public private(set) bool $thrown_the_dice; # TODO currently pretty useless, always set to true during setup - decide on the fate of this
     # dependent data, should be set during the setup process
     public protected(set) int $end_amount; #not private because of mocking
     private bool $game_over_acknowledged;
