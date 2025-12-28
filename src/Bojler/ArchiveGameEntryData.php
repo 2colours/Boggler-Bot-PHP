@@ -20,7 +20,7 @@ class ArchiveGameEntryData
         return new self(...$entry);
     }
 
-    public static function fromStatusObject(GameStatus $status): self
+    public static function fromStatus(GameStatus $status): self
     {
         $ctor_dict = [];
         $letters_sorted = $status->letters->list;

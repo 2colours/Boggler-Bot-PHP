@@ -9,6 +9,20 @@ function remove_special_char(string $word)
     return str_replace(['.', '-'], '', $word);
 }
 
+function german_letters(string $word)
+{
+    $german_letters = [
+        'ä' => 'ae',
+        'ö' => 'oe',
+        'ü' => 'ue',
+        'Ä' => 'AE',
+        'Ö' => 'OE',
+        'Ü' => 'UE',
+        'ß' => 'ss'
+    ];
+    return str_replace(array_keys($german_letters), array_values($german_letters), $word);
+}
+
 function textual_length(string $word): int
 {
     return grapheme_strlen(remove_special_char($word));
