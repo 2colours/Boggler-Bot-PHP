@@ -52,7 +52,7 @@ class GameStatus #not final because of mocking
         $this->custom_emojis = $this->config->getCustomEmojis();
 
         $this->thrown_the_dice = false;
-        
+
         match (get_class($payload)) {
             CurrentGameData::class => $this->initializeFromCurrent($payload),
             ArchiveGameEntryData::class => $this->initializeFromArchive($payload),
