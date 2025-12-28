@@ -22,7 +22,7 @@ class GameManager
     public private(set) string $planned_lang;
     public private(set) int $max_saved_game;
     public private(set) bool $changes_to_save;
-    public private(set) mixed $current_community_list; # TODO revise visibility and typing
+    public private(set) array $current_community_list;
 
 
     public function __construct(string $live_data_prefix, GameStatusFactory $factory, ConfigHandler $config, PlayerHandler $player_handler)
@@ -42,14 +42,14 @@ class GameManager
         $this->loadGame(); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/40 et al.
     }
 
-    public function currentEntryJson(): CurrentGameData # TODO the name will eventually lose the JSON
+    public function currentEntry(): CurrentGameData
     {
         return CurrentGameData::fromStatus($this);
     }
 
     public function saveGame()
     {
-        file_put_contents($this->file, json_encode($this->currentEntryJson(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        file_put_contents($this->file, json_encode($this->currentEntry(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     public function setLang(string $lang)
