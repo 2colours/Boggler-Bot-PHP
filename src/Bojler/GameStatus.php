@@ -127,7 +127,7 @@ class GameStatus #not final because of mocking
             $this->solutions->add(...$hints_for_language);
         }
         # communitylist
-        $this->manager->loadCommunityList();
+        $this->manager->loadCommunityList($this->current_lang);
         $this->solutions->add(...array_filter($this->manager->current_community_list, fn($word) => $this->wordValidFast($word, $refdict)));
         # custom emojis
         $this->findCustomEmojis($refdict);

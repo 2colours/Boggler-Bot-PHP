@@ -157,9 +157,9 @@ class GameManager
     }
 
     # TODO review visibility and architecture overall
-    public function loadCommunityList()
+    public function loadCommunityList(string $current_language) # needs to be a parameter because of bootstrapping issues
     {
-        $this->current_community_list = file($this->community_wordlist_paths[$this->current_game->current_lang], FILE_IGNORE_NEW_LINES) ?: [];
+        $this->current_community_list = file($this->community_wordlist_paths[$current_language], FILE_IGNORE_NEW_LINES) ?: [];
     }
 
     public function tryAddCommunity(Message $ctx, string $word)
