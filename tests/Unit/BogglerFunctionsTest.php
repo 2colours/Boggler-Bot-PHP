@@ -2,12 +2,15 @@
 
 use function Bojler\{
     acknowledgement_reaction,
+    current_emoji_version,
     progress_bar
 };
 use Bojler\{
     ConfigHandler,
     GameStatus
 };
+
+use phpmock\mockery\PHPMockery;
 
 describe('acknowledgement_reaction', function () {
     it('detects short words correctly', function () {
@@ -151,4 +154,36 @@ describe('progress_bar', function () {
             expect($result)->toBe($expected);
         }
     });
+});
+
+
+describe('current_emoji_version', function() {
+    $config_handler = new ConfigHandler();
+
+    $test_data = [
+        [
+            'month_day_string' => '0213',
+            'letters_sorted' => ['A', 'C', 'D', 'É', 'É', 'I', 'I', 'N', 'O', 'Ö', 'R', 'S', 'T', 'U', 'V', 'Y'],
+            'expected_emoji_bar' => ['Egg edition', '🥚🐣🐥']
+        ],
+        [
+            'month_day_string' => '0214',
+            'letters_sorted' => ['A', 'C', 'D', 'É', 'É', 'I', 'I', 'N', 'O', 'Ö', 'R', 'S', 'T', 'U', 'V', 'Y'],
+            'expected_emoji_bar' => ['Love letter edition', '✉️💌']
+        ]
+    ];
+
+    foreach ($test_data as $current_test) {
+        $letters_formatted = implode(' ', $current_test['letters_sorted']);
+        $date_formatted = chunk_split($current_test['month_day_string'], 2, '.');
+        test("letters $letters_formatted on day $date_formatted", function() use ($config_handler, $current_test) {
+            PHPMockery::mock('Bojler', 'date')->andReturn($current_test['month_day_string']);
+            $mocked_status = Mockery::mock(GameStatus::class);
+            $mocked_status->shouldReceive('lettersSorted')->andReturn($current_test['letters_sorted']);
+
+            $result = current_emoji_version($config_handler, $mocked_status);
+
+            expect($result)->toBe($current_test['expected_emoji_bar']);
+        });
+    }
 });

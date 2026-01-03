@@ -19,7 +19,8 @@
     "require-dev": {
         "pestphp/pest": "^4.0",
         "mockery/mockery": "^1.6",
-        "squizlabs/php_codesniffer": "^4.0"
+        "squizlabs/php_codesniffer": "^4.0",
+        "php-mock/php-mock-mockery": "^1.5"
     },
     "config": {
         "allow-plugins": {
