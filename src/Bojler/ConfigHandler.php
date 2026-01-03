@@ -13,7 +13,7 @@ class ConfigHandler
         $this->config = json_decode(file_get_contents(self::CONFIG_PATH), true);
     }
 
-    public function getDictionaries()
+    public function getDictionaries(): array
     {
         return $this->config['dictionaries'];
     }
