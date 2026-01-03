@@ -204,7 +204,6 @@ $builder->addDefinitions([
     Logger::class => new Logger('bojlerLogger', [new StreamHandler('php://stdout', Level::Debug)])
 ]);
 $container = $builder->build();
-# TODO it's dubious whether these are actually constants; gotta think about it
 # define('easter_egg_handler', new EasterEggHandler($game->found_words_set));
 
 $bot = new CustomCommandClient($container, [
