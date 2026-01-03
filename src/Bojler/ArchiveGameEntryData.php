@@ -23,8 +23,7 @@ class ArchiveGameEntryData
     public static function fromStatus(GameStatus $status): self
     {
         $ctor_dict = [];
-        $letters_sorted = $status->letters->list;
-        $status->collator()->sort($letters_sorted);
+        $letters_sorted = $status->lettersSorted();
         $ctor_dict['letters_sorted'] = $letters_sorted;
         $ctor_dict['found_words_sorted'] = $status->foundWordsSorted();
         $ctor_dict['game_number'] = $status->game_number;

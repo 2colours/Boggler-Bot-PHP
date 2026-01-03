@@ -162,16 +162,11 @@ function progress_bar(ConfigHandler $config, GameStatus $game_status, ?string $e
 # in general, the letters are hashed modulo the length of the emoji list, to obtain the index in the emoji list
 function current_emoji_version(ConfigHandler $config, GameStatus $game): array
 {
-    $progress_bar_version = $config->getProgressBarVersion();
-    $letter_list = $game->letters->list;
-    $game->collator()->sort($letter_list);
-    $hash = md5(implode(' ', $letter_list));
+    $letter_list_sorted = $game->lettersSorted();
+    $hash = md5(implode(' ', $letter_list_sorted));
     $date = date('md');
-    if (array_key_exists($date, $progress_bar_version)) {
-        $current_list = $progress_bar_version[$date];
-    } else {
-        $current_list = $progress_bar_version['default'];
-    }
+    $progress_bar_version = $config->getProgressBarVersion();
+    $current_list = $progress_bar_version[$date] ?? $progress_bar_version['default'];
     return $current_list[gmp_intval(gmp_mod(gmp_init($hash, 16), count($current_list)))];
 }
 

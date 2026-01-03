@@ -186,7 +186,7 @@ class GameStatus #not final because of mocking
         $this->approved_words = $this->solutions->intersect($this->found_words);
     }
 
-    public function collator()
+    private function collator()
     {
         return new Collator($this->config->getLocale($this->current_lang));
     }
@@ -194,6 +194,13 @@ class GameStatus #not final because of mocking
     public function foundWordsSorted()
     {
         $result = $this->found_words->toArray();
+        $this->collator()->sort($result);
+        return $result;
+    }
+
+    public function lettersSorted(): array
+    {
+        $result = $this->letters->list;
         $this->collator()->sort($result);
         return $result;
     }
