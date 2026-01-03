@@ -200,20 +200,19 @@ $builder->addDefinitions([
     GameManager::class => autowire()->constructor(LIVE_DATA_PREFIX), # we pretend this was a singleton
     Counter::class => new Counter(10),
     Randomizer::class => new Randomizer(),
-    EnvironmentHandler::class => new EnvironmentHandler()
+    EnvironmentHandler::class => new EnvironmentHandler(),
+    Logger::class => new Logger('bojlerLogger', [new StreamHandler('php://stdout', Level::Debug)])
 ]);
 $container = $builder->build();
 # TODO it's dubious whether these are actually constants; gotta think about it
 # define('easter_egg_handler', new EasterEggHandler($game->found_words_set));
-const BOT_LOGGER = new Logger('bojlerLogger');
-BOT_LOGGER->pushHandler(new StreamHandler('php://stdout', Level::Debug));
 
 $bot = new CustomCommandClient($container, [
     'prefix' => 'b!',
     'token' => $container->get(EnvironmentHandler::class)->getDiscordToken(),
     'description' => 'Szórakodtató bot',
     'discordOptions' => [
-        'logger' => BOT_LOGGER,
+        'logger' => $container->get(Logger::class),
         'intents' => Intents::getDefaultIntents() | Intents::MESSAGE_CONTENT # Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
     ],
     'caseInsensitiveCommands' => true,
