@@ -46,7 +46,7 @@ describe('wordValidFast', function () {
         for ($game_index = 1; $game_index <= $amount; $game_index++) {
             $json_file = get_test_data_file($language, $game_index);
             $test_data = json_decode(file_get_contents($json_file), true);
-            $string_representation = join(' ', refdict_to_ordered_letters($test_data['refdict']));
+            $string_representation = implode(' ', refdict_to_ordered_letters($test_data['refdict']));
             
 
             test("$language game #$game_index: $string_representation", function () use ($language, $test_data) {
