@@ -2,14 +2,15 @@
 
 namespace Bojler;
 
+use Generator;
 use SQLite3Result;
 
-function remove_special_char(string $word)
+function remove_special_char(string $word): string
 {
     return str_replace(['.', '-'], '', $word);
 }
 
-function german_letters(string $word)
+function german_letters(string $word): string
 {
     $german_letters = [
         'ä' => 'ae',
@@ -29,7 +30,7 @@ function textual_length(string $word): int
 }
 
 
-function name_shortened(string $name)
+function name_shortened(string $name): string
 {
     if (grapheme_strlen($name) >= 15) {
         $name = grapheme_substr($name, 0, grapheme_strpos($name, '|') ?: null);
@@ -44,7 +45,7 @@ function name_shortened(string $name)
 }
 
 # Might be a way of splitting a too long output string
-function output_split(string $arg)
+function output_split(string $arg): array
 {
     if (grapheme_strlen($arg) <= MAX_GRAPHEME_NUMBER) {
         return [$arg];
@@ -54,7 +55,7 @@ function output_split(string $arg)
     return [grapheme_substr($arg, 0, $index), ...output_split(grapheme_substr($arg, $index + 1))];
 }
 
-function output_split_cursive(string $arg)
+function output_split_cursive(string $arg): array
 {
     $open_cursive = false;
     $output_array = output_split($arg);
@@ -81,7 +82,7 @@ function output_split_cursive(string $arg)
     return $output_array;
 }
 
-function fetch_all(SQLite3Result $db_result)
+function fetch_all(SQLite3Result $db_result): Generator
 {
     while ($current_entry = $db_result->fetchArray()) {
         yield $current_entry;
@@ -89,7 +90,7 @@ function fetch_all(SQLite3Result $db_result)
 }
 
 
-function masked_word(string $original_word, array $transparent_positions)
+function masked_word(string $original_word, array $transparent_positions): string
 {
     $result = '';
     $bytes_count = strlen($original_word);
@@ -103,7 +104,7 @@ function masked_word(string $original_word, array $transparent_positions)
 }
 
 # [d1, d2, d3, ..., dn], h -> d1 ∘ d2 ∘ d3 ∘ ... ∘ dn ∘ h
-function decorate_handler(array $decorators, callable $handler)
+function decorate_handler(array $decorators, callable $handler): callable
 {
-    return array_reduce(array_reverse($decorators), fn($aggregate, $current) => $current($aggregate), $handler);
+    return array_reduce(array_reverse($decorators), fn(callable $aggregate, callable $current) => $current($aggregate), $handler);
 }

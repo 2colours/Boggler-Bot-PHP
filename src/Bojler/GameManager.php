@@ -2,7 +2,6 @@
 
 namespace Bojler;
 
-use DI\FactoryInterface;
 use Discord\Parts\Channel\Message;
 
 use function React\Async\await;
@@ -33,7 +32,7 @@ class GameManager
 
         $this->file = $live_data_prefix . $config->getCurrentGameFileName();
         $this->archive_file = $live_data_prefix . $config->getSavesFileName();
-        $this->community_wordlist_paths = array_map(fn($value) => $live_data_prefix . $value, $this->config->getCommunityWordlists());
+        $this->community_wordlist_paths = array_map(fn(string $relative_path) => $live_data_prefix . $relative_path, $this->config->getCommunityWordlists());
 
         $default_translation = $config->getDefaultTranslation();
         $this->base_lang = $default_translation[1];
@@ -47,18 +46,18 @@ class GameManager
         return CurrentGameData::fromStatus($this);
     }
 
-    public function saveGame()
+    public function saveGame(): void
     {
         file_put_contents($this->file, json_encode($this->currentEntry(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
-    public function setLang(string $lang)
+    public function setLang(string $lang): void
     {
         $this->planned_lang = $lang;
         $this->saveGame();
     }
 
-    private function loadGame()
+    private function loadGame(): void
     {
         $parsed = CurrentGameData::fromJsonFile($this->file);
         $this->current_game = $this->factory->createInstanceFromCurrent($this, $parsed);
@@ -76,7 +75,7 @@ class GameManager
         $this->changes_to_save = true;
     }
 
-    private function saveOld()
+    private function saveOld(): void
     {
         # unchanged loaded old games are not saved; if the game is not saved yet in saves.txt, it is appended (determined by game_number compared to max_saved_game and number of lines in saves.txt)
         if (!$this->changes_to_save) {
@@ -109,7 +108,7 @@ class GameManager
         file_put_contents($this->archive_file, json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
-    public function newGame()
+    public function newGame(): void
     {
         $this->saveOld();
         $this->player_handler->newGame();
@@ -123,7 +122,7 @@ class GameManager
         $this->changes_to_save = true;
     }
 
-    public function tryLoadOldGame(int $number)
+    public function tryLoadOldGame(int $number): bool
     {
         $this->saveOld();
         if ($number < 1 || $this->max_saved_game < $number) {
@@ -139,7 +138,7 @@ class GameManager
         return true;
     }
 
-    public function checkNewestGame()
+    public function checkNewestGame(): bool
     {
         # answer to: should we load the newest game instead of creating a new one?
         if ($this->current_game->game_number === $this->max_saved_game) {
@@ -157,12 +156,12 @@ class GameManager
     }
 
     # TODO review visibility and architecture overall
-    public function loadCommunityList(string $current_language) # needs to be a parameter because of bootstrapping issues
+    public function loadCommunityList(string $current_language): void # needs to be a parameter because of bootstrapping issues
     {
         $this->current_community_list = file($this->community_wordlist_paths[$current_language], FILE_IGNORE_NEW_LINES) ?: [];
     }
 
-    public function tryAddCommunity(Message $ctx, string $word)
+    public function tryAddCommunity(Message $ctx, string $word): bool
     {
         if (in_array($word, $this->current_community_list)) {
             await($ctx->channel->sendMessage('Word already in the community list.'));

@@ -44,7 +44,7 @@ final class CustomCommandClient extends DiscordCommandClient
         $this->on('init', $this->monkeyPatching(...));
     }
 
-    public function registerCommand(string $command, $callable, array $options = []): Command
+    public function registerCommand(string $command, mixed $callable, array $options = []): Command
     {
         return parent::registerCommand($command, async(fn(Message $message, array $args) => $this->invoker->call($callable, ['ctx' => $message, 'args' => $args])), $options);
     }
@@ -67,7 +67,7 @@ final class CustomCommandClient extends DiscordCommandClient
         return $resolver->resolve($custom_options);
     }
 
-    private function monkeyPatching()
+    private function monkeyPatching(): void
     {
         $this->removeAllListeners('message');
         $this->on('message', $this->baseMessageHandler(...));
@@ -98,7 +98,7 @@ final class CustomCommandClient extends DiscordCommandClient
         return null;
     }
 
-    private function baseMessageHandler($message)
+    private function baseMessageHandler(Message $message): void
     {
         $this->logger->debug('Message event received...', [grapheme_substr($message->content, 0, 10)]);
 
@@ -137,7 +137,7 @@ final class CustomCommandClient extends DiscordCommandClient
         }
     }
 
-    private function defaultHelp($ctx, $args)
+    private function defaultHelp(Message $ctx, array $args): void
     {
         $prefix = str_replace((string) $this->user, "@{$this->username}", $this->commandClientOptions['prefix']);
 
@@ -170,14 +170,15 @@ final class CustomCommandClient extends DiscordCommandClient
         $ctx->channel->sendEmbed($embed);
     }
 
-    private function defaultHelpWithArgs($message, $prefix, $args)
+    private function defaultHelpWithArgs(Message $message, string $prefix, array $args): void
     {
         $command = $this;
         foreach ($args as $commandString) {
             $newCommand = $command->getCommand($commandString);
 
             if (is_null($newCommand)) {
-                return "The command $commandString does not exist.";
+                $message->reply("The command $commandString does not exist.");
+                return;
             }
 
             $command = $newCommand;
@@ -261,7 +262,7 @@ final class CustomCommandClient extends DiscordCommandClient
     private function groupTexts(array $texts, int $groupSize): array
     {
         return array_map(
-            fn($grouped_texts, $no) =>
+            fn(array $grouped_texts, int $no) =>
             [
                 'name' => "Commands #$no.",
                 'value' => grapheme_substr(implode("\n\n", $grouped_texts), 0, 1024), # TODO do something with the magic constant

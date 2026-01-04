@@ -4,7 +4,7 @@ namespace Bojler;
 
 class DictionaryType
 {
-    public static function fromDictstring(ConfigHandler $config, string $dictstring)
+    public static function fromDictstring(ConfigHandler $config, string $dictstring): self
     {
         return new self($config, ...explode('-', $dictstring));
     }
@@ -21,12 +21,12 @@ class DictionaryType
         $this->target_lang = $target_lang;
     }
 
-    public function asDictstring()
+    public function asDictstring(): string
     {
         return "{$this->src_lang}-{$this->target_lang}";
     }
 
-    public function asDictcode()
+    public function asDictcode(): int
     {
         return $this->config->getDictionaries()[$this->asDictstring()];
     }

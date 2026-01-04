@@ -16,11 +16,6 @@ class DictionaryEntry
     public function __construct(string $line)
     {
         $line_pieces = explode("\t", $line);
-        /*debug purposes
-        if (count($line_pieces) !== 3) {
-            var_dump($line_pieces);
-        }
-        */
         list($this->word, $this->description, $this->langcode) = $line_pieces;
     }
 
@@ -30,7 +25,7 @@ class DictionaryEntry
     }
 
     # Has to be in accordance with TABLE_TYPES and TABLE_COLUMNS!
-    public function asRow()
+    public function asRow(): array
     {
         return [$this->word, $this->description, $this->langcode];
     }
