@@ -163,6 +163,11 @@ class GameStatus #not final because of mocking
         return new ValidityInfo($word, array_count_values($this->preprocessWord($word)), $refdict);
     }
 
+    public function relevantHint(string $hint): bool
+    {
+        return !$this->found_words->contains($hint);
+    }
+
     public function preprocessWord(string $word): array
     {
         # Pre-processing word for validity check

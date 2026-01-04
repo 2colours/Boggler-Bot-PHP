@@ -394,7 +394,7 @@ function left(GameManager $game_manager, Message $ctx): void
     #$hints_caps = array_map(mb_strtoupper(...), $game->available_hints);
     $unfound_hints_without_empty = array_filter(
         array_map(
-            fn($hints_for_language) => array_filter($hints_for_language, fn($hint) => !$game->found_words->contains($hint)),
+            fn(array $hints_for_language) => array_filter($hints_for_language, $game->relevantHint(...)),
             $game->available_hints
         ),
         fn(array $hints_for_language) => count($hints_for_language) > 0
@@ -562,7 +562,7 @@ function hint_command(string $from_language): callable
 {
     return function (GameManager $game_manager, FactoryInterface $factory, PlayerHandler $player, DatabaseHandler $db, Message $ctx) use ($from_language): void {
         $game = $game_manager->current_game;
-        $unfound_hint_list = array_values(array_filter($game->available_hints[$from_language], fn($hint) => !$game->found_words->contains($hint)));
+        $unfound_hint_list = array_values(array_filter($game->available_hints[$from_language], $game->relevantHint(...)));
         if (count($unfound_hint_list) === 0) {
             await($ctx->channel->sendMessage('No hints left.'));
             return;
