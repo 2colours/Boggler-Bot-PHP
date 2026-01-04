@@ -2,13 +2,13 @@
 
 namespace Bojler;
 
-use Iterator;
+use Generator;
 
 class ValidityInfo
 {
     private array $problematic_letters = []; # letter => [needed_count, available_count]
 
-    public static function listProblems(array $input_dictionary, array $reference_dictionary): Iterator
+    public static function listProblems(array $input_dictionary, array $reference_dictionary): Generator
     {
         foreach (array_keys($input_dictionary) as $letter) {
             if ($input_dictionary[$letter] > ($reference_dictionary[$letter] ?? 0)) {
