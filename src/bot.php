@@ -100,8 +100,8 @@ function translator_command(ConfigHandler $config, ?string $src_lang = null, ?st
 
 # internal context-dependent functions that aren't really related to command handling
 
-#Determines which emoji reaction a certain word deserves - it doesn't remove special characters
-function achievements(GameStatus $game, string $word, string $command_type)
+#Determines which emoji reaction a certain word deserves
+function achievements(GameStatus $game, string $word, string $command_type): array
 {
     $reactions = [];
     if ($command_type === 's' && ($game->isLongestSolution($word))) {
