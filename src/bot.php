@@ -136,7 +136,7 @@ function channel_valid(EnvironmentHandler $env, Message $ctx): bool
 }
 
 #Checks if dice are thrown, thrown_the_dice exists just for this
-function needs_thrown_dice(GameManager $game_manager)
+function dice_thrown(GameManager $game_manager): bool
 {
     return $game_manager->current_game->thrown_the_dice;
 }
@@ -329,7 +329,7 @@ function see(Counter $counter, ConfigHandler $config, GameManager $game_manager,
     $counter->reset();
 }
 
-define('ENSURE_THROWN_DICE', ensure_predicate(needs_thrown_dice(...), fn() => '_Please load game using_ **b!loadgame** _or start a new game using_ **b!new**'));
+define('ENSURE_THROWN_DICE', ensure_predicate(dice_thrown(...), fn() => '_Please load game using_ **b!loadgame** _or start a new game using_ **b!new**'));
 
 $bot->registerCommand(
     'status',
