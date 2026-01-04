@@ -4,7 +4,7 @@ use Bojler\{
     GameStatus
 };
 
-function get_wordlist_file($language) {
+function get_wordlist_file($language): string {
     $name_suffixes = [
         'English' => 'eng',
         'German' => 'ger',
@@ -14,15 +14,15 @@ function get_wordlist_file($language) {
     return __DIR__ . "/../input_data/wordlist_$name_suffixes[$language].txt";
 }
 
-describe('wordValidFast', function () {
-    function hack_current_language(mixed $game_status_mock, string $current_lang)
+describe('wordValidFast', function (): void {
+    function hack_current_language(mixed $game_status_mock, string $current_lang): void
     {
         $reflection = new ReflectionClass($game_status_mock);
         $property = $reflection->getProperty('current_lang');
         $property->setValue($game_status_mock, $current_lang);
     }
 
-    function get_test_data_file($language, $index)
+    function get_test_data_file($language, $index): string
     {
         return __DIR__ . "/../input_data/basic_validity/$language$index.json";
     }
@@ -49,7 +49,7 @@ describe('wordValidFast', function () {
             $string_representation = implode(' ', refdict_to_ordered_letters($test_data['refdict']));
             
 
-            test("$language game #$game_index: $string_representation", function () use ($language, $test_data) {
+            test("$language game #$game_index: $string_representation", function () use ($language, $test_data): void {
                 $refdict = $test_data['refdict'];
                 $expected_words = $test_data['expected_words'];
         

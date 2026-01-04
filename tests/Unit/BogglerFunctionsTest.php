@@ -12,8 +12,8 @@ use Bojler\{
 
 use phpmock\mockery\PHPMockery;
 
-describe('acknowledgement_reaction', function () {
-    it('detects short words correctly', function () {
+describe('acknowledgement_reaction', function (): void {
+    it('detects short words correctly', function (): void {
         $short_words = ['alma', 'béka', 'e-mail', 'Fuß', 'naïve'];
         foreach ($short_words as $current_word) {
             $result = acknowledgement_reaction($current_word);
@@ -21,7 +21,7 @@ describe('acknowledgement_reaction', function () {
         }
     });
 
-    it('detects intermediate (6, 7, 8) length words correctly', function () {
+    it('detects intermediate (6, 7, 8) length words correctly', function (): void {
         $intermediate_words = ['szavak', 'lebzsel', 'doesn\'t', 'túlélőit']; # NOTE: the apostrophe is not stripped
         foreach ($intermediate_words as $current_word) {
             $result = acknowledgement_reaction($current_word);
@@ -29,7 +29,7 @@ describe('acknowledgement_reaction', function () {
         }
     });
 
-    it('detects advanced (9) length words correctly', function () {
+    it('detects advanced (9) length words correctly', function (): void {
         $advanced_words = ['kilencven', 'lassított', 'lassít-ott', 'Aalfänger', 'Zytologie'];
         foreach ($advanced_words as $current_word) {
             $result = acknowledgement_reaction($current_word);
@@ -37,7 +37,7 @@ describe('acknowledgement_reaction', function () {
         }
     });
 
-    it('detects long words correctly', function () {
+    it('detects long words correctly', function (): void {
         $long_words = ['érelmeszesedés', 'árvíztűrő tükörfúrógép'];
         foreach ($long_words as $current_word) {
             $result = acknowledgement_reaction($current_word);
@@ -47,8 +47,8 @@ describe('acknowledgement_reaction', function () {
 });
 
 
-describe('progress_bar', function () {
-    function hack_end_amount(mixed $game_status_mock, int $end_amount)
+describe('progress_bar', function (): void {
+    function hack_end_amount(mixed $game_status_mock, int $end_amount): void
     {
         $reflection = new ReflectionClass($game_status_mock);
         $property = $reflection->getProperty('end_amount');
@@ -61,7 +61,7 @@ describe('progress_bar', function () {
 
     $config_handler = new ConfigHandler();
 
-    test('100 = word limit < found approved words', function () use ($config_handler, $emoji_scales, $last_symbols) {
+    test('100 = word limit < found approved words', function () use ($config_handler, $emoji_scales, $last_symbols): void {
         $expected_emoji_count = 10;
 
         $mocked_status = Mockery::mock(GameStatus::class);
@@ -74,7 +74,7 @@ describe('progress_bar', function () {
         }
     });
 
-    test('0 = found approved words < word limit = 123', function () use ($config_handler, $emoji_scales, $first_symbols) {
+    test('0 = found approved words < word limit = 123', function () use ($config_handler, $emoji_scales, $first_symbols): void {
         $expected_emoji_count = 13;
 
         $mocked_status = Mockery::mock(GameStatus::class);
@@ -87,7 +87,7 @@ describe('progress_bar', function () {
         }
     });
 
-    test('42 = found approved words < word limit = 53', function () use ($config_handler, $emoji_scales, $first_symbols, $last_symbols) {
+    test('42 = found approved words < word limit = 53', function () use ($config_handler, $emoji_scales, $first_symbols, $last_symbols): void {
         $expected_full_emoji_count = 4;
         $expected_intermediate_emojis = ['🤾‍♀️', '🥚', '📖', '🥖', '🎨', '🎲', '☁️'];
         $expected_empty_emoji_count = 1;
@@ -105,7 +105,7 @@ describe('progress_bar', function () {
         }
     });
 
-    test('117 = found approved words < word limit = 118', function () use ($config_handler, $emoji_scales, $last_symbols) {
+    test('117 = found approved words < word limit = 118', function () use ($config_handler, $emoji_scales, $last_symbols): void {
         $expected_full_emoji_count = 11;
         $expected_intermediate_emojis = ['🤾‍♀️', '🐣', '📖', '🥖', '🎨', '🎲', '🌤️'];
 
@@ -121,7 +121,7 @@ describe('progress_bar', function () {
         }
     });
 
-    test('104 = found approved words < word limit = 148', function () use ($config_handler, $emoji_scales, $first_symbols, $last_symbols) {
+    test('104 = found approved words < word limit = 148', function () use ($config_handler, $emoji_scales, $first_symbols, $last_symbols): void {
         $expected_full_emoji_count = 10;
         $expected_intermediate_emojis = ['🤾‍♀️', '🥚', '📖', '🥖', '🎨', '🎲', '🌥️'];
         $expected_empty_emoji_count = 4;
@@ -139,7 +139,7 @@ describe('progress_bar', function () {
         }
     });
 
-    test('6 = found approved words < word limit = 47', function () use ($config_handler, $emoji_scales, $first_symbols) {
+    test('6 = found approved words < word limit = 47', function () use ($config_handler, $emoji_scales, $first_symbols): void {
         $expected_intermediate_emojis = ['🤾‍♀️', '🐣', '📖', '🥖', '🎨', '🎲', '⛅'];
         $expected_empty_emoji_count = 4;
 
@@ -157,7 +157,7 @@ describe('progress_bar', function () {
 });
 
 
-describe('current_emoji_version', function() {
+describe('current_emoji_version', function(): void {
     $config_handler = new ConfigHandler();
 
     $test_data = [
@@ -176,7 +176,7 @@ describe('current_emoji_version', function() {
     foreach ($test_data as $current_test) {
         $letters_formatted = implode(' ', $current_test['letters_sorted']);
         $date_formatted = chunk_split($current_test['month_day_string'], 2, '.');
-        test("letters $letters_formatted on day $date_formatted", function() use ($config_handler, $current_test) {
+        test("letters $letters_formatted on day $date_formatted", function() use ($config_handler, $current_test): void {
             PHPMockery::mock('Bojler', 'date')->andReturn($current_test['month_day_string']);
             $mocked_status = Mockery::mock(GameStatus::class);
             $mocked_status->shouldReceive('lettersSorted')->andReturn($current_test['letters_sorted']);
