@@ -4,13 +4,11 @@ namespace Bojler;
 
 class Counter
 {
-    private $current_value;
-    public readonly int $threshold;
+    private int $current_value;
 
-    public function __construct($threshold)
+    public function __construct(public readonly int $threshold)
     {
         $this->current_value = 0;
-        $this->threshold = $threshold;
     }
 
     public function reset(): void
