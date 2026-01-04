@@ -144,7 +144,7 @@ class GameStatus #not final because of mocking
     }
 
     # for a given language gives back which languages you can translate it to
-    public function availableDictionariesFrom(?string $origin = null)
+    private function availableDictionariesFrom(?string $origin = null): array
     {
         $origin ??= $this->current_lang;
         return array_filter($this->available_languages, fn(string $item) => array_key_exists($this->factory->make(DictionaryType::class, ['src_lang' => $origin, 'target_lang' => $item])->asDictstring(), $this->config->getDictionaries()));
