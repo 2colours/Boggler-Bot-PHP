@@ -18,7 +18,7 @@ function try_send_msg(Message $ctx, string $content): bool
     return $can_be_sent;
 }
 
-function hungarian_role(Member $member)
+function hungarian_role(Member $member): ?string
 {
     $hungarian_roles = ['Beginner', 'Native speaker', 'Intermediate', 'Fluent', 'Advanced', 'Distant native'];
     $roles = $member->roles;
@@ -29,7 +29,7 @@ function hungarian_role(Member $member)
             }
         }
     }
-    return '';
+    return null;
 }
 
 function discord_specific_fields(Member $member): array
