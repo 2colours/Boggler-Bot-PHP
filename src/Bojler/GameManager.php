@@ -33,7 +33,7 @@ class GameManager
 
         $this->file = $live_data_prefix . $config->getCurrentGameFileName();
         $this->archive_file = $live_data_prefix . $config->getSavesFileName();
-        $this->community_wordlist_paths = array_map(fn($value) => $live_data_prefix . $value, $this->config->getCommunityWordlists());
+        $this->community_wordlist_paths = array_map(fn(string $relative_path) => $live_data_prefix . $relative_path, $this->config->getCommunityWordlists());
 
         $default_translation = $config->getDefaultTranslation();
         $this->base_lang = $default_translation[1];

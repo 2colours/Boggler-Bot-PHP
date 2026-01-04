@@ -212,7 +212,7 @@ class GameStatus #not final because of mocking
 
     private function findWordlistSolutions(array $refdict): void
     {
-        $wordlist_paths = array_map(fn($value) => "param/$value", $this->config->getWordlists());
+        $wordlist_paths = array_map(fn(string $relative_path) => "param/$relative_path", $this->config->getWordlists());
         $content = file($wordlist_paths[$this->current_lang], FILE_IGNORE_NEW_LINES);
         $this->wordlist_solutions = new Set(array_filter($content, fn(string $line) => $this->wordValidFast($line, $refdict)));
     }
@@ -355,15 +355,15 @@ class GameStatus #not final because of mocking
             if (count($awards['Best Beginner']) > 0) {
                 break;
             }
-            $awards['Best Beginner'] = array_filter($players, fn($player) => $this->player_handler->getPlayerField($player, 'role') === 'Beginner');
+            $awards['Best Beginner'] = array_filter($players, fn(string|int $player_id) => $this->player_handler->getPlayerField($player_id, 'role') === 'Beginner');
         }
         $relevant_players = array_merge(...$highscore);
-        $is_newcomer = fn($player_data) => count($player_data['found_words']) === $player_data['all_time_found'];
-        $solved_hints = fn($player_data) => count(array_intersect($player_data['found_words'], $player_data['used_hints']));
-        $awards['Newcomer'] = array_filter($relevant_players, fn($player) => $is_newcomer($this->player_handler->player_dict[$player]));
-        $most_solved_hints_amount = count($relevant_players) === 0 ? 0 : max(array_map(fn($player) => $solved_hints($this->player_handler->player_dict[$player]), $relevant_players));
+        $is_newcomer = fn(array $player_data) => count($player_data['found_words']) === $player_data['all_time_found'];
+        $solved_hints = fn(array $player_data) => count(array_intersect($player_data['found_words'], $player_data['used_hints']));
+        $awards['Newcomer'] = array_filter($relevant_players, fn(string|int $player_id) => $is_newcomer($this->player_handler->player_dict[$player_id]));
+        $most_solved_hints_amount = count($relevant_players) === 0 ? 0 : max(array_map(fn(string|int $player_id) => $solved_hints($this->player_handler->player_dict[$player_id]), $relevant_players));
         if ($most_solved_hints_amount > 0) {
-            $awards['Most solved hints'] = array_filter($relevant_players, fn($player) => $solved_hints($this->player_handler->player_dict[$player]) === $most_solved_hints_amount);
+            $awards['Most solved hints'] = array_filter($relevant_players, fn(string|int $player_id) => $solved_hints($this->player_handler->player_dict[$player_id]) === $most_solved_hints_amount);
         }
         return $awards;
     }
