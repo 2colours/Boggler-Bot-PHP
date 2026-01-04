@@ -2,8 +2,6 @@
 
 namespace Bojler;
 
-use Exception;
-
 class ArchiveGameEntryData
 {
     private function __construct(

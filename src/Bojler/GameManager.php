@@ -2,7 +2,6 @@
 
 namespace Bojler;
 
-use DI\FactoryInterface;
 use Discord\Parts\Channel\Message;
 
 use function React\Async\await;
