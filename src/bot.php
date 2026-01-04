@@ -76,18 +76,18 @@ const INSTRUCTION_TEMPLATE = <<<END
 
 # TODO maybe this would deserve a proper util function at least
 # lame emulation of Python str.format as PHP only has sprintf
-function instructions(ConfigHandler $config, string $lang)
+function instructions(ConfigHandler $config, string $lang): string
 {
     return str_replace(['{0}', '{1}'], [$lang, $config->getExamples()[$lang]], INSTRUCTION_TEMPLATE);
 }
 
-function translator_command(ConfigHandler $config, ?string $src_lang = null, ?string $target_lang = null)
+function translator_command(ConfigHandler $config, ?string $src_lang = null, ?string $target_lang = null): callable
 {
     $default_translation = $config->getDefaultTranslation();
     $src_lang ??= $default_translation[0];
     $target_lang ??= $default_translation[1];
     $ctor_args = compact('src_lang', 'target_lang');
-    return function (FactoryInterface $factory, DatabaseHandler $db, Message $ctx, $args) use ($ctor_args): void {
+    return function (FactoryInterface $factory, DatabaseHandler $db, Message $ctx, array $args) use ($ctor_args): void {
         $word = $args[0];
         $translation = get_translation($word, $factory->make(DictionaryType::class, [...$ctor_args]), $db);
         if (isset($translation)) {
@@ -110,7 +110,7 @@ function achievements(GameStatus $game, string $word, string $command_type)
     return $reactions;
 }
 
-function s_reactions(ConfigHandler $config, GameManager $game_manager, string $word)
+function s_reactions(ConfigHandler $config, GameManager $game_manager, string $word): array
 {
     $reaction_list = [acknowledgement_reaction($word), approval_reaction($config, $game_manager, $word)];
     return array_merge($reaction_list, achievements($game_manager->current_game, $word, 's'));
@@ -119,18 +119,18 @@ function s_reactions(ConfigHandler $config, GameManager $game_manager, string $w
 # "predicate-ish" functions (not higher order, takes context, performs a check)
 
 #Checks whether the author of the message is a "native speaker"
-function from_native_speaker(Message $ctx)
+function from_native_speaker(Message $ctx): bool
 {
     return hungarian_role($ctx->member) === 'Native speaker'; # TODO preferably should be configurable, not hardcoded constant
 }
 
-function from_creator(Message $ctx)
+function from_creator(Message $ctx): bool
 {
     return in_array($ctx->author->id, CREATORS, true);
 }
 
 #Checks if the current message is in the tracked channel
-function channel_valid(EnvironmentHandler $env, Message $ctx)
+function channel_valid(EnvironmentHandler $env, Message $ctx): bool
 {
     return $ctx->guild?->id === $env->getHomeServerId() && $ctx->channel?->id === $env->getHomeChannelId();
 }
@@ -141,7 +141,7 @@ function needs_thrown_dice(GameManager $game_manager)
     return $game_manager->current_game->thrown_the_dice;
 }
 
-function emoji_awarded(PlayerHandler $player, ConfigHandler $config, Message $ctx)
+function emoji_awarded(PlayerHandler $player, ConfigHandler $config, Message $ctx): bool
 {
     return $player->getPlayerField($ctx->author->id, 'all_time_found') >= $config->getWordCountForEmoji();
 }
@@ -165,9 +165,9 @@ function simple_board(ConfigHandler $config, GameStatus $game, Message $ctx): vo
 }
 
 # "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
-function needs_counting(callable $handler)
+function needs_counting(callable $handler): callable
 {
-    return function (Counter $counter, GameManager $game_manager, ConfigHandler $config, InvokerInterface $invoker, $ctx, $args) use ($handler) {
+    return function (Counter $counter, GameManager $game_manager, ConfigHandler $config, InvokerInterface $invoker, Message $ctx, array $args) use ($handler): void {
         $invoker->call($handler, ['ctx' => $ctx, 'args' => $args]);
         if ($counter->trigger()) {
             simple_board($config, $game_manager->current_game, $ctx);
@@ -176,9 +176,9 @@ function needs_counting(callable $handler)
 }
 
 # $refusalMessageProducer is a function that can take $ctx
-function ensure_predicate(callable $predicate, ?callable $refusalMessageProducer = null)
+function ensure_predicate(callable $predicate, ?callable $refusalMessageProducer = null): callable
 {
-    return fn($handler) => function (InvokerInterface $invoker, Message $ctx, $args) use ($handler, $predicate, $refusalMessageProducer) {
+    return fn(callable $handler) => function (InvokerInterface $invoker, Message $ctx, array $args) use ($handler, $predicate, $refusalMessageProducer): void {
         if ($invoker->call($predicate, ['ctx' => $ctx])) {
             $invoker->call($handler, ['ctx' => $ctx, 'args' => $args]);
         } elseif (isset($refusalMessageProducer)) {
@@ -227,13 +227,13 @@ $bot->registerCommand('the', translator_command($container->get(ConfigHandler::c
 $bot->registerCommand('thg', translator_command($container->get(ConfigHandler::class), 'Hungarian', 'German'), ['description' => 'translate given word Hun-Ger']);
 $bot->registerCommand('tgh', translator_command($container->get(ConfigHandler::class), 'German', 'Hungarian'), ['description' => 'translate given word Ger-Hun']);
 $bot->registerCommand('thh', translator_command($container->get(ConfigHandler::class), 'Hungarian', 'Hungarian'), ['description' => 'translate given word Hun-Hun']);
-$bot->registerCommand('t', function (FactoryInterface $factory, DatabaseHandler $db, ConfigHandler $config, EnvironmentHandler $env, InvokerInterface $invoker, GameManager $game_manager, Message $ctx, $args): void {
+$bot->registerCommand('t', function (FactoryInterface $factory, DatabaseHandler $db, ConfigHandler $config, EnvironmentHandler $env, GameManager $game_manager, Message $ctx, array $args): void {
     $translator_args = channel_valid($env, $ctx)
         ? ['src_lang' => $game_manager->current_game->current_lang, 'target_lang' => $game_manager->base_lang]
         : [];
     translator_command($config, ...$translator_args)($factory, $db, $ctx, $args);
 }, ['description' => 'translate given word']);
-$bot->registerCommand('stats', function (PlayerHandler $player, Message $ctx) {
+$bot->registerCommand('stats', function (PlayerHandler $player, Message $ctx): void {
     $infos = $player->player_dict[$ctx->author->id];
     if (is_null($infos)) {
         await($ctx->reply('You don\'t have any statistics registered.'));
@@ -254,7 +254,7 @@ $bot->registerCommand(
     decorate_handler([ensure_predicate(from_creator(...), fn() => 'This would be very silly now, wouldn\'t it.')], 'trigger'),
     ['description' => 'testing purposes only']
 );
-function trigger(Message $ctx, $args): void
+function trigger(Message $ctx, array $args): void
 {
     await($ctx->reply('Congrats, Master.'));
 }
@@ -264,7 +264,7 @@ $bot->registerCommand(
     decorate_handler([ensure_predicate(channel_valid(...))], 'next_language'),
     ['description' => 'change language']
 );
-function next_language(ConfigHandler $config, GameManager $game_manager, Message $ctx, $args): void
+function next_language(ConfigHandler $config, GameManager $game_manager, Message $ctx, array $args): void
 {
     $available_languages = $config->getAvailableLanguages();
     $lang = $args[0];
@@ -397,12 +397,12 @@ function left(GameManager $game_manager, Message $ctx): void
             fn($hints_for_language) => array_filter($hints_for_language, fn($hint) => !$game->found_words->contains($hint)),
             $game->available_hints
         ),
-        fn($hints_for_language) => count($hints_for_language) > 0
+        fn(array $hints_for_language) => count($hints_for_language) > 0
     );
     $hint_count_by_language = implode(
         ', ',
         array_map(
-            fn($language, $hints_for_language) => count($hints_for_language) . " $language",
+            fn(string $language, array $hints_for_language) => count($hints_for_language) . " $language",
             array_keys($unfound_hints_without_empty),
             array_values($unfound_hints_without_empty)
         )
@@ -437,7 +437,7 @@ $bot->registerCommand(
     ['description' => 'add solution'] # TODO alias to empty string?
 );
 
-function add_solution(ConfigHandler $config, GameManager $game_manager, Message $ctx, $args): void
+function add_solution(ConfigHandler $config, GameManager $game_manager, Message $ctx, array $args): void
 {
     var_dump($args);
     $word = $args[0];
@@ -458,7 +458,7 @@ $bot->registerCommand(
     ['description' => 'remove solution', 'aliases' => ['r']]
 );
 
-function remove(GameManager $game_manager, PlayerHandler $player, Message $ctx, $args): void
+function remove(GameManager $game_manager, PlayerHandler $player, Message $ctx, array $args): void
 {
     $game = $game_manager->current_game;
     $word = $args[0];
@@ -492,7 +492,7 @@ $bot->registerCommand(
     ['description' => 'add to community wordlist']
 );
 
-function add(GameManager $game_manager, Message $ctx, $args): void
+function add(GameManager $game_manager, Message $ctx, array $args): void
 {
     $word = $args[0];
     if ($game_manager->tryAddCommunity($ctx, $word)) {
@@ -524,7 +524,7 @@ $bot->registerCommand(
     ['description' => 'change your personal emoji']
 );
 
-function emoji(PlayerHandler $player, Message $ctx, $args): void
+function emoji(PlayerHandler $player, Message $ctx, array $args): void
 {
     $emoji_str = $args[0];
     $player->setEmoji($ctx->author->id, $emoji_str);
@@ -558,7 +558,7 @@ $bot->registerCommand(
     ['description' => 'give a hint in Hungarian']
 );
 
-function hint_command(string $from_language)
+function hint_command(string $from_language): callable
 {
     return function (GameManager $game_manager, FactoryInterface $factory, PlayerHandler $player, DatabaseHandler $db, Message $ctx) use ($from_language): void {
         $game = $game_manager->current_game;
@@ -594,7 +594,7 @@ $bot->registerCommand(
     ['description' => 'load older games (see: oldgames), example: b!loadgame 5']
 );
 
-function load_game(Counter $counter, ConfigHandler $config, GameManager $game_manager, Message $ctx, $args): void
+function load_game(Counter $counter, ConfigHandler $config, GameManager $game_manager, Message $ctx, array $args): void
 {
     $game = $game_manager->current_game;
     $game_number = (int) $args[0];
@@ -719,13 +719,13 @@ function approval_reaction(ConfigHandler $config, GameManager $game_manager, str
     return match (true) {
         (bool) @$approval_status->translations[$game_manager->base_lang] => '☑️', # TODO review the design itself: the concept of a base language is weird - mostly because it's not archived
         $approval_status->wordlist => '✅',
-        array_any($config->getAvailableLanguages(), fn($lang) => @$approval_status->translations[$lang]) => '✅',
+        array_any($config->getAvailableLanguages(), fn(string $lang) => (bool) @$approval_status->translations[$lang]) => '✅',
         $approval_status->community => '✔',
         default => '❔'
     };
 }
 
-function found_words_output(ConfigHandler $config, GameStatus $game)
+function found_words_output(ConfigHandler $config, GameStatus $game): string
 {
     $found_word_list = $game->foundWordsSorted();
     if (count($found_word_list) === 0) {
@@ -740,11 +740,11 @@ function found_words_output(ConfigHandler $config, GameStatus $game)
         END;
 }
 
-function format_found_words(GameStatus $game, $words): string
+function format_found_words(GameStatus $game, array $words): string
 {
     return implode(
         ', ',
-        array_map(fn($word) => $game->isFoundApproved($word) ? $word : strikethrough($word), $words)
+        array_map(fn(string $word) => $game->isFoundApproved($word) ? $word : strikethrough($word), $words)
     );
 }
 

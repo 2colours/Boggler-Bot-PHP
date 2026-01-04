@@ -9,7 +9,7 @@ use function React\Async\await;
 
 const MAX_GRAPHEME_NUMBER = 1500; # "2000 characters" but Discord for some unacceptable reason doesn't count graphemes here so the number goes lower...
 
-function try_send_msg(Message $ctx, string $content)
+function try_send_msg(Message $ctx, string $content): bool
 {
     $can_be_sent = grapheme_strlen($content) <= MAX_GRAPHEME_NUMBER;
     if ($can_be_sent) {
@@ -32,7 +32,7 @@ function hungarian_role(Member $member)
     return '';
 }
 
-function discord_specific_fields(Member $member)
+function discord_specific_fields(Member $member): array
 {
     return [
         'name' => $member->username,
@@ -41,7 +41,7 @@ function discord_specific_fields(Member $member)
     ];
 }
 
-function highscore_names(array $ids, PlayerHandler $player_handler)
+function highscore_names(array $ids, PlayerHandler $player_handler): string
 {
     if (count($ids) === 0) {
         return ' - ';
@@ -54,7 +54,7 @@ function highscore_names(array $ids, PlayerHandler $player_handler)
 }
 
 
-function on_podium(array $people, PlayerHandler $player_handler)
+function on_podium(array $people, PlayerHandler $player_handler): string # TODO make this implementation nicer somehow
 {
     switch (count($people)) {
         case 0:
@@ -85,7 +85,7 @@ function on_podium(array $people, PlayerHandler $player_handler)
 }
 
 
-function game_highscore(GameStatus $status, PlayerHandler $player_handler)
+function game_highscore(GameStatus $status, PlayerHandler $player_handler): string
 {
     $awards = $status->gameAwards();
     [$on_podium_first, $on_podium_second, $on_podium_third] = [

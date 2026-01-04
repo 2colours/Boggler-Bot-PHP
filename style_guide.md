@@ -23,3 +23,8 @@ _Replacement_: `$ctx->reply($value)` (assuming `$ctx` as the message instance) i
 _Rationale_: in a well-designed codebase, `null`-checks are seldom used - `null` values shouldn't be propagated too much and in general missing values are a special enough case that might demand a design change overall. Since `is_null` is safe to use and stands out more than an `=== null` check, it's a good choice for presenting a special circumstance as special.
 - `implode` is preferred over its alias `join`
 _Rationale_: mainly consistency, and the fact that there is no plain `split` either way - the direct counterpart of this function is `explode`
+- functions and methods (using any sort of `function()` notation) must have type annotations both on their parameters and their return value
+_Rationale_: this kind of type safety helps with refactors in particular and it might catch some logic bugs on the way, as a basic type of contracts
+_Addendum_: magic methods are an exception: neither for `__construct` nor for `__tostring` does it make sense to try to define a different return type (for `__tostring` even the parameter list is fixed); without going through all of them, probably there will be other similar cases for magic methods
+- `fn` arrow functions must be annotated for parameter types but not return values
+_Rationale_: since these functions are usually disposable and rarely reused, and also consist of one single statement, we are dealing with redundancy here. The tradeoff is that usually the return type is so tied to both the context and that single return expression that it's wasteful to have to mark it, while for parameters this is often a kind of sanity check because the value usually comes from some distance at least.

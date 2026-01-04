@@ -23,29 +23,29 @@ class PlayerHandler
         }
         $read_dict = json_decode($read_content, true);
         $this->player_dict = array_map(
-            fn($player_data) => array_merge($this->default_player, $player_data),
+            fn(array $player_data) => array_merge($this->default_player, $player_data),
             $read_dict
         );
         $this->saveFile();
     }
 
-    public function getPlayerField(string|int $id, $field_name)
+    public function getPlayerField(string|int $id, string $field_name): mixed # TODO refine
     {
         return $this->player_dict[$id][$field_name];
     }
 
-    public function setEmoji(string $id, $emoji)
+    public function setEmoji(string $id, string $emoji): void
     {
         $this->player_dict[$id]['personal_emoji'] = $emoji;
         $this->saveFile();
     }
 
-    public function saveFile()
+    public function saveFile(): void
     {
         file_put_contents(self::PLAYER_SAVES_PATH, json_encode((object)$this->player_dict, JSON_UNESCAPED_UNICODE));
     }
 
-    public function newPlayer(Member $member)
+    public function newPlayer(Member $member): void
     {
         $this->player_dict[$member->user->id] = array_merge(
             [
@@ -59,7 +59,7 @@ class PlayerHandler
         );
     }
 
-    public function newGame()
+    public function newGame(): void
     {
         foreach ($this->player_dict as &$player_data) {
             $player_data['found_words'] = [];
@@ -68,7 +68,7 @@ class PlayerHandler
         $this->saveFile();
     }
 
-    private function playerUpdate(Member $player)
+    private function playerUpdate(Member $player): void
     {
         if (!array_key_exists($player->user->id, $this->player_dict)) {
             $this->newPlayer($player);
@@ -82,7 +82,7 @@ class PlayerHandler
         );
     }
 
-    public function playerAddWord(Message $ctx, ApprovalData $word_info)
+    public function playerAddWord(Message $ctx, ApprovalData $word_info): void
     {
         $this->playerUpdate($ctx->member);
         $this->player_dict[$ctx->author->id]['found_words'][] = $word_info->word;
@@ -93,7 +93,7 @@ class PlayerHandler
         $this->saveFile();
     }
 
-    public function approveWord(string $word)
+    public function approveWord(string $word): void
     {
         $content_changed = false;
         foreach ($this->player_dict as &$player_entry) {
@@ -108,7 +108,7 @@ class PlayerHandler
         }
     }
 
-    public function playerRemoveWord(Message $ctx, ApprovalData $word_info)
+    public function playerRemoveWord(Message $ctx, ApprovalData $word_info): void
     {
         foreach ($this->player_dict as &$player_data) {
             $word_index = array_search($word_info->word, $player_data['found_words']);
@@ -124,7 +124,7 @@ class PlayerHandler
         $this->saveFile();
     }
 
-    public function playerUsedHint(Message $ctx, $word)
+    public function playerUsedHint(Message $ctx, $word): void
     {
         $this->playerUpdate($ctx->member);
         $this->player_dict[$ctx->author->id]['used_hints'][] = $word;

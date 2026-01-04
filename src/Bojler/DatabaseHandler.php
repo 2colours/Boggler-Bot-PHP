@@ -13,7 +13,7 @@ class DatabaseHandler
     public readonly SQLite3 $db;
     public readonly array $dictionaries;
 
-    private function tableSetup()
+    private function tableSetup(): void
     {
         foreach (self::TABLES as $name => $entry_class) {
             $typed_columns = [];
@@ -31,7 +31,7 @@ class DatabaseHandler
         }
     }
 
-    private function importData(string $table_name, string $table_file)
+    private function importData(string $table_name, string $table_file): void
     {
         $current_table_class = self::TABLES[$table_name];
         foreach (file($table_file, FILE_IGNORE_NEW_LINES) as $line) {
@@ -48,7 +48,7 @@ class DatabaseHandler
         }
     }
 
-    public function importSucceeded(DictionaryType $dtype)
+    public function importSucceeded(DictionaryType $dtype): bool
     {
         $in_language = $dtype->src_lang;
         $test_words = ['Hungarian' => 'bársonyos', 'German' => 'Ente', 'English' => 'admirer'];
@@ -56,7 +56,7 @@ class DatabaseHandler
         return isset(array_values($dummy_request)[0]);
     }
 
-    public function translate(string $word, DictionaryType $dtype)
+    public function translate(string $word, DictionaryType $dtype): array
     {
         $dictcode = $dtype->asDictcode();
         $operators = ['=', 'LIKE'];
@@ -72,7 +72,7 @@ class DatabaseHandler
         return $result;
     }
 
-    public function getWords(DictionaryType $dtype)
+    public function getWords(DictionaryType $dtype): array
     {
         $statement = $this->db->prepare('SELECT DISTINCT word FROM dictionary WHERE dictionarycode = :dictcode');
         $statement->bindValue(':dictcode', $dtype->asDictcode(), SQLITE3_INTEGER);

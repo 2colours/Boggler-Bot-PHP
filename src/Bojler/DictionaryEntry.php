@@ -30,7 +30,7 @@ class DictionaryEntry
     }
 
     # Has to be in accordance with TABLE_TYPES and TABLE_COLUMNS!
-    public function asRow()
+    public function asRow(): array
     {
         return [$this->word, $this->description, $this->langcode];
     }

@@ -32,14 +32,14 @@ class LetterList
         }
     }
 
-    public function shuffle()
+    public function shuffle(): void
     {
         shuffle($this->list);
         $this->drawImageMatrix(...$this->display_normal);
         $this->drawImageMatrix(...$this->display_small);
     }
 
-    private function drawImageMatrix(int $space_top, int $space_left, int $distance_vertical, int $distance_horizontal, int $font_size, string $image_filename, int $img_h, int $img_w)
+    private function drawImageMatrix(int $space_top, int $space_left, int $distance_vertical, int $distance_horizontal, int $font_size, string $image_filename, int $img_h, int $img_w): void
     {
         $manager = new ImageManager(Driver::class);
         $image = $manager->create($img_w, $img_h)->fill('white');
@@ -59,7 +59,7 @@ class LetterList
         $image->save("live_data/$image_filename");
     }
 
-    public function isAbnormal()
+    public function isAbnormal(): bool
     {
         return count($this->list) !== self::SIZE;
     }

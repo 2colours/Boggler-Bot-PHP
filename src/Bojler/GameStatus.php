@@ -62,7 +62,7 @@ class GameStatus #not final because of mocking
         $this->gameSetup();
     }
 
-    private function initializeFromCurrent(CurrentGameData $parsed)
+    private function initializeFromCurrent(CurrentGameData $parsed): void
     {
         $this->letters = $this->factory->make(LetterList::class, ['data' => $parsed->letters]);
         $this->found_words = new Set($parsed->found_words);
@@ -70,7 +70,7 @@ class GameStatus #not final because of mocking
         $this->current_lang = $parsed->current_lang;
     }
 
-    private function initializeFromArchive(ArchiveGameEntryData $parsed)
+    private function initializeFromArchive(ArchiveGameEntryData $parsed): void
     {
         $this->letters = $this->factory->make(LetterList::class, ['data' => $parsed->letters_sorted, 'preshuffle' => true]);
         if ($this->letters->isAbnormal()) {
@@ -81,7 +81,7 @@ class GameStatus #not final because of mocking
         $this->current_lang = $parsed->current_lang;
     }
 
-    private function initializeNew(NewGamePayload $new_data)
+    private function initializeNew(NewGamePayload $new_data): void
     {
         $this->found_words = new Set();
         $this->throwDice();
@@ -89,17 +89,17 @@ class GameStatus #not final because of mocking
         $this->current_lang = $new_data->planned_language;
     }
 
-    private function throwDice()
+    private function throwDice(): void
     {
         $used_permutation = range(0, 15);
         shuffle($used_permutation);
         $current_dice = $this->config->getDice()[$this->current_lang];
-        $dice_permutated = array_map(fn($dice_index) => $current_dice[$dice_index], $used_permutation);
-        $this->letters = $this->factory->make(LetterList::class, ['data' => array_map(fn($current_die) => $current_die[array_rand($current_die)], $dice_permutated), 'just_regenerate' => true]);
+        $dice_permutated = array_map(fn(int $dice_index) => $current_dice[$dice_index], $used_permutation);
+        $this->letters = $this->factory->make(LetterList::class, ['data' => array_map(fn(array $current_die) => $current_die[array_rand($current_die)], $dice_permutated), 'just_regenerate' => true]);
         $this->manager->saveGame(); # TODO revise
     }
 
-    private function gameSetup()
+    private function gameSetup(): void
     {
         $this->findSolutions();
         $this->setEndAmount();
@@ -115,7 +115,7 @@ class GameStatus #not final because of mocking
         return max(array_map(textual_length(...), $this->solutions->toArray()));
     }
 
-    private function findSolutions()
+    private function findSolutions(): void
     {
         $refdict = $this->letters->lower_cntdict;
         # wordlist
@@ -128,18 +128,18 @@ class GameStatus #not final because of mocking
         }
         # communitylist
         $this->manager->loadCommunityList($this->current_lang);
-        $this->solutions->add(...array_filter($this->manager->current_community_list, fn($word) => $this->wordValidFast($word, $refdict)));
+        $this->solutions->add(...array_filter($this->manager->current_community_list, fn(string $word) => $this->wordValidFast($word, $refdict)));
         # custom emojis
         $this->findCustomEmojis($refdict);
         $this->solutions->add(...$this->custom_emoji_solution);
     }
 
-    private function findHints()
+    private function findHints(): void
     {
         $refdict = $this->letters->lower_cntdict;
         $this->available_hints = array_map(fn() => [], array_flip($this->available_languages));
         foreach ($this->availableDictionariesFrom($this->current_lang) as $language) {
-            $this->available_hints[$language] = array_values(array_filter($this->db->getWords($this->factory->make(DictionaryType::class, ['src_lang' => $this->current_lang, 'target_lang' => $language])), fn($item) => $this->wordValidFast($item, $refdict)));
+            $this->available_hints[$language] = array_values(array_filter($this->db->getWords($this->factory->make(DictionaryType::class, ['src_lang' => $this->current_lang, 'target_lang' => $language])), fn(string $item) => $this->wordValidFast($item, $refdict)));
         }
     }
 
@@ -147,7 +147,7 @@ class GameStatus #not final because of mocking
     public function availableDictionariesFrom(?string $origin = null)
     {
         $origin ??= $this->current_lang;
-        return array_filter($this->available_languages, fn($item) => array_key_exists($this->factory->make(DictionaryType::class, ['src_lang' => $origin, 'target_lang' => $item])->asDictstring(), $this->config->getDictionaries()));
+        return array_filter($this->available_languages, fn(string $item) => array_key_exists($this->factory->make(DictionaryType::class, ['src_lang' => $origin, 'target_lang' => $item])->asDictstring(), $this->config->getDictionaries()));
     }
 
     # gets the refdict instead of creating it every time
@@ -175,23 +175,23 @@ class GameStatus #not final because of mocking
         return grapheme_str_split($word);
     }
 
-    private function setEndAmount()
+    private function setEndAmount(): void
     {
         $expected_solution_count = $this->wordlist_solutions->count();
         $this->end_amount = $this->solutions->isEmpty() ? 100 : min($this->default_end_amount, intdiv($expected_solution_count, 2));
     }
 
-    private function setApprovedWords()
+    private function setApprovedWords(): void
     {
         $this->approved_words = $this->solutions->intersect($this->found_words);
     }
 
-    private function collator()
+    private function collator(): Collator
     {
         return new Collator($this->config->getLocale($this->current_lang));
     }
 
-    public function foundWordsSorted()
+    public function foundWordsSorted(): array
     {
         $result = $this->found_words->toArray();
         $this->collator()->sort($result);
@@ -205,11 +205,11 @@ class GameStatus #not final because of mocking
         return $result;
     }
 
-    private function findWordlistSolutions(array $refdict)
+    private function findWordlistSolutions(array $refdict): void
     {
         $wordlist_paths = array_map(fn($value) => "param/$value", $this->config->getWordlists());
         $content = file($wordlist_paths[$this->current_lang], FILE_IGNORE_NEW_LINES);
-        $this->wordlist_solutions = new Set(array_filter($content, fn($line) => $this->wordValidFast($line, $refdict)));
+        $this->wordlist_solutions = new Set(array_filter($content, fn(string $line) => $this->wordValidFast($line, $refdict)));
     }
 
     public function approvalStatus(string $word): ApprovalData
@@ -246,18 +246,18 @@ class GameStatus #not final because of mocking
         return $this->approved_words->contains($word);
     }
 
-    private function findCustomEmojis(array $refdict)
+    private function findCustomEmojis(array $refdict): void
     {
-        $this->custom_emoji_solution = array_filter(array_keys($this->custom_emojis[$this->current_lang]), fn($word) => $this->wordValidFast($word, $refdict));
+        $this->custom_emoji_solution = array_filter(array_keys($this->custom_emojis[$this->current_lang]), fn(string $word) => $this->wordValidFast($word, $refdict));
     }
 
-    public function shuffleLetters()
+    public function shuffleLetters(): void
     {
         $this->letters->shuffle();
         $this->manager->saveGame();
     }
 
-    private function ensureGameOver(Message $ctx)
+    private function ensureGameOver(Message $ctx): void
     {
         if ($this->game_over_acknowledged) {
             return;
@@ -267,7 +267,7 @@ class GameStatus #not final because of mocking
         await($ctx->channel->sendMessage(game_highscore($this, $this->player_handler)));
     }
 
-    public function tryAddWord(Message $ctx, string $word)
+    public function tryAddWord(Message $ctx, string $word): bool
     {
         $word_info = $this->approvalStatus($word);
         #await(easter_egg_trigger($ctx, $word, '_Rev'));
@@ -293,7 +293,7 @@ class GameStatus #not final because of mocking
         return true;
     }
 
-    private function addApprovedWord(Message $ctx, string $word)
+    private function addApprovedWord(Message $ctx, string $word): void
     {
         $this->approved_words->add($word);
         if ($this->getApprovedAmount() === $this->end_amount) {
@@ -301,12 +301,12 @@ class GameStatus #not final because of mocking
         }
     }
 
-    private function removeApprovedWord(string $word)
+    private function removeApprovedWord(string $word): void
     {
         $this->approved_words->remove($word);
     }
 
-    public function removeWord(string $word)
+    public function removeWord(string $word): void
     {
         $this->found_words->remove($word);
         # removed words have always to be saved (changes_to_save)
@@ -317,12 +317,12 @@ class GameStatus #not final because of mocking
         $this->manager->saveGame(); # TODO revise
     }
 
-    public function enoughWordsFound()
+    public function enoughWordsFound(): bool
     {
         return $this->found_words->count() >= $this->end_amount;
     }
 
-    public function gameAwards()
+    public function gameAwards(): array
     {
         $highscore = [];
         $awards = [
@@ -368,7 +368,7 @@ class GameStatus #not final because of mocking
         return $this->solutions->contains($word) && textual_length($word) >= $this->getLongestWordLength();
     }
     # TODO revise visibility
-    public function acceptSolutionRetrospectively(Message $ctx, string $word)
+    public function acceptSolutionRetrospectively(Message $ctx, string $word): void
     {
         if ($this->wordValidFast($word, $this->letters->lower_cntdict)) {
             $this->solutions->add($word);

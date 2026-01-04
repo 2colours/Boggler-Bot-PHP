@@ -13,12 +13,12 @@ class Counter
         $this->threshold = $threshold;
     }
 
-    public function reset()
+    public function reset(): void
     {
         $this->current_value = 0;
     }
 
-    public function trigger()
+    public function trigger(): bool
     {
         $this->current_value++;
         if ($this->current_value === $this->threshold) {

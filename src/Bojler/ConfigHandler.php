@@ -18,92 +18,92 @@ class ConfigHandler
         return $this->config['dictionaries'];
     }
 
-    public function getWordCountForEmoji()
+    public function getWordCountForEmoji(): int
     {
         return $this->config['rewards']['words_for_emoji'];
     }
 
-    public function getPlayerDefaults()
+    public function getPlayerDefaults(): array
     {
         return $this->config['default_player'];
     }
 
-    public function getDisplayNormalRecord()
+    public function getDisplayNormalRecord(): array
     {
         return $this->config['display']['normal'];
     }
 
-    public function getDisplaySmallRecord()
+    public function getDisplaySmallRecord(): array
     {
         return $this->config['display']['small'];
     }
 
-    public function getDisplayNormalFilePath(string $prefix)
+    public function getDisplayNormalFilePath(string $prefix): string
     {
         return $prefix . $this->getDisplayNormalRecord()['image_filename'];
     }
 
-    public function getDisplaySmallFilePath(string $prefix)
+    public function getDisplaySmallFilePath(string $prefix): string
     {
         return $prefix . $this->getDisplaySmallRecord()['image_filename'];
     }
 
-    public function getSavesFileName()
+    public function getSavesFileName(): string
     {
         return $this->config['saves_filename'];
     }
 
-    public function getCurrentGameFileName()
+    public function getCurrentGameFileName(): string
     {
         return $this->config['current_game'];
     }
 
-    public function getExamples()
+    public function getExamples(): array
     {
         return $this->config['examples'];
     }
 
-    public function getAvailableLanguages()
+    public function getAvailableLanguages(): array
     {
         return array_keys($this->config['dice']);
     }
 
-    public function getCommunityWordlists()
+    public function getCommunityWordlists(): array
     {
         return $this->config['community_wordlists'];
     }
 
-    public function getCustomEmojis()
+    public function getCustomEmojis(): array
     {
         return $this->config['custom_emojis'];
     }
 
-    public function getProgressBarVersion()
+    public function getProgressBarVersion(): array
     {
         return $this->config['progress_bar_version'];
     }
 
-    public function getDefaultTranslation()
+    public function getDefaultTranslation(): array
     {
         return $this->config['default_translation'];
     }
 
-    public function getDice()
+    public function getDice(): array
     {
         return $this->config['dice'];
     }
 
-    public function getWordlists()
+    public function getWordlists(): array
     {
         return $this->config['wordlists'];
     }
 
-    public function getDefaultEndAmount()
+    public function getDefaultEndAmount(): int
     {
         return $this->config['default_end_amount'];
     }
 
-    public function getLocale(string $languageName)
+    public function getLocale(string $languageName): string
     {
         return $this->config['locale'][$languageName];
     }
