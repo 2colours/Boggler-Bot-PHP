@@ -170,14 +170,15 @@ final class CustomCommandClient extends DiscordCommandClient
         $ctx->channel->sendEmbed($embed);
     }
 
-    private function defaultHelpWithArgs($message, $prefix, $args)
+    private function defaultHelpWithArgs(Message $message, string $prefix, array $args): void
     {
         $command = $this;
         foreach ($args as $commandString) {
             $newCommand = $command->getCommand($commandString);
 
             if (is_null($newCommand)) {
-                return "The command $commandString does not exist.";
+                $message->reply("The command $commandString does not exist.");
+                return;
             }
 
             $command = $newCommand;
