@@ -11,7 +11,7 @@ class PlayerHandler
 {
     public const PLAYER_SAVES_PATH = 'live_data/player_saves.json';
     private readonly array $default_player; # injection-dependent
-    public $player_dict;
+    public private(set) array $player_dict;
 
     public function __construct(ConfigHandler $config)
     {
