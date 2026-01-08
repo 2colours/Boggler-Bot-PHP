@@ -2,13 +2,13 @@
 
 namespace Bojler;
 
-class ArchiveGameEntryData
+readonly class ArchiveGameEntryData
 {
     private function __construct(
-        public private(set) array $letters_sorted,
-        public private(set) array $found_words_sorted,
-        public private(set) int $game_number,
-        public private(set) string $current_lang
+        public array $letters_sorted,
+        public array $found_words_sorted,
+        public int $game_number,
+        public string $current_lang
     ) {
     }
 

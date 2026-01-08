@@ -2,9 +2,9 @@
 
 namespace Bojler;
 
-class NewGamePayload
+readonly class NewGamePayload
 {
-    public function __construct(public readonly int $games_so_far, public readonly string $planned_language)
+    public function __construct(public int $games_so_far, public string $planned_language)
     {
     }
 }

@@ -3,15 +3,15 @@
 namespace Bojler;
 
 #A dictionary entry that represents one record - needs to be changed when applying a migration
-class DictionaryEntry
+readonly class DictionaryEntry
 {
     public const TABLE_TYPES = ['TEXT', 'TEXT', 'INTEGER'];
     public const TABLE_COLUMNS = ['word', 'description', 'dictionarycode'];
     public const INDEXES = ['dictindex' => ['word', 'dictionarycode']];
 
-    public readonly string $word;
-    public readonly string $description;
-    public readonly string $langcode;
+    public string $word;
+    public string $description;
+    public string $langcode;
 
     public function __construct(string $line)
     {

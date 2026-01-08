@@ -2,16 +2,16 @@
 
 namespace Bojler;
 
-class CurrentGameData
+readonly class CurrentGameData
 {
     private function __construct(
-        public private(set) array $letters,
-        public private(set) array $found_words,
-        public private(set) int $game_number,
-        public private(set) string $current_lang,
-        public private(set) string $base_lang,
-        public private(set) string $planned_lang,
-        public private(set) string $max_saved_game
+        public array $letters,
+        public array $found_words,
+        public int $game_number,
+        public string $current_lang,
+        public string $base_lang,
+        public string $planned_lang,
+        public string $max_saved_game
     ) {
     }
 
