@@ -107,4 +107,9 @@ class ConfigHandler
     {
         return $this->config['locale'][$languageName];
     }
+
+    public function getPrefix(): string
+    {
+        return $this->config['prefix'];
+    }
 }

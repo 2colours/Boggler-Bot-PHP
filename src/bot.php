@@ -207,7 +207,7 @@ $container = $builder->build();
 # define('easter_egg_handler', new EasterEggHandler($game->found_words_set));
 
 $bot = new CustomCommandClient($container, [
-    'prefix' => 'b!',
+    'prefix' => $container->get(ConfigHandler::class)->getPrefix(),
     'token' => $container->get(EnvironmentHandler::class)->getDiscordToken(),
     'description' => 'Szórakodtató bot',
     'discordOptions' => [
