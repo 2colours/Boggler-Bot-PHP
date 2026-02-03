@@ -84,9 +84,9 @@ class GameStatus #not final because of mocking
     private function initializeNew(NewGamePayload $new_data): void
     {
         $this->found_words = new Set();
-        $this->throwDice();
         $this->game_number = $new_data->games_so_far + 1;
         $this->current_lang = $new_data->planned_language;
+        $this->throwDice();
     }
 
     private function throwDice(): void
