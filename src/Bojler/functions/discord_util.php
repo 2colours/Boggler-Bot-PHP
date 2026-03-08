@@ -2,29 +2,36 @@
 
 namespace Bojler;
 
-use Discord\Parts\Channel\Message;
-use Discord\Parts\User\Member;
+use Ragnarok\Fenrir\Discord;
+use Ragnarok\Fenrir\Gateway\Events\MessageCreate;
+use Ragnarok\Fenrir\Parts\GuildMember;
+use Ragnarok\Fenrir\Parts\Message;
+use Ragnarok\Fenrir\Rest\Helpers\Channel\EmbedBuilder;
+use Ragnarok\Fenrir\Rest\Helpers\Channel\MessageBuilder;
+use Ragnarok\Fenrir\Rest\Helpers\Emoji\EmojiBuilder;
+use React\Promise\PromiseInterface;
+use RuntimeException;
 
 use function React\Async\await;
 
 const MAX_GRAPHEME_NUMBER = 1500; # "2000 characters" but Discord for some unacceptable reason doesn't count graphemes here so the number goes lower...
 
-function try_send_msg(Message $ctx, string $content): bool
+function try_send_msg(Discord $discord, MessageCreate $ctx, string $content): bool
 {
     $can_be_sent = grapheme_strlen($content) <= MAX_GRAPHEME_NUMBER;
     if ($can_be_sent) {
-        await($ctx->channel->sendMessage($content));
+        await(message_send_same_channel($discord, $ctx, $content));
     }
     return $can_be_sent;
 }
 
-function hungarian_role(Member $member): ?string
+function hungarian_role(GuildMember $member): ?string
 {
     $hungarian_roles = ['Beginner', 'Native speaker', 'Intermediate', 'Fluent', 'Advanced', 'Distant native'];
     $roles = $member->roles;
     foreach ($roles as $item) {
         foreach ($hungarian_roles as $hu_role) {
-            if ($item->name === $hu_role) {
+            if ($item === $hu_role) {
                 return $hu_role;
             }
         }
@@ -32,12 +39,12 @@ function hungarian_role(Member $member): ?string
     return null;
 }
 
-function discord_specific_fields(Member $member): array
+function discord_specific_fields(GuildMember $member): array
 {
     return [
-        'name' => $member->username,
+        'name' => $member->user->username,
         'role' => hungarian_role($member),
-        'server_name' => name_shortened($member->nick ?? $member->username)
+        'server_name' => name_shortened($member->nick ?? $member->user->username)
     ];
 }
 
@@ -152,7 +159,7 @@ function progress_bar(ConfigHandler $config, GameStatus $game_status, ?string $e
     # covered by the full emojis, which would mean the target number has been reached.
     # but we handled that as a separate case.
     $empty_emoji_number = $progress_bar_length - $full_emoji_number - 1;
-    $progress_bar .= $emoji_scale[floor($progress_in_current_step * (count($emoji_scale) - 1))];
+    $progress_bar .= $emoji_scale[(int)($progress_in_current_step * (count($emoji_scale) - 1))];
     $progress_bar .= str_repeat($emoji_scale[0], $empty_emoji_number);
     return $progress_bar;
 }
@@ -200,4 +207,32 @@ function get_translation(string $text, DictionaryType $dictionary, DatabaseHandl
         }
     }
     return null;
+}
+
+
+# Fenrir convenience functions
+
+function message_reply(Discord $discord, MessageCreate $ctx, string $content): PromiseInterface
+{
+    return $discord->rest->channel->createMessage(
+        $ctx->channel_id,
+        new MessageBuilder()->setReference($ctx->channel_id, $ctx->id, false, $ctx->guild_id)->setContent($content)
+    );
+}
+
+function message_send_same_channel(Discord $discord, MessageCreate $ctx, string|EmbedBuilder $content, ?bool $isFileName = false): PromiseInterface
+{
+    $builder = new MessageBuilder();
+    $builder = match (true) {
+        is_string($content) && !$isFileName => $builder->setContent($content),
+        is_string($content) && $isFileName => $builder->addFile(basename($content), file_get_contents($content)),
+        $content instanceof EmbedBuilder => $builder->addEmbed($content),
+        default => throw new RuntimeException('Invalid type for parameter $content.')
+    };
+    return $discord->rest->channel->createMessage($ctx->channel_id, $builder);
+}
+
+function message_react(Discord $discord, Message $ctx, string $reaction): PromiseInterface
+{
+    return $discord->rest->channel->createReaction($ctx->channel_id, $ctx->id, new EmojiBuilder()->setId($reaction));
 }

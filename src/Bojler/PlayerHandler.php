@@ -2,10 +2,8 @@
 
 namespace Bojler;
 
-use Discord\Parts\{
-    Channel\Message,
-    User\Member,
-};
+use Ragnarok\Fenrir\Gateway\Events\MessageCreate;
+use Ragnarok\Fenrir\Parts\GuildMember;
 
 class PlayerHandler
 {
@@ -45,7 +43,7 @@ class PlayerHandler
         file_put_contents(self::PLAYER_SAVES_PATH, json_encode((object)$this->player_dict, JSON_UNESCAPED_UNICODE));
     }
 
-    public function newPlayer(Member $member): void
+    public function newPlayer(GuildMember $member): void
     {
         $this->player_dict[$member->user->id] = array_merge(
             [
@@ -68,7 +66,7 @@ class PlayerHandler
         $this->saveFile();
     }
 
-    private function playerUpdate(Member $player): void
+    private function playerUpdate(GuildMember $player): void
     {
         if (!array_key_exists($player->user->id, $this->player_dict)) {
             $this->newPlayer($player);
@@ -82,7 +80,7 @@ class PlayerHandler
         );
     }
 
-    public function playerAddWord(Message $ctx, ApprovalData $word_info): void
+    public function playerAddWord(MessageCreate $ctx, ApprovalData $word_info): void
     {
         $this->playerUpdate($ctx->member);
         $this->player_dict[$ctx->author->id]['found_words'][] = $word_info->word;
@@ -108,7 +106,7 @@ class PlayerHandler
         }
     }
 
-    public function playerRemoveWord(Message $ctx, ApprovalData $word_info): void
+    public function playerRemoveWord(MessageCreate $ctx, ApprovalData $word_info): void
     {
         foreach ($this->player_dict as &$player_data) {
             $word_index = array_search($word_info->word, $player_data['found_words']);
@@ -124,7 +122,7 @@ class PlayerHandler
         $this->saveFile();
     }
 
-    public function playerUsedHint(Message $ctx, $word): void
+    public function playerUsedHint(MessageCreate $ctx, $word): void
     {
         $this->playerUpdate($ctx->member);
         $this->player_dict[$ctx->author->id]['used_hints'][] = $word;

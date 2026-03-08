@@ -10,7 +10,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Bojler\{
     ConfigHandler,
     Counter,
-    CustomCommandClient,
     DatabaseHandler,
     DictionaryType,
     EnvironmentHandler,
@@ -18,13 +17,12 @@ use Bojler\{
     GameStatus,
     GameStatusFactory,
     PlayerHandler,
+    Discord\CommandClientOptions,
+    Discord\CustomCommandClient
 };
 use DI\ContainerBuilder;
 use DI\FactoryInterface;
-use Discord\Builders\MessageBuilder;
 use Symfony\Component\Dotenv\Dotenv;
-use Discord\Parts\Channel\Message;
-use Discord\WebSockets\Intents;
 use Invoker\InvokerInterface;
 use Random\Randomizer;
 use Monolog\{
@@ -32,6 +30,11 @@ use Monolog\{
     Handler\StreamHandler,
     Level,
 };
+use Psr\Log\LoggerInterface;
+use Ragnarok\Fenrir\Bitwise\Bitwise;
+use Ragnarok\Fenrir\Discord;
+use Ragnarok\Fenrir\Enums\Intent;
+use Ragnarok\Fenrir\Gateway\Events\MessageCreate;
 
 use function Bojler\{
     masked_word,
@@ -44,6 +47,9 @@ use function Bojler\{
     get_translation,
     hungarian_role,
     italic,
+    message_react,
+    message_reply,
+    message_send_same_channel,
     strikethrough,
     progress_bar
 };
@@ -87,13 +93,13 @@ function translator_command(ConfigHandler $config, ?string $src_lang = null, ?st
     $src_lang ??= $default_translation[0];
     $target_lang ??= $default_translation[1];
     $ctor_args = compact('src_lang', 'target_lang');
-    return function (FactoryInterface $factory, DatabaseHandler $db, Message $ctx, array $args) use ($ctor_args): void {
+    return function (FactoryInterface $factory, DatabaseHandler $db, Discord $discord, MessageCreate $ctx, array $args) use ($ctor_args): void {
         $word = $args[0];
         $translation = get_translation($word, $factory->make(DictionaryType::class, [...$ctor_args]), $db);
         if (isset($translation)) {
-            await($ctx->channel->sendMessage("$word: ||$translation||"));
+            await(message_send_same_channel($discord, $ctx, "$word: ||$translation||"));
         } else {
-            await($ctx->react('😶'));
+            await(message_react($discord, $ctx, '😶'));
         }
     };
 }
@@ -119,20 +125,20 @@ function s_reactions(ConfigHandler $config, GameManager $game_manager, string $w
 # "predicate-ish" functions (not higher order, takes context, performs a check)
 
 #Checks whether the author of the message is a "native speaker"
-function from_native_speaker(Message $ctx): bool
+function from_native_speaker(MessageCreate $ctx): bool
 {
     return hungarian_role($ctx->member) === 'Native speaker'; # TODO preferably should be configurable, not hardcoded constant
 }
 
-function from_creator(Message $ctx): bool
+function from_creator(MessageCreate $ctx): bool
 {
     return in_array($ctx->author->id, CREATORS, true);
 }
 
 #Checks if the current message is in the tracked channel
-function channel_valid(EnvironmentHandler $env, Message $ctx): bool
+function channel_valid(EnvironmentHandler $env, MessageCreate $ctx): bool
 {
-    return $ctx->guild?->id === $env->getHomeServerId() && $ctx->channel?->id === $env->getHomeChannelId();
+    return $ctx->guild_id === $env->getHomeServerId() && $ctx->channel_id === $env->getHomeChannelId();
 }
 
 #Checks if dice are thrown, thrown_the_dice exists just for this
@@ -141,36 +147,36 @@ function dice_thrown(GameManager $game_manager): bool
     return $game_manager->current_game->thrown_the_dice;
 }
 
-function emoji_awarded(PlayerHandler $player, ConfigHandler $config, Message $ctx): bool
+function emoji_awarded(PlayerHandler $player, ConfigHandler $config, MessageCreate $ctx): bool
 {
     return $player->getPlayerField($ctx->author->id, 'all_time_found') >= $config->getWordCountForEmoji();
 }
 
 # "handler-ish" functions (not higher order, takes context, DC side effects)
 
-function send_instructions(ConfigHandler $config, GameManager $game_manager, Message $ctx): void
+function send_instructions(ConfigHandler $config, GameManager $game_manager, Discord $discord, MessageCreate $ctx): void
 {
-    await($ctx->channel->sendMessage(instructions($config, $game_manager->current_game->current_lang)));
+    await(message_send_same_channel($discord, $ctx, instructions($config, $game_manager->current_game->current_lang)));
 }
 
 # sends the small game board with the found words if they fit into one message
-function simple_board(ConfigHandler $config, GameStatus $game, Message $ctx): void
+function simple_board(ConfigHandler $config, GameStatus $game, Discord $discord, MessageCreate $ctx): void
 {
     $found_words_display = found_words_output($config, $game);
     $message = "**Already found words:** $found_words_display";
-    if (!(try_send_msg($ctx, $message))) {
-        await($ctx->channel->sendMessage('_Too many found words. Please use b!see._'));
+    if (!(try_send_msg($discord, $ctx, $message))) {
+        await(message_send_same_channel($discord, $ctx, '_Too many found words. Please use b!see._'));
     }
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplaySmallFilePath(LIVE_DATA_PREFIX))));
+    await(message_send_same_channel($discord, $ctx, $config->getDisplaySmallFilePath(LIVE_DATA_PREFIX), true));
 }
 
 # "decorator-ish" stuff (produces something "handler-ish" or something "decorator-ish")
 function needs_counting(callable $handler): callable
 {
-    return function (Counter $counter, GameManager $game_manager, ConfigHandler $config, InvokerInterface $invoker, Message $ctx, array $args) use ($handler): void {
+    return function (Counter $counter, GameManager $game_manager, ConfigHandler $config, InvokerInterface $invoker, Discord $discord, MessageCreate $ctx, array $args) use ($handler): void {
         $invoker->call($handler, ['ctx' => $ctx, 'args' => $args]);
         if ($counter->trigger()) {
-            simple_board($config, $game_manager->current_game, $ctx);
+            simple_board($config, $game_manager->current_game, $discord, $ctx);
         }
     };
 }
@@ -178,11 +184,11 @@ function needs_counting(callable $handler): callable
 # $refusalMessageProducer is a function that can take $ctx
 function ensure_predicate(callable $predicate, ?callable $refusalMessageProducer = null): callable
 {
-    return fn(callable $handler) => function (InvokerInterface $invoker, Message $ctx, array $args) use ($handler, $predicate, $refusalMessageProducer): void {
+    return fn(callable $handler) => function (InvokerInterface $invoker, Discord $discord, MessageCreate $ctx, array $args) use ($handler, $predicate, $refusalMessageProducer): void {
         if ($invoker->call($predicate, ['ctx' => $ctx])) {
             $invoker->call($handler, ['ctx' => $ctx, 'args' => $args]);
         } elseif (isset($refusalMessageProducer)) {
-            await($ctx->reply($invoker->call($refusalMessageProducer, ['ctx' => $ctx])));
+            await(message_reply($discord, $ctx, $invoker->call($refusalMessageProducer, ['ctx' => $ctx])));
         }
     };
 }
@@ -201,25 +207,31 @@ $builder->addDefinitions([
     Counter::class => new Counter(10),
     Randomizer::class => new Randomizer(),
     EnvironmentHandler::class => new EnvironmentHandler(),
-    Logger::class => new Logger('bojlerLogger', [new StreamHandler('php://stdout', Level::Debug)])
+    Discord::class => function (LoggerInterface $logger, EnvironmentHandler $env) {
+        return new Discord($env->getDiscordToken(), $logger)
+            ->withGateway(Bitwise::from(
+                Intent::GUILD_MESSAGES,
+                Intent::MESSAGE_CONTENT,
+            ))
+            ->withRest();
+    },
+    LoggerInterface::class => new Logger('bojlerLogger', [new StreamHandler('php://stdout', Level::Debug)])
 ]);
 $container = $builder->build();
 # define('easter_egg_handler', new EasterEggHandler($game->found_words_set));
 
-$bot = new CustomCommandClient($container, [
-    'prefix' => $container->get(ConfigHandler::class)->getPrefix(),
-    'token' => $container->get(EnvironmentHandler::class)->getDiscordToken(),
-    'description' => 'Szórakodtató bot',
-    'discordOptions' => [
-        'logger' => $container->get(Logger::class),
-        'intents' => Intents::getDefaultIntents() | Intents::MESSAGE_CONTENT # Note: MESSAGE_CONTENT is privileged, see https://dis.gd/mcfaq
-    ],
-    'caseInsensitiveCommands' => true,
-    'customOptions' => [
-        'locale' => $container->get(ConfigHandler::class)->getLocale($container->get(ConfigHandler::class)->getDefaultTranslation()[0]), # TODO allow configuration of locale during the usage of the bot
-        'caseInsensitivePrefix' => true
-    ]
-]); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/49
+$bot = new CustomCommandClient(
+    $container,
+    $container->get(Discord::class),
+    new CommandClientOptions(
+        prefix: $container->get(ConfigHandler::class)->getPrefix(),
+        description: 'Szórakodtató bot',
+        caseInsensitiveCommands: true,
+        caseInsensitivePrefix: true,
+        locale: $container->get(ConfigHandler::class)->getLocale($container->get(ConfigHandler::class)->getDefaultTranslation()[0]), # TODO allow configuration of locale during the usage of the bot
+        logger: $container->get(LoggerInterface::class)
+    )
+); # TODO https://github.com/2colours/Boggler-Bot-PHP/issues/49
 
 $bot->registerCommand('info', send_instructions(...), ['description' => 'show instructions']);
 $bot->registerCommand('teh', translator_command($container->get(ConfigHandler::class), 'English', 'Hungarian'), ['description' => 'translate given word Eng-Hun']);
@@ -227,20 +239,20 @@ $bot->registerCommand('the', translator_command($container->get(ConfigHandler::c
 $bot->registerCommand('thg', translator_command($container->get(ConfigHandler::class), 'Hungarian', 'German'), ['description' => 'translate given word Hun-Ger']);
 $bot->registerCommand('tgh', translator_command($container->get(ConfigHandler::class), 'German', 'Hungarian'), ['description' => 'translate given word Ger-Hun']);
 $bot->registerCommand('thh', translator_command($container->get(ConfigHandler::class), 'Hungarian', 'Hungarian'), ['description' => 'translate given word Hun-Hun']);
-$bot->registerCommand('t', function (FactoryInterface $factory, DatabaseHandler $db, ConfigHandler $config, EnvironmentHandler $env, GameManager $game_manager, Message $ctx, array $args): void {
+$bot->registerCommand('t', function (FactoryInterface $factory, DatabaseHandler $db, ConfigHandler $config, EnvironmentHandler $env, GameManager $game_manager, Discord $discord, MessageCreate $ctx, array $args): void {
     $translator_args = channel_valid($env, $ctx)
         ? ['src_lang' => $game_manager->current_game->current_lang, 'target_lang' => $game_manager->base_lang]
         : [];
-    translator_command($config, ...$translator_args)($factory, $db, $ctx, $args);
+    translator_command($config, ...$translator_args)($factory, $db, $discord, $ctx, $args);
 }, ['description' => 'translate given word']);
-$bot->registerCommand('stats', function (PlayerHandler $player, Message $ctx): void {
+$bot->registerCommand('stats', function (PlayerHandler $player, Discord $discord, MessageCreate $ctx): void {
     $infos = $player->player_dict[$ctx->author->id];
     if (is_null($infos)) {
-        await($ctx->reply('You don\'t have any statistics registered.'));
+        await(message_reply($discord, $ctx, 'You don\'t have any statistics registered.'));
         return;
     }
     $found_words = implode(', ', $infos['found_words']);
-    await($ctx->channel->sendMessage(<<<END
+    await(message_send_same_channel($discord, $ctx, <<<END
         **Player stats for $infos[server_name]:**
         *Total found words:* $infos[all_time_found]
         *Approved words in all games:* $infos[all_time_approved]
@@ -254,9 +266,9 @@ $bot->registerCommand(
     decorate_handler([ensure_predicate(from_creator(...), fn() => 'This would be very silly now, wouldn\'t it.')], 'trigger'),
     ['description' => 'testing purposes only']
 );
-function trigger(Message $ctx, array $args): void
+function trigger(Discord $discord, MessageCreate $ctx, array $args): void
 {
-    await($ctx->reply('Congrats, Master.'));
+    await(message_reply($discord, $ctx, 'Congrats, Master.'));
 }
 
 $bot->registerCommand(
@@ -264,20 +276,20 @@ $bot->registerCommand(
     decorate_handler([ensure_predicate(channel_valid(...))], 'next_language'),
     ['description' => 'change language']
 );
-function next_language(ConfigHandler $config, GameManager $game_manager, Message $ctx, array $args): void
+function next_language(ConfigHandler $config, GameManager $game_manager, Discord $discord, MessageCreate $ctx, array $args): void
 {
     $available_languages = $config->getAvailableLanguages();
     $lang = $args[0];
     if (is_null($lang) || !in_array($lang, $available_languages)) {
         $languages = implode(', ', $available_languages);
-        await($ctx->reply(<<<END
+        await(message_reply($discord, $ctx, <<<END
             Please provide an argument <language>.
             <language> should be one of the values [$languages].
             END));
         return;
     }
     $game_manager->setLang($lang);
-    await($ctx->channel->sendMessage("Changed language to $lang for the next games."));
+    await(message_send_same_channel($discord, $ctx, "Changed language to $lang for the next games."));
 }
 
 $bot->registerCommand(
@@ -285,32 +297,32 @@ $bot->registerCommand(
     decorate_handler([ensure_predicate(channel_valid(...))], new_game(...)),
     ['description' => 'start new game']
 );
-function new_game(Counter $counter, ConfigHandler $config, GameManager $game_manager, PlayerHandler $player, Message $ctx): void
+function new_game(Counter $counter, ConfigHandler $config, GameManager $game_manager, PlayerHandler $player, Discord $discord, MessageCreate $ctx): void
 {
     $game = $game_manager->current_game;
     # this isn't perfect, but at least it won't display this "found words" always when just having looked at an old game for a second. That would be annoying.
     if ($game_manager->changes_to_save) {
-        await($ctx->channel->sendMessage(game_highscore($game, $player)));
+        await(message_send_same_channel($discord, $ctx, game_highscore($game, $player)));
         $message = 'All words found in the last game: ' . found_words_output($config, $game) . "\n\n" . instructions($config, $game_manager->planned_lang) . "\n\n";
         foreach (output_split_cursive($message) as $item) {
-            await($ctx->channel->sendMessage($item));
+            await(message_send_same_channel($discord, $ctx, $item));
         }
     } else {
-        await($ctx->channel->sendMessage(instructions($config, $game_manager->planned_lang) . "\n\n"));
+        await(message_send_same_channel($discord, $ctx, instructions($config, $game_manager->planned_lang) . "\n\n"));
     }
 
-    $ctx->channel->broadcastTyping(); # TODO better synchronization maybe?
+    $discord->rest->channel->triggerTypingIndicator($ctx->channel_id); # TODO better synchronization maybe?
     $game_manager->newGame();
     $counter->reset();
 
     $game_number = $game->game_number;
     $solutions_count = $game->solutions->count();
     $emoji_version_description = current_emoji_version($config, $game)[0];
-    await($ctx->channel->sendMessage(<<<END
+    await(message_send_same_channel($discord, $ctx, <<<END
         Game #**$game_number** _($emoji_version_description)_:
         **($solutions_count)** possible approved words
         END));
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplaySmallFilePath(LIVE_DATA_PREFIX))));
+    await(message_send_same_channel($discord, $ctx, $config->getDisplaySmallFilePath(LIVE_DATA_PREFIX), true));
 }
 
 $bot->registerCommand(
@@ -319,13 +331,13 @@ $bot->registerCommand(
     ['description' => 'show current game']
 );
 
-function see(Counter $counter, ConfigHandler $config, GameManager $game_manager, Message $ctx): void
+function see(Counter $counter, ConfigHandler $config, GameManager $game_manager, Discord $discord, MessageCreate $ctx): void
 {
     $message = '**Game #' . $game_manager->current_game->game_number . ': Already found words:** ' . found_words_output($config, $game_manager->current_game);
     foreach (output_split_cursive($message) as $part) {
-        await($ctx->channel->sendMessage($part));
+        await(message_send_same_channel($discord, $ctx, $part));
     }
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplaySmallFilePath(LIVE_DATA_PREFIX))));
+    await(message_send_same_channel($discord, $ctx, $config->getDisplaySmallFilePath(LIVE_DATA_PREFIX), true));
     $counter->reset();
 }
 
@@ -337,7 +349,7 @@ $bot->registerCommand(
     ['description' => 'show current status of the game']
 );
 
-function status(Counter $counter, ConfigHandler $config, GameManager $game_manager, Message $ctx): void
+function status(Counter $counter, ConfigHandler $config, GameManager $game_manager, Discord $discord, MessageCreate $ctx): void
 {
     $game = $game_manager->current_game;
     $space_separated_letters = implode(' ', $game->letters->list);
@@ -354,9 +366,9 @@ function status(Counter $counter, ConfigHandler $config, GameManager $game_manag
         $status_text .= ", next game: {$game_manager->planned_lang}";
     }
     foreach (output_split_cursive($status_text) as $part) {
-        await($ctx->channel->sendMessage($part));
+        await(message_send_same_channel($discord, $ctx, $part));
     }
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplaySmallFilePath(LIVE_DATA_PREFIX))));
+    await(message_send_same_channel($discord, $ctx, $config->getDisplaySmallFilePath(LIVE_DATA_PREFIX), true));
     $counter->reset();
 }
 
@@ -369,13 +381,13 @@ $bot->registerCommand(
     ['description' => 'send unfound Scrabble solutions']
 );
 
-function unfound(GameManager $game_manager, Message $ctx): void
+function unfound(GameManager $game_manager, Discord $discord, MessageCreate $ctx): void
 {
     $game = $game_manager->current_game;
     $unfound_file = LIVE_DATA_PREFIX . 'unfound_solutions.txt';
     #$found_words_caps = array_map(mb_strtoupper(...), $game->found_words->toArray());
     file_put_contents($unfound_file, implode("\n", $game->solutions->diff($game->found_words)->toArray()));
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($unfound_file)));
+    await(message_send_same_channel($discord, $ctx, $unfound_file, true));
 }
 
 $bot->registerCommand(
@@ -387,7 +399,7 @@ $bot->registerCommand(
     ['description' => 'amount of unfound Scrabble solutions']
 );
 
-function left(GameManager $game_manager, Message $ctx): void
+function left(GameManager $game_manager, Discord $discord, MessageCreate $ctx): void
 {
     $game = $game_manager->current_game;
     $amount = $game->solutions->diff($game->found_words)->count();
@@ -408,7 +420,7 @@ function left(GameManager $game_manager, Message $ctx): void
         )
     ) ?: '0';
     $solution_count = $game->solutions->count();
-    await($ctx->channel->sendMessage("**$amount** approved words left (of $solution_count) - $hint_count_by_language hints left."));
+    await(message_send_same_channel($discord, $ctx, "**$amount** approved words left (of $solution_count) - $hint_count_by_language hints left."));
 }
 
 $bot->registerCommand(
@@ -420,11 +432,11 @@ $bot->registerCommand(
     ['description' => 'shuffle the position of dice']
 );
 
-function shuffle2(GameManager $game_manager, ConfigHandler $config, Message $ctx): void
+function shuffle2(GameManager $game_manager, ConfigHandler $config, Discord $discord, MessageCreate $ctx): void
 {
     $game_manager->current_game->shuffleLetters();
-    await($ctx->channel->sendMessage('**Letters shuffled.**'));
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplayNormalFilePath(LIVE_DATA_PREFIX))));
+    await(message_send_same_channel($discord, $ctx, '**Letters shuffled.**'));
+    await(message_send_same_channel($discord, $ctx, $config->getDisplayNormalFilePath(LIVE_DATA_PREFIX), true));
 }
 
 
@@ -437,14 +449,14 @@ $bot->registerCommand(
     ['description' => 'add solution'] # TODO alias to empty string?
 );
 
-function add_solution(ConfigHandler $config, GameManager $game_manager, Message $ctx, array $args): void
+function add_solution(ConfigHandler $config, GameManager $game_manager, Discord $discord, MessageCreate $ctx, array $args): void
 {
     var_dump($args);
     $word = $args[0];
-    $success = $game_manager->current_game->tryAddWord($ctx, $word);
+    $success = $game_manager->current_game->tryAddWord($discord, $ctx, $word);
     if ($success) {
         foreach (s_reactions($config, $game_manager, $word) as $reaction) {
-            await($ctx->react($reaction));
+            await(message_react($discord, $ctx, $reaction));
         }
     }
 }
@@ -458,7 +470,7 @@ $bot->registerCommand(
     ['description' => 'remove solution', 'aliases' => ['r']]
 );
 
-function remove(GameManager $game_manager, PlayerHandler $player, Message $ctx, array $args): void
+function remove(GameManager $game_manager, PlayerHandler $player, Discord $discord, MessageCreate $ctx, array $args): void
 {
     $game = $game_manager->current_game;
     $word = $args[0];
@@ -466,9 +478,9 @@ function remove(GameManager $game_manager, PlayerHandler $player, Message $ctx, 
         $game->removeWord($word);
         $player->playerRemoveWord($ctx, $game->approvalStatus($word));
         $formatted_word = italic($word);
-        await($ctx->channel->sendMessage("Removed $formatted_word."));
+        await(message_send_same_channel($discord, $ctx, "Removed $formatted_word."));
     } else {
-        await($ctx->channel->sendMessage("$word doesn't appear among the found solutions."));
+        await(message_send_same_channel($discord, $ctx, "$word doesn't appear among the found solutions."));
     }
 }
 
@@ -478,9 +490,9 @@ $bot->registerCommand(
     ['description' => 'send highscore']
 );
 
-function highscore(GameManager $game_manager, PlayerHandler $player, Message $ctx): void
+function highscore(GameManager $game_manager, PlayerHandler $player, Discord $discord, MessageCreate $ctx): void
 {
-    await($ctx->channel->sendMessage(game_highscore($game_manager->current_game, $player)));
+    await(message_send_same_channel($discord, $ctx, game_highscore($game_manager->current_game, $player)));
 }
 
 $bot->registerCommand(
@@ -492,11 +504,11 @@ $bot->registerCommand(
     ['description' => 'add to community wordlist']
 );
 
-function add(GameManager $game_manager, Message $ctx, array $args): void
+function add(GameManager $game_manager, Discord $discord, MessageCreate $ctx, array $args): void
 {
     $word = $args[0];
-    if ($game_manager->tryAddCommunity($ctx, $word)) {
-        await($ctx->react('📝'));
+    if ($game_manager->tryAddCommunity($discord, $ctx, $word)) {
+        await(message_react($discord, $ctx, '📝'));
     }
 }
 
@@ -506,29 +518,29 @@ $bot->registerCommand(
     ['description' => 'send current community list']
 );
 
-function community_list(ConfigHandler $config, GameManager $game_manager, Message $ctx): void
+function community_list(ConfigHandler $config, GameManager $game_manager, Discord $discord, MessageCreate $ctx): void
 {
     $file_to_send = LIVE_DATA_PREFIX . $config->getCommunityWordlists()[$game_manager->current_game->current_lang];
     if (!is_file($file_to_send)) {
         touch($file_to_send);
     }
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($file_to_send)));
+    await(message_send_same_channel($discord, $ctx, $file_to_send, true));
 }
 
 $bot->registerCommand(
     'emoji',
     decorate_handler(
-        [ensure_predicate(emoji_awarded(...), fn(PlayerHandler $player, ConfigHandler $config, Message $ctx) => 'You have to find ' . $config->getWordCountForEmoji() . ' words first! (currently ' . $player->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
+        [ensure_predicate(emoji_awarded(...), fn(PlayerHandler $player, ConfigHandler $config, MessageCreate $ctx) => 'You have to find ' . $config->getWordCountForEmoji() . ' words first! (currently ' . $player->getPlayerField($ctx->author->id, 'all_time_found') . ')')],
         'emoji'
     ),
     ['description' => 'change your personal emoji']
 );
 
-function emoji(PlayerHandler $player, Message $ctx, array $args): void
+function emoji(PlayerHandler $player, Discord $discord, MessageCreate $ctx, array $args): void
 {
     $emoji_str = $args[0];
     $player->setEmoji($ctx->author->id, $emoji_str);
-    await($ctx->channel->sendMessage("Changed emoji to $emoji_str."));
+    await(message_send_same_channel($discord, $ctx, "Changed emoji to $emoji_str."));
 }
 
 $bot->registerCommand(
@@ -560,16 +572,16 @@ $bot->registerCommand(
 
 function hint_command(string $from_language): callable
 {
-    return function (GameManager $game_manager, FactoryInterface $factory, PlayerHandler $player, DatabaseHandler $db, Message $ctx) use ($from_language): void {
+    return function (GameManager $game_manager, FactoryInterface $factory, PlayerHandler $player, DatabaseHandler $db, Discord $discord, MessageCreate $ctx) use ($from_language): void {
         $game = $game_manager->current_game;
         $unfound_hint_list = array_values(array_filter($game->available_hints[$from_language], $game->relevantHint(...)));
         if (count($unfound_hint_list) === 0) {
-            await($ctx->channel->sendMessage('No hints left.'));
+            await(message_send_same_channel($discord, $ctx, 'No hints left.'));
             return;
         }
         $chosen_hint = $unfound_hint_list[array_rand($unfound_hint_list)];
         $formatted_hint_content = italic(get_translation($chosen_hint, $factory->make(DictionaryType::class, ['src_lang' => $game->current_lang, 'target_lang' => $from_language]), $db));
-        await($ctx->channel->sendMessage("hint: $formatted_hint_content"));
+        await(message_send_same_channel($discord, $ctx, "hint: $formatted_hint_content"));
         $player->playerUsedHint($ctx, $chosen_hint);
     };
 }
@@ -580,9 +592,9 @@ $bot->registerCommand(
     ['description' => 'send saved games']
 );
 
-function old_games(ConfigHandler $config, Message $ctx): void
+function old_games(ConfigHandler $config, Discord $discord, MessageCreate $ctx): void
 {
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile(LIVE_DATA_PREFIX . $config->getSavesFileName())));
+    await(message_send_same_channel($discord, $ctx, LIVE_DATA_PREFIX . $config->getSavesFileName(), true));
 }
 
 $bot->registerCommand(
@@ -594,21 +606,21 @@ $bot->registerCommand(
     ['description' => 'load older games (see: oldgames), example: b!loadgame 5']
 );
 
-function load_game(Counter $counter, ConfigHandler $config, GameManager $game_manager, Message $ctx, array $args): void
+function load_game(Counter $counter, ConfigHandler $config, GameManager $game_manager, Discord $discord, MessageCreate $ctx, array $args): void
 {
     $game = $game_manager->current_game;
     $game_number = (int) $args[0];
     # Checks for changes before showing "found words" every time when just skipping through old games. That would be annoying.
     if ($game_manager->changes_to_save) {
         $message = 'All words found in the last game: ' . found_words_output($config, $game);
-        if (!try_send_msg($ctx, $message)) {
+        if (!try_send_msg($discord, $ctx, $message)) {
             $found_words_count = $game_manager->current_game->found_words->count();
-            await($ctx->channel->sendMessage("**$found_words_count** words found in this game. **"));
+            await(message_send_same_channel($discord, $ctx, "**$found_words_count** words found in this game. **"));
         }
     }
-    $ctx->channel->broadcastTyping(); # TODO better synchronization maybe?
+    $discord->rest->channel->triggerTypingIndicator($ctx->channel_id); # TODO better synchronization maybe?
     if (!$game_manager->tryLoadOldGame($game_number)) {
-        await($ctx->channel->sendMessage('The requested game doesn\'t exist.'));
+        await(message_send_same_channel($discord, $ctx, 'The requested game doesn\'t exist.'));
         return;
     }
 
@@ -623,9 +635,9 @@ function load_game(Counter $counter, ConfigHandler $config, GameManager $game_ma
     **Already found words:** $found_words_output
     END;
     foreach (output_split_cursive($message) as $part) {
-        await($ctx->channel->sendMessage($part));
+        await(message_send_same_channel($discord, $ctx, $part));
     }
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplayNormalFilePath(LIVE_DATA_PREFIX))));
+    await(message_send_same_channel($discord, $ctx, $config->getDisplayNormalFilePath(LIVE_DATA_PREFIX), true));
     $counter->reset();
 }
 
@@ -638,13 +650,13 @@ $bot->registerCommand(
     ['description' => 'load random old game']
 );
 
-function random(Counter $counter, ConfigHandler $config, GameManager $game_manager, Message $ctx): void
+function random(Counter $counter, ConfigHandler $config, GameManager $game_manager, Discord $discord, MessageCreate $ctx): void
 {
     $game = $game_manager->current_game;
     # random game between 1 and max_saved_game - after one calling, newest game is saved, too. Newest game can appear as second random call
     $number = random_int(1, $game_manager->max_saved_game + 1);
     if ($game->thrown_the_dice) {
-        await($ctx->channel->sendMessage('All words found in the last game: ' . found_words_output($config, $game)));
+        await(message_send_same_channel($discord, $ctx, 'All words found in the last game: ' . found_words_output($config, $game)));
     }
     $game_manager->tryLoadOldGame($number);
     # here current_lang, because this is loaded from saves.txt
@@ -659,9 +671,9 @@ function random(Counter $counter, ConfigHandler $config, GameManager $game_manag
     **Already found words:** $found_words_output
     END;
     foreach (output_split_cursive($message) as $part) {
-        await($ctx->channel->sendMessage($part));
+        await(message_send_same_channel($discord, $ctx, $part));
     }
-    await($ctx->channel->sendMessage(MessageBuilder::new()->addFile($config->getDisplayNormalFilePath(LIVE_DATA_PREFIX))));
+    await(message_send_same_channel($discord, $ctx, $config->getDisplayNormalFilePath(LIVE_DATA_PREFIX), true));
     $counter->reset();
 }
 
@@ -674,19 +686,19 @@ $bot->registerCommand(
     ['description' => 'reveal letters of a previously requested hint']
 );
 
-function reveal(Randomizer $randomizer, GameManager $game_manager, PlayerHandler $player, Message $ctx): void
+function reveal(Randomizer $randomizer, GameManager $game_manager, PlayerHandler $player, Discord $discord, MessageCreate $ctx): void
 {
     $player_hints = $player->getPlayerField($ctx->author->id, 'used_hints');
     $left_hints = array_diff($player_hints, $game_manager->current_game->found_words->toArray());
     if (count($left_hints) === 0) {
-        await($ctx->channel->sendMessage('You have no unsolved hints left.'));
+        await(message_send_same_channel($discord, $ctx, 'You have no unsolved hints left.'));
         return;
     }
     $chosen_word = $left_hints[array_rand($left_hints)];
     $word_length = grapheme_strlen($chosen_word);
     $revealed_indices = $randomizer->pickArrayKeys(range(0, $word_length - 1), intdiv($word_length, 3));
     $formatted_masked_word = italic(masked_word($chosen_word, $revealed_indices));
-    await($ctx->channel->sendMessage("Hint: $formatted_masked_word"));
+    await(message_send_same_channel($discord, $ctx, "Hint: $formatted_masked_word"));
 }
 
 $bot->registerCommand(
@@ -698,14 +710,14 @@ $bot->registerCommand(
     ['description' => 'tell the length of the longest word(s)']
 );
 
-function longest(GameManager $game_manager, Message $ctx): void
+function longest(GameManager $game_manager, Discord $discord, MessageCreate $ctx): void
 {
     $formatted_longest_word_length = italic((string) $game_manager->current_game->getLongestWordLength());
-    await($ctx->channel->sendMessage("The largest possible word length is: $formatted_longest_word_length."));
+    await(message_send_same_channel($discord, $ctx, "The largest possible word length is: $formatted_longest_word_length."));
 }
 
 # Blocks the code - has to be at the bottom
-$bot->run();
+$container->get(Discord::class)->gateway->open();
 
 function approval_reaction(ConfigHandler $config, GameManager $game_manager, string $word): string
 {
