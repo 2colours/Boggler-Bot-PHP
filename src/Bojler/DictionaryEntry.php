@@ -16,7 +16,7 @@ readonly class DictionaryEntry
     public function __construct(string $line)
     {
         $line_pieces = explode("\t", $line);
-        list($this->word, $this->description, $this->langcode) = $line_pieces;
+        [$this->word, $this->description, $this->langcode] = $line_pieces;
     }
 
     public function __toString()
