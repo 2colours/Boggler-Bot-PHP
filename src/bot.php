@@ -70,7 +70,7 @@ const INSTRUCTION_TEMPLATE = <<<END
     _**b!help** for further commands._
     ✅ _means the word is Scrabble dictionary approved_
     ☑️ _means there is a translation available_
-    ✔ _means the word is community-approved_
+    ✔️ _means the word is community-approved_
     ❔ _means the word is not in the dictionary (might still be right)_
     END;
 
