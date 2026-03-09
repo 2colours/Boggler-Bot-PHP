@@ -2,21 +2,19 @@
 
 namespace Bojler\Discord;
 
+use Closure;
 use Ragnarok\Fenrir\Gateway\Events\MessageCreate;
 
 class Command
 {
-    private mixed $callable; // unfortunately callable cannot be used as type for  properties
-
     public function __construct(
-        callable $callable,
+        private Closure $callable,
         public readonly string $command,
         public readonly string $description,
         public readonly string $longDescription,
         public readonly string $usage,
         public readonly bool $showhelp = true
     ) {
-        $this->callable = $callable;
     }
 
     public function handle(MessageCreate $message, array $args): mixed // void or PromiseInterface

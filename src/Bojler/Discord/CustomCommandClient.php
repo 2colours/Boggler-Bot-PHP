@@ -2,6 +2,7 @@
 
 namespace Bojler\Discord;
 
+use Closure;
 use Collator;
 use React\Promise\PromiseInterface;
 use Invoker\InvokerInterface;
@@ -70,13 +71,15 @@ final class CustomCommandClient
             throw new RuntimeException("A command with the name {$command} already exists.");
         }
 
-        $commandInstance = $this->buildCommand($command, async(fn(MessageCreate $message, array $args) => $this->invoker->call($callable, ['ctx' => $message, 'args' => $args])), $options);
+        $command_handler = Closure::fromCallable(async(fn(MessageCreate $message, array $args) => $this->invoker->call($callable, ['ctx' => $message, 'args' => $args])));
+
+        $commandInstance = $this->buildCommand($command, $command_handler, $options);
         $this->commands[$command] = $commandInstance;
 
         return $commandInstance;
     }
 
-    private function buildCommand(string $command, callable $callable, array $options): Command
+    private function buildCommand(string $command, Closure $callable, array $options): Command
     {
         $command_options = new CommandOptions($options);
 
