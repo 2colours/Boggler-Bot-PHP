@@ -1,79 +1,50 @@
 <?php
 
-namespace Bojler;
+namespace Bojler\Discord;
 
+use Closure;
 use Collator;
-use Discord\CommandClient\Command;
-use Discord\DiscordCommandClient;
-use Discord\Parts\Channel\Message;
-use Discord\Parts\Embed\Embed;
 use React\Promise\PromiseInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Invoker\InvokerInterface;
+use Psr\Log\LoggerInterface;
+use Ragnarok\Fenrir\Constants\Events;
+use Ragnarok\Fenrir\Discord;
+use Ragnarok\Fenrir\Gateway\Events\MessageCreate;
+use Ragnarok\Fenrir\Parts\User;
+use Ragnarok\Fenrir\Rest\Helpers\Channel\EmbedBuilder;
+use RuntimeException;
 
+use function Bojler\message_reply;
+use function Bojler\message_send_same_channel;
 use function React\Async\async;
+use function React\Async\await;
 
 # TODO investigate and improve help message
-final class CustomCommandClient extends DiscordCommandClient
+final class CustomCommandClient
 {
     private Collator $collator;
     private readonly InvokerInterface $invoker;
+    private readonly Discord $discord;
+    public private(set) CommandClientOptions $options;
+    private LoggerInterface $logger;
+    private User $bot;
+    private array $commands = [];
+    private array $aliases = [];
 
     public const MAX_EMBEDS = 25;
 
-    public function __construct(InvokerInterface $invoker, array $options = [])
+    public function __construct(InvokerInterface $invoker, Discord $discord, CommandClientOptions $options)
     {
         $this->invoker = $invoker;
+        $this->discord = $discord;
+        $this->options = $options;
+        $this->logger = $options->logger;
 
-        $own_options = $this->resolveCustomOptions($options['customOptions']);
-        unset($options['customOptions']);
-
-        parent::__construct($options);
-
-        $this->commandClientOptions += $own_options;
-
-        if ($own_options['caseInsensitivePrefix']) {
-            foreach ($this->commandClientOptions['prefixes'] as &$prefix) {
-                $prefix = mb_strtolower($prefix);
-            }
+        if ($this->options->caseInsensitivePrefix) {
+            $this->options = $options->withLowerCasePrefix();
         }
 
-        $this->collator = new Collator($own_options['locale']);
-
-        # This is completely idiotic, thank DiscordPHP
-        $this->on('init', $this->monkeyPatching(...));
-    }
-
-    public function registerCommand(string $command, mixed $callable, array $options = []): Command
-    {
-        return parent::registerCommand($command, async(fn(Message $message, array $args) => $this->invoker->call($callable, ['ctx' => $message, 'args' => $args])), $options);
-    }
-
-    private function resolveCustomOptions(array $custom_options): array
-    {
-        $resolver = new OptionsResolver();
-
-        $resolver
-            ->setRequired('locale')
-            ->setAllowedTypes('locale', 'string')
-            ->setDefined([
-                'locale',
-                'caseInsensitivePrefix'
-            ])
-            ->setDefaults([
-                'caseInsensitivePrefix' => false
-            ]);
-
-        return $resolver->resolve($custom_options);
-    }
-
-    private function monkeyPatching(): void
-    {
-        $this->removeAllListeners('message');
-        $this->on('message', $this->baseMessageHandler(...));
-
-        if ($this->commandClientOptions['defaultHelpCommand']) {
-            $this->unregisterCommand('help');
+        if ($this->options->defaultHelpCommand) {
             $this->registerCommand(
                 'help',
                 $this->defaultHelp(...),
@@ -83,26 +54,82 @@ final class CustomCommandClient extends DiscordCommandClient
                 ]
             );
         }
+
+        $this->collator = new Collator($this->options->locale);
+
+        $discord->gateway->events->on(Events::READY, fn() => $this->bot = await($discord->rest->user->getCurrent()));
+        $discord->gateway->events->on(Events::MESSAGE_CREATE, fn (MessageCreate $message) => $this->baseMessageHandler($message));
+        ;
+    }
+
+    public function registerCommand(string $command, callable $callable, array $options = []): Command
+    {
+        if ($this->options->caseInsensitiveCommands) {
+            $command = strtolower($command);
+        }
+        if (array_key_exists($command, $this->commands)) {
+            throw new RuntimeException("A command with the name {$command} already exists.");
+        }
+
+        $command_handler = Closure::fromCallable(async(fn(MessageCreate $message, array $args) => $this->invoker->call($callable, ['ctx' => $message, 'args' => $args])));
+
+        $commandInstance = $this->buildCommand($command, $command_handler, $options);
+        $this->commands[$command] = $commandInstance;
+
+        return $commandInstance;
+    }
+
+    private function buildCommand(string $command, Closure $callable, array $options): Command
+    {
+        $command_options = new CommandOptions($options);
+
+        foreach ($command_options->aliases as $alias) {
+            if ($this->options->caseInsensitiveCommands) {
+                $alias = strtolower($alias);
+            }
+            $this->aliases[$alias] = $command;
+        }
+
+        return new Command(
+            $callable,
+            $command,
+            $command_options->description,
+            $command_options->long_description,
+            $command_options->usage,
+            $command_options->show_help
+        );
     }
 
     protected function checkForPrefix(string $content): ?string
     {
-        $content_for_check = $this->commandClientOptions['caseInsensitivePrefix'] ? mb_strtolower($content) : $content;
+        $content_for_check = $this->options->caseInsensitivePrefix ? mb_strtolower($content) : $content;
 
-        foreach ($this->commandClientOptions['prefixes'] as $prefix) {
-            if (substr($content_for_check, 0, strlen($prefix)) === $prefix) {
-                return substr($content, strlen($prefix));
-            }
+        $prefix = $this->options->prefix;
+        if (substr($content_for_check, 0, strlen($prefix)) === $prefix) {
+            return substr($content, strlen($prefix));
         }
 
         return null;
     }
 
-    private function baseMessageHandler(Message $message): void
+    public function getCommand(string $command, bool $aliases = true): ?Command
+    {
+        if (array_key_exists($command, $this->commands)) {
+            return $this->commands[$command];
+        }
+
+        if (array_key_exists($command, $this->aliases) && $aliases) {
+            return $this->commands[$this->aliases[$command]];
+        }
+
+        return null;
+    }
+
+    private function baseMessageHandler(MessageCreate $message): void
     {
         $this->logger->debug('Message event received...', [grapheme_substr($message->content, 0, 10)]);
 
-        if ($message->author->id === $this->id) {
+        if ($message->author->id === $this->bot->id) {
             return;
         }
 
@@ -113,10 +140,13 @@ final class CustomCommandClient extends DiscordCommandClient
 
         $this->logger->debug('Message looked like a command...');
 
+        # MESSAGE_CREATE payloads don't have ->member->user assigned - pull it from ->author
+        $message->member->user = $message->author;
+
         $args = mb_split(' +', $withoutPrefix);
         $command = array_shift($args);
 
-        if (!is_null($command) && $this->commandClientOptions['caseInsensitiveCommands']) {
+        if (!is_null($command) && $this->options->caseInsensitiveCommands) {
             $command = mb_strtolower($command);
         }
 
@@ -126,10 +156,6 @@ final class CustomCommandClient extends DiscordCommandClient
         }
 
         $result = $command->handle($message, $args);
-        if (is_string($result)) {
-            $result = $message->reply($result);
-        }
-
         if ($result instanceof PromiseInterface) {
             $result->then(null, function (\Throwable $e) {
                 $this->logger->warning($e->getMessage(), [$e->getFile(), $e->getLine(), $e->getTraceAsString()]);
@@ -137,19 +163,19 @@ final class CustomCommandClient extends DiscordCommandClient
         }
     }
 
-    private function defaultHelp(Message $ctx, array $args): void
+    private function defaultHelp(Discord $discord, MessageCreate $ctx, array $args): void
     {
-        $prefix = str_replace((string) $this->user, "@{$this->username}", $this->commandClientOptions['prefix']);
+        $prefix = $this->options->prefix;
 
         if (count($args) > 0) {
-            $this->defaultHelpWithArgs($ctx, $prefix, $args);
+            $this->defaultHelpWithArgs($discord, $ctx, $prefix, $args);
             return;
         }
 
-        $embed = new Embed($this);
-        $embed->setAuthor($this->commandClientOptions['name'], $this->client->avatar)
-            ->setTitle($this->commandClientOptions['name'])
-            ->setFooter($this->commandClientOptions['name']);
+        $embed = new EmbedBuilder()
+            ->setAuthor($this->bot->username, iconUrl: $this->bot->avatar)
+            ->setTitle($this->bot->username)
+            ->setFooter($this->bot->username);
 
         $commandsDescription = '';
         $embed_fields = $this->embedPerCommand($prefix);
@@ -163,21 +189,21 @@ final class CustomCommandClient extends DiscordCommandClient
             $commandsDescription = implode("\n\n", $texts);
         }
         foreach ($embed_fields as $field) {
-            $embed->addField($field);
+            $embed->addField(...$field);
         }
-        $embed->setDescription(grapheme_substr("{$this->commandClientOptions['description']}$commandsDescription", 0, 2048));
+        $embed->setDescription(grapheme_substr("{$this->options->description}$commandsDescription", 0, 2048));
 
-        $ctx->channel->sendEmbed($embed);
+        message_send_same_channel($discord, $ctx, $embed);
     }
 
-    private function defaultHelpWithArgs(Message $message, string $prefix, array $args): void
+    private function defaultHelpWithArgs(Discord $discord, MessageCreate $message, string $prefix, array $args): void
     {
         $command = $this;
         foreach ($args as $commandString) {
             $newCommand = $command->getCommand($commandString);
 
             if (is_null($newCommand)) {
-                $message->reply("The command $commandString does not exist.");
+                message_reply($this->discord, $message, "The command $commandString does not exist.");
                 return;
             }
 
@@ -186,12 +212,13 @@ final class CustomCommandClient extends DiscordCommandClient
 
         $help = $command->getHelp($prefix);
 
-        $embed = new Embed($this);
+        $embed = new EmbedBuilder($this);
         $fullCommandString = implode(' ', $args);
-        $embed->setAuthor($this->commandClientOptions['name'], $this->client->user->avatar)
+        $embed
+            ->setAuthor($this->bot->username, iconUrl: $this->bot->avatar)
             ->setTitle("$prefix$fullCommandString {$help['usage']}")
             ->setDescription($help['longDescription'] ?: $help['description'])
-            ->setFooter($this->commandClientOptions['name']);
+            ->setFooter($this->bot->username);
 
         if (count($this->aliases) > 0) {
             $aliasesString = '';
@@ -204,15 +231,11 @@ final class CustomCommandClient extends DiscordCommandClient
             }
 
             if ($aliasesString) {
-                $embed->addFieldValues('Aliases', $aliasesString, true);
+                $embed->addField('Aliases', $aliasesString, true);
             }
         }
 
-        foreach ($help['subCommandsHelp'] as $subCommandHelp) {
-            $embed->addFieldValues($subCommandHelp['command'], $subCommandHelp['description'], true);
-        }
-
-        $message->channel->sendEmbed($embed);
+        message_send_same_channel($discord, $message, $embed);
     }
 
     private function embedPerCommand(string $prefix): array

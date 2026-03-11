@@ -2,7 +2,8 @@
 
 namespace Bojler;
 
-use Discord\Parts\Channel\Message;
+use Ragnarok\Fenrir\Discord;
+use Ragnarok\Fenrir\Gateway\Events\MessageCreate;
 
 use function React\Async\await;
 
@@ -161,23 +162,23 @@ class GameManager
         $this->current_community_list = file($this->community_wordlist_paths[$current_language], FILE_IGNORE_NEW_LINES) ?: [];
     }
 
-    public function tryAddCommunity(Message $ctx, string $word): bool
+    public function tryAddCommunity(Discord $discord, MessageCreate $ctx, string $word): bool
     {
         if (in_array($word, $this->current_community_list)) {
-            await($ctx->channel->sendMessage('Word already in the community list.'));
+            await(message_send_same_channel($discord, $ctx, 'Word already in the community list.'));
             return false;
         }
 
         $current_game = $this->current_game;
         $approval_data = $this->current_game->approvalStatus($word);
         if ($approval_data->any) {
-            await($ctx->channel->sendMessage('This word is already approved.'));
+            await(message_send_same_channel($discord, $ctx, 'This word is already approved.'));
             return false;
         }
 
         file_put_contents($this->community_wordlist_paths[$current_game->current_lang], "$word\n", FILE_APPEND);
         array_push($this->current_community_list, $word);
-        $current_game->acceptSolutionRetrospectively($ctx, $word);
+        $current_game->acceptSolutionRetrospectively($discord, $ctx, $word);
         return true;
     }
 }

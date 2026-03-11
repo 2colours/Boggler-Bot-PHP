@@ -4,8 +4,9 @@ namespace Bojler;
 
 use Collator;
 use DI\FactoryInterface;
-use Discord\Parts\Channel\Message;
 use Ds\Set;
+use Ragnarok\Fenrir\Discord;
+use Ragnarok\Fenrir\Gateway\Events\MessageCreate;
 
 use function React\Async\await;
 
@@ -262,28 +263,28 @@ class GameStatus #not final because of mocking
         $this->manager->saveGame();
     }
 
-    private function ensureGameOver(Message $ctx): void
+    private function ensureGameOver(Discord $discord, MessageCreate $ctx): void
     {
         if ($this->game_over_acknowledged) {
             return;
         }
         $this->game_over_acknowledged = true;
-        await($ctx->channel->sendMessage('**Congratulations! You won this game! You found ' . $this->end_amount . ' words!**'));
-        await($ctx->channel->sendMessage(game_highscore($this, $this->player_handler)));
+        await(message_send_same_channel($discord, $ctx, '**Congratulations! You won this game! You found ' . $this->end_amount . ' words!**'));
+        await(message_send_same_channel($discord, $ctx, game_highscore($this, $this->player_handler)));
     }
 
-    public function tryAddWord(Message $ctx, string $word): bool
+    public function tryAddWord(Discord $discord, MessageCreate $ctx, string $word): bool
     {
         $word_info = $this->approvalStatus($word);
         #await(easter_egg_trigger($ctx, $word, '_Rev'));
         $problem_message = $word_info->validity_info->messageWhenValid();
         if (isset($problem_message)) {
-            await($ctx->channel->sendMessage($problem_message));
+            await(message_send_same_channel($discord, $ctx, $problem_message));
             return false;
         }
 
         if ($this->found_words->contains($word)) {
-            await($ctx->channel->sendMessage("$word was already found."));
+            await(message_send_same_channel($discord, $ctx, "$word was already found."));
             return false;
         }
 
@@ -291,18 +292,18 @@ class GameStatus #not final because of mocking
         $this->found_words->add($word);
         $this->manager->currentGameChanged();
         if ($this->solutions->contains($word)) {
-            $this->addApprovedWord($ctx, $word);
+            $this->addApprovedWord($discord, $ctx, $word);
         }
         $this->manager->saveGame();
         $this->player_handler->playerAddWord($ctx, $word_info);
         return true;
     }
 
-    private function addApprovedWord(Message $ctx, string $word): void
+    private function addApprovedWord(Discord $discord, MessageCreate $ctx, string $word): void
     {
         $this->approved_words->add($word);
         if ($this->getApprovedAmount() === $this->end_amount) {
-            $this->ensureGameOver($ctx);
+            $this->ensureGameOver($discord, $ctx);
         }
     }
 
@@ -373,12 +374,12 @@ class GameStatus #not final because of mocking
         return $this->solutions->contains($word) && textual_length($word) >= $this->getLongestWordLength();
     }
     # TODO revise visibility
-    public function acceptSolutionRetrospectively(Message $ctx, string $word): void
+    public function acceptSolutionRetrospectively(Discord $discord, MessageCreate $ctx, string $word): void
     {
         if ($this->wordValidFast($word, $this->letters->lower_cntdict)) {
             $this->solutions->add($word);
             if ($this->found_words->contains($word)) {
-                $this->addApprovedWord($ctx, $word);
+                $this->addApprovedWord($discord, $ctx, $word);
             }
             $this->player_handler->approveWord($word);
         }

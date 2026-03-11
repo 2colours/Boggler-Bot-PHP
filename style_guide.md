@@ -16,9 +16,6 @@ _Rationale_: mainly consistency across the project; slightly also ease of refact
 _Rationale_: it communicates the intent clearer than `T|null` and it's good to codify for consistency.
 - single-line string literals without interpolation should always use single quoting (apostrophes)
 _Rationale_: it clearly communicates lack of interpolation - and following this principle, double quoting can clearly communicate presence of interpolation. It is also somewhat a safety measure against accidental interpolation.
-- message-based command handlers shouldn't return anything
-_Rationale_: the return value of command handlers _could_ be used the content of the reply to the message; however, this is not flexible enough and it's by no means obvious to somebody unfamiliar. It's a bad API not to be relied on. It would probably be harder to migrate from it as well.
-_Replacement_: `$ctx->reply($value)` (assuming `$ctx` as the message instance) instead of `return $value`.
 - `is_null` is the preferred way to do a `null`-check
 _Rationale_: in a well-designed codebase, `null`-checks are seldom used - `null` values shouldn't be propagated too much and in general missing values are a special enough case that might demand a design change overall. Since `is_null` is safe to use and stands out more than an `=== null` check, it's a good choice for presenting a special circumstance as special.
 - `implode` is preferred over its alias `join`
