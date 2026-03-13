@@ -2,8 +2,8 @@
 
 namespace Bojler;
 
+use Ragnarok\Fenrir\Discord;
 use Ragnarok\Fenrir\Gateway\Events\MessageCreate;
-use Ragnarok\Fenrir\Parts\GuildMember;
 
 class PlayerHandler
 {
@@ -43,9 +43,9 @@ class PlayerHandler
         file_put_contents(self::PLAYER_SAVES_PATH, json_encode((object)$this->player_dict, JSON_UNESCAPED_UNICODE));
     }
 
-    public function newPlayer(GuildMember $member): void
+    public function newPlayer(Discord $discord, MessageCreate $ctx): void
     {
-        $this->player_dict[$member->user->id] = array_merge(
+        $this->player_dict[$ctx->author->id] = array_merge(
             [
                 'found_words' => [],
                 'used_hints' => [],
@@ -53,7 +53,7 @@ class PlayerHandler
                 'all_time_approved' => 0,
                 'personal_emoji' => '👤'
             ],
-            discord_specific_fields($member)
+            discord_specific_fields($discord, $ctx)
         );
     }
 
@@ -66,23 +66,23 @@ class PlayerHandler
         $this->saveFile();
     }
 
-    private function playerUpdate(GuildMember $player): void
+    private function playerUpdate(Discord $discord, MessageCreate $ctx): void
     {
-        if (!array_key_exists($player->user->id, $this->player_dict)) {
-            $this->newPlayer($player);
+        if (!array_key_exists($ctx->author->id, $this->player_dict)) {
+            $this->newPlayer($discord, $ctx);
             return;
         }
 
-        $this->player_dict[$player->user->id] = array_merge(
+        $this->player_dict[$ctx->author->id] = array_merge(
             $this->default_player,
-            $this->player_dict[$player->user->id],
-            discord_specific_fields($player)
+            $this->player_dict[$ctx->author->id],
+            discord_specific_fields($discord, $ctx)
         );
     }
 
-    public function playerAddWord(MessageCreate $ctx, ApprovalData $word_info): void
+    public function playerAddWord(Discord $discord, MessageCreate $ctx, ApprovalData $word_info): void
     {
-        $this->playerUpdate($ctx->member);
+        $this->playerUpdate($discord, $ctx);
         $this->player_dict[$ctx->author->id]['found_words'][] = $word_info->word;
         $this->player_dict[$ctx->author->id]['all_time_found']++;
         if ($word_info->any) {
@@ -122,9 +122,9 @@ class PlayerHandler
         $this->saveFile();
     }
 
-    public function playerUsedHint(MessageCreate $ctx, $word): void
+    public function playerUsedHint(Discord $discord, MessageCreate $ctx, $word): void
     {
-        $this->playerUpdate($ctx->member);
+        $this->playerUpdate($discord, $ctx);
         $this->player_dict[$ctx->author->id]['used_hints'][] = $word;
         $this->saveFile();
     }

@@ -125,9 +125,9 @@ function s_reactions(ConfigHandler $config, GameManager $game_manager, string $w
 # "predicate-ish" functions (not higher order, takes context, performs a check)
 
 #Checks whether the author of the message is a "native speaker"
-function from_native_speaker(MessageCreate $ctx): bool
+function from_native_speaker(Discord $discord, MessageCreate $ctx): bool
 {
-    return hungarian_role($ctx->member) === 'Native speaker'; # TODO preferably should be configurable, not hardcoded constant
+    return hungarian_role($discord, $ctx) === 'Native speaker'; # TODO preferably should be configurable, not hardcoded constant
 }
 
 function from_creator(MessageCreate $ctx): bool
@@ -582,7 +582,7 @@ function hint_command(string $from_language): callable
         $chosen_hint = $unfound_hint_list[array_rand($unfound_hint_list)];
         $formatted_hint_content = italic(get_translation($chosen_hint, $factory->make(DictionaryType::class, ['src_lang' => $game->current_lang, 'target_lang' => $from_language]), $db));
         await(message_send_same_channel($discord, $ctx, "hint: $formatted_hint_content"));
-        $player->playerUsedHint($ctx, $chosen_hint);
+        $player->playerUsedHint($discord, $ctx, $chosen_hint);
     };
 }
 

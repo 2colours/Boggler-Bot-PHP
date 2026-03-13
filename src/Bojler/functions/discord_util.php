@@ -4,7 +4,6 @@ namespace Bojler;
 
 use Ragnarok\Fenrir\Discord;
 use Ragnarok\Fenrir\Gateway\Events\MessageCreate;
-use Ragnarok\Fenrir\Parts\GuildMember;
 use Ragnarok\Fenrir\Parts\Message;
 use Ragnarok\Fenrir\Rest\Helpers\Channel\EmbedBuilder;
 use Ragnarok\Fenrir\Rest\Helpers\Channel\MessageBuilder;
@@ -25,26 +24,27 @@ function try_send_msg(Discord $discord, MessageCreate $ctx, string $content): bo
     return $can_be_sent;
 }
 
-function hungarian_role(GuildMember $member): ?string
+function hungarian_role(Discord $discord, MessageCreate $message): ?string
 {
     $hungarian_roles = ['Beginner', 'Native speaker', 'Intermediate', 'Fluent', 'Advanced', 'Distant native'];
-    $roles = $member->roles;
-    foreach ($roles as $item) {
-        foreach ($hungarian_roles as $hu_role) {
-            if ($item === $hu_role) {
-                return $hu_role;
+    $role_ids = $message->member->roles;
+    foreach ($role_ids as $role_id) {
+        $resolved_role = await($discord->rest->guild->getRole($message->guild_id, $role_id));
+        foreach ($hungarian_roles as $hu_role_name) {
+            if ($hu_role_name === $resolved_role->name) {
+                return $hu_role_name;
             }
         }
     }
     return null;
 }
 
-function discord_specific_fields(GuildMember $member): array
+function discord_specific_fields(Discord $discord, MessageCreate $message): array
 {
     return [
-        'name' => $member->user->username,
-        'role' => hungarian_role($member),
-        'server_name' => name_shortened($member->nick ?? $member->user->username)
+        'name' => $message->author->username,
+        'role' => hungarian_role($discord, $message),
+        'server_name' => name_shortened($message->member->nick ?? $message->author->username)
     ];
 }
 

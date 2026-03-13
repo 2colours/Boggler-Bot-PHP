@@ -295,7 +295,7 @@ class GameStatus #not final because of mocking
             $this->addApprovedWord($discord, $ctx, $word);
         }
         $this->manager->saveGame();
-        $this->player_handler->playerAddWord($ctx, $word_info);
+        $this->player_handler->playerAddWord($discord, $ctx, $word_info);
         return true;
     }
 
