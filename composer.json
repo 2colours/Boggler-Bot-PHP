@@ -9,7 +9,7 @@
         }
     },
     "require": {
-        "intervention/image": "^3.3",
+        "intervention/image": "^4.0",
         "symfony/dotenv": "^8.0",
         "php-ds/php-ds": "^1.5",
         "react/async": "^4.2",
