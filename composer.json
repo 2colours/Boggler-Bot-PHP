@@ -11,7 +11,7 @@
     "require": {
         "intervention/image": "^3.3",
         "symfony/dotenv": "^8.0",
-        "php-ds/php-ds": "^1.5",
+        "php-ds/php-ds": "^2.0",
         "react/async": "^4.2",
         "php-di/php-di": "^7.1",
         "ragnarok/fenrir": "^1.0",
